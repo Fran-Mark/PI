@@ -1,3 +1,6 @@
 [submodule "digital-beamforming"]
 	path = digital-beamforming
 	url = https://github.com/grigosback/digital-beamforming.git
+[submodule "PIQuinteros"]
+	path = PIQuinteros
+	url = https://github.com/JIQdC/PIQuinteros.git
