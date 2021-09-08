@@ -1,0 +1,3 @@
+[submodule "digital-beamforming"]
+	path = digital-beamforming
+	url = https://github.com/grigosback/digital-beamforming.git
