@@ -5,3 +5,5 @@ NA
 .vscode
 sdt.code-workspace
 desktop.ini
+ignore
+test
