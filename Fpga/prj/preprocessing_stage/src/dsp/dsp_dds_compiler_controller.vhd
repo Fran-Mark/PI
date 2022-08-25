@@ -30,16 +30,17 @@ begin
         m_axis_tdata_reg <= (others => '0');
         m_axis_tvalid_reg <= '0';
         counter_reg <= (others => '0');
+        s_axis_tready <= '0';
       else
         s_axis_tready <= '0';
         m_axis_tvalid_reg <= '0';
         counter_reg <= counter_reg + 1;
         if (counter_reg = std_logic_vector(to_unsigned(DIVIDE_CLK_FREQ_BY, 8) - 1)) then
+          counter_reg <= (others => '0');
           if s_axis_tvalid = '1' then
             s_axis_tready <= '1';
             m_axis_tdata_reg <= s_axis_tdata;
             m_axis_tvalid_reg <= '1';
-            counter_reg <= (others => '0');
           end if;
         end if;
       end if;
