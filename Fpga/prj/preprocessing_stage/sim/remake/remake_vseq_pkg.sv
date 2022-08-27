@@ -63,14 +63,14 @@ package remake_vseq_pkg;
       for (int i = 0; i < LARGO_TONO; i++) begin
         stream_seq_item item;
         item = stream_seq_item::type_id::create("item");
-        time_ = $time*10e-4;
-        tono = 4096*$cos(2*PI_CONST*time_ * FREQ_TONO_GHz); //+ 4096*$cos(2*PI_CONST*$time * FREQ_TONO_GHz_2); //$cos() es en radianes        $display("time: %t",$time);
+        time_ = $time*10e-1;
+        tono = 8192*$cos(2*PI_CONST*time_ * FREQ_TONO_MHZ); //+ 4096*$cos(2*PI_CONST*$time * FREQ_TONO_GHz_2); //$cos() es en radianes        $display("time: %t",$time);
         //tono = 4096*$cos(2*PI_CONST*time_* FREQ_LOW_GHz);
         //$display("cos arg: %f",2*PI_CONST*$time* 10e-4 * FREQ_LOW_GHz);
         tono_adc = tono;
-        $display("tono %f",tono);
-        $display("tono_adc %d",tono_adc);
-        $display("tiempo: %f",$time);
+        // $display("tono %f",tono);
+        // $display("tono_adc %d",tono_adc);
+        // $display("tiempo: %f",$time);
         // for(int j = 0; j<ADC_WIDTH; j++) begin
 
         //   start_item(item, .sequencer(stream_sqr));
@@ -95,7 +95,7 @@ package remake_vseq_pkg;
         start_item(item, .sequencer(stream_sqr));
         if(!item.randomize with {
           data == tono_adc;
-          delay_cycles==0;}) begin
+          delay_cycles==CLOCKS_PER_SAMPLE;}) begin
             `uvm_error(get_name(), "Failed to randomize stream_trasm_sqr error sequence item!");
           end
         //item.data = tono_adc;

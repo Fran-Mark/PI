@@ -173,37 +173,37 @@ package remake_test_pkg;
       //Transmitimos un write al registro (un 1)
       remake_seq_write write_seq;
 
-      write_seq = remake_seq_write::type_id::create("write_seq");
+      //write_seq = remake_seq_write::type_id::create("write_seq");
       eth_trasm_vseq = remake_vseq_stream_trasm::type_id::create("eth_trasm_vseq");
 
-       init_axi_vseq(write_seq);
+       //init_axi_vseq(write_seq);
 
       init_adc_vseq(eth_trasm_vseq);
 
 
       uvm_test_done.raise_objection(this);
 
-      fork
+      //fork
         begin
           eth_trasm_vseq.start(null);
         end
 
-        begin
-          #(50us);
-          $display("Escribiendo 1 en data source control");
+      //   begin
+      //     #(50us);
+      //     $display("Escribiendo 1 en data source control");
 
-          if (!write_seq.randomize() with {
-                addr == SEL_SOURCE_ADDR + OFFSET_ADDR;
-                data == 1;
-              }) begin
-            `uvm_error(get_full_name(), "Failed to randomize sequence!");
-          end
-          write_seq.start(null);
-         end
+      //     if (!write_seq.randomize() with {
+      //           addr == SEL_SOURCE_ADDR + OFFSET_ADDR;
+      //           data == 1;
+      //         }) begin
+      //       `uvm_error(get_full_name(), "Failed to randomize sequence!");
+      //     end
+      //     write_seq.start(null);
+      //    end
 
-      join
+      // join
 
-      #(500us);
+      #(1ms);
       uvm_test_done.drop_objection(this);
 
     endtask : run_phase
