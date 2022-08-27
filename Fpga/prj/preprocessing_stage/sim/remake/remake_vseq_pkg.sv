@@ -59,12 +59,14 @@ package remake_vseq_pkg;
 
      real tono;
      logic [13:0] tono_adc;
-     real time_;
+     real fs = 65e6;
+     //real time_;
       for (int i = 0; i < LARGO_TONO; i++) begin
         stream_seq_item item;
         item = stream_seq_item::type_id::create("item");
-        time_ = $time*10e-1;
-        tono = 8192*$cos(2*PI_CONST*time_ * FREQ_TONO_MHZ); //+ 4096*$cos(2*PI_CONST*$time * FREQ_TONO_GHz_2); //$cos() es en radianes        $display("time: %t",$time);
+        //time_ = $time*10e-1;
+        tono = 8191*$cos(2*PI_CONST*i/fs*FREQ_TONO_MHZ*1e6); //+ 4096*$cos(2*PI_CONST*$time * FREQ_TONO_GHz_2); //$cos() es en radianes        
+        //$display("time: %t",$time);
         //tono = 4096*$cos(2*PI_CONST*time_* FREQ_LOW_GHz);
         //$display("cos arg: %f",2*PI_CONST*$time* 10e-4 * FREQ_LOW_GHz);
         tono_adc = tono;
