@@ -1,0 +1,29 @@
+\documentclass[../../main.tex]{subfiles}
+\begin{document}
+
+\chapter{Introducción}
+
+%% Creciente número de sats LEO en órbita (ejemplos)
+%% Antenas mecánicas -> solo 1 obj por vez
+
+En los últimos años, el número de satélites en órbita baja (LEO) ha crecido considerablemente debido a la creación de constelaciones de dichos satélites a manos de diversas empresas [REF] con el objetivo de brindar diversos servicios, entre los que se destaca el referente al acceso a internet. 
+Estos satélites tienen la ventaja de orbitar a una altura baja (alrededor de 500~km), de manera que la latencia de las comunicaciones, limitadas por la velocidad de la luz, también es baja. 
+Por otro lado, tienen un tiempo de pasada inferior a 10 minutos [REF], lo cual vuelve necesario disponer de algún mecanismo que permita seguir al satélite durante el limitado tiempo de comunicación.
+
+Tradicionalmente [REF] para establecer la comunicación con estos satélites desde una estación terrena (ET) se dispone de una antena de gran ganancia y tamaño que, mecanicamente, apuntan al satélite durante su pasada.
+Este enfoque tiene dos principales limitaciones: la complejidad mecánica asociada a mover físicamente a una gran antena y la restricción de apuntar únicamente a un satélite a la vez. Parte de la motivación de este proyecto es desarrollar una estación terrena capaz de eliminar esas dos limitaciones.
+
+
+\section{Conformación de haz}
+
+Para lograr apuntar al satélite sin realizar un seguimiento mecánico se propone el uso de conformación de haz o \textit{beamforming} para la cual se requiere disponer de un arreglo de antenas. Esta técnica consiste en sumar coherentemente las señales entrantes a cada elemento del arreglo mediante la aplicación de los desfases correspondientes calculados a partir de la dirección de arribo de la señal que quiere seguirse.
+
+IMAGEN Y EXPLICACIÓN DE LAS CUENTAS
+
+La conformación de haz recién mencionada elimina la necesidad de realizar apuntamiento mecánico pero aún tiene la limitación de seguir únicamente a un satélite a la vez. Para deshacerse de esta segunda limitación se necesitaría aplicar un conjunto de retrasos distintos a las señales provenientes de cada elemento del arreglo, de manera de conformar más de un haz [FIGURA].
+Si bien esto es posible, rápidamente se vuelve impráctico ya que requiere equipamiento adicional, y, además, implica incurrir en nuevos costos cada vez que se quiera hacer el seguimiento en simúltaneo de un nuevo haz.
+Todas estas problemáticas se resuelven al pasar al dominio digital. 
+
+La conformación digital de haz o digital beamforming consiste en muestrear las señales ``crudas'' para luego, digitalmente, aplicar los retrasos correspondientes y poder apuntar simultáneamente a varios satélites sin necesidad de mover físicamente el arreglo de antenas. Esta técnica se puso en práctica en este proyecto.
+
+\end{document}
