@@ -28,6 +28,6 @@ package remake_defn_pkg;
 
   localparam int CLOCKS_PER_SAMPLE = 3;
 
-  localparam real NOISE_LEVEL = 0.3;
+  localparam real NOISE_LEVEL = 0.8;
 
 endpackage : remake_defn_pkg

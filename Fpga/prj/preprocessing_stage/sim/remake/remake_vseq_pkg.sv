@@ -67,9 +67,10 @@ package remake_vseq_pkg;
         //tono = 8191*$cos(2*PI_CONST*i/fs*FREQ_TONO_MHZ*1e6);
         tono = 8191.0/3*($cos(2*PI_CONST*i/fs*FREQ_TONO_MHZ*1e6) + $cos(2*PI_CONST*i/fs*FREQ_TONO_MHZ_2*1e6) + $cos(2*PI_CONST*i/fs*FREQ_TONO_MHZ_3*1e6));
         //tono = 4096*$cos(2*PI_CONST*time_* FREQ_LOW_GHz);
-        noise =  real'(NOISE_LEVEL*($urandom_range(0,2**ADC_WIDTH-1)) - 2**(ADC_WIDTH-2));
+        noise =  NOISE_LEVEL*(real'($urandom_range(0,2**ADC_WIDTH - 1)) - 2**(ADC_WIDTH-1));
         $display("NOISE: %f", noise);
         tono_adc = tono + noise;
+
         begin
         start_item(item, .sequencer(stream_sqr));
         if(!item.randomize with {
