@@ -1,7 +1,59 @@
-\documentclass{report}
+\documentclass[screen, pagebackref, oneside]{ibtesis}
 \usepackage{subfiles}
 \usepackage{preamble}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%% Informacion sobre la tesis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    \title{Receptor para estación terrena con conformación digital de haz}
+    \author{Francisco Gabriel Marquinez}
+    \director{Ing. Nicolás Catalano}
+    \codirector{Ing. José Ignacio Quinteros del Castillo}
+    \carrera{Proyecto Integrador de la Carrera de Ingeniería en Telecomunicaciones}
+    \grado{Estudiante}
+    \laboratorio{Departamento de Ingeniería en Telecomunicaciones
+    Comisión Nacional de Energía Atómica
+    Centro Atómico Bariloche}
+    \jurado{Alejandro Boeri (INVAP) \\ 
+    Leonardo Morbidel (Instituto Balseiro)}
+    \palabrasclave{formato de Tesis, Lineamientos de escritura, Instituto Balseiro}
+    \keywords{Thesis format, Templates, Instituto Balseiro}
+    % Si queremos poner la fecha manualmente:
+    % \date{Diciembre de 2099}
+
 \begin{document}
-Por acá se empieza
+
+\begin{preliminary}
+
+    \dedicatoria{
+    A alguien
+    }
+
+    \begin{abreviaturas}
+    FFT \hspace{1cm} Fast Fourier Transform                            %Abreviaturas
+    \end{abreviaturas}
+    
+    \tableofcontents                %Índice
+    \listoffigures                  %Figuras
+    \listoftables                   %Tablas
+    \include{Resumen/resumen.tex}
+    
+\end{preliminary}
+
+
+\subfile{Caps/Intro/intro.tex}
+
+\subfile{Caps/Enlace/enlace.tex}
+
+\begin{biblio}
+    \bibliography{mibib}
+\end{biblio}
+
+\begin{postliminary}
+
+    \begin{seccion}{Agradecimientos}
+    A todos los que se lo merecen, por merecerlo
+    \end{seccion}
+    
+\end{postliminary}
+    
 \end{document}

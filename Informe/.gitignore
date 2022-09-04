@@ -4,3 +4,10 @@
 *.fdb_latexmk
 *.synctex.gz
 *.pdf
+*.lof
+*.lot
+*.out
+*.toc
+*.bbl
+*.blg
+*.bst
