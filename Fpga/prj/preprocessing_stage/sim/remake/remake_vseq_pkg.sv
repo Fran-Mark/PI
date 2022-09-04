@@ -59,47 +59,25 @@ package remake_vseq_pkg;
 
      real tono;
      logic [13:0] tono_adc;
-     real time_;
+     real fs = 65e6;
+     real noise;  
       for (int i = 0; i < LARGO_TONO; i++) begin
         stream_seq_item item;
         item = stream_seq_item::type_id::create("item");
-        time_ = $time*10e-4;
-        tono = 4096*$cos(2*PI_CONST*time_ * FREQ_TONO_GHz); //+ 4096*$cos(2*PI_CONST*$time * FREQ_TONO_GHz_2); //$cos() es en radianes        $display("time: %t",$time);
+        //tono = 8191*$cos(2*PI_CONST*i/fs*FREQ_TONO_MHZ*1e6);
+        tono = 8191.0/3*($cos(2*PI_CONST*i/fs*FREQ_TONO_MHZ*1e6) + $cos(2*PI_CONST*i/fs*FREQ_TONO_MHZ_2*1e6) + $cos(2*PI_CONST*i/fs*FREQ_TONO_MHZ_3*1e6));
         //tono = 4096*$cos(2*PI_CONST*time_* FREQ_LOW_GHz);
-        //$display("cos arg: %f",2*PI_CONST*$time* 10e-4 * FREQ_LOW_GHz);
-        tono_adc = tono;
-        $display("tono %f",tono);
-        $display("tono_adc %d",tono_adc);
-        $display("tiempo: %f",$time);
-        // for(int j = 0; j<ADC_WIDTH; j++) begin
+        noise =  NOISE_LEVEL*(real'($urandom_range(0,2**ADC_WIDTH - 1)) - 2**(ADC_WIDTH-1));
+        $display("NOISE: %f", noise);
+        tono_adc = tono + noise;
 
-        //   start_item(item, .sequencer(stream_sqr));
-
-        //   if (!item.randomize() with {delay_cycles==0;}) begin
-        //     `uvm_error(get_name(), "Failed to randomize stream_trasm_sqr error sequence item!");
-        //   end
-
-        //   item.data[0] = tono_adc[ADC_WIDTH-j-1];
-
-        //   if (j<7) begin
-        //    item.data[1] = 1;
-        //   end else begin
-        //     item.data[1] = 0;
-        //   end
-
-        //   item.data[2] = (j+1)%2;
-
-        // finish_item(item);
-        // end
         begin
         start_item(item, .sequencer(stream_sqr));
         if(!item.randomize with {
           data == tono_adc;
-          delay_cycles==0;}) begin
+          delay_cycles==CLOCKS_PER_SAMPLE;}) begin
             `uvm_error(get_name(), "Failed to randomize stream_trasm_sqr error sequence item!");
           end
-        //item.data = tono_adc;
-        
         finish_item(item);
         end
       end

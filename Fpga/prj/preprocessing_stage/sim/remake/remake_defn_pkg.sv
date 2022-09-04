@@ -15,9 +15,10 @@ package remake_defn_pkg;
   localparam int WSTRB_WIDTH = DATA_WIDTH / 8;
   localparam logic[WSTRB_WIDTH-1:0] WSTRB_AGREGADO = 4'b1111;
 
-  localparam real FREQ_TONO_GHz = 0.019;
-  localparam real FREQ_TONO_GHz_2 = 0.017;
-  localparam real FREQ_LOW_GHz = 0.002;
+  localparam real FREQ_TONO_MHZ = 19.51;
+  localparam real FREQ_TONO_MHZ_2 = 16.5;
+  localparam real FREQ_TONO_MHZ_3 = 14;
+  localparam real FREQ_LOW_MHZ = 2;
   localparam real PI_CONST = 3.14159265;
   localparam int LARGO_TONO = 50000;
 
@@ -25,7 +26,8 @@ package remake_defn_pkg;
 
   localparam int ADC_WIDTH = 14;
 
+  localparam int CLOCKS_PER_SAMPLE = 3;
 
-
+  localparam real NOISE_LEVEL = 0.8;
 
 endpackage : remake_defn_pkg
