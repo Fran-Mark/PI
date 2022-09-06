@@ -1,0 +1,3 @@
+/media/fran/46FAA90DFAA8FA77/Ventanas/IB/PI/entendiendo-file-sink/output_test/build/CMakeFiles/edit_cache.dir
+/media/fran/46FAA90DFAA8FA77/Ventanas/IB/PI/entendiendo-file-sink/output_test/build/CMakeFiles/rebuild_cache.dir
+/media/fran/46FAA90DFAA8FA77/Ventanas/IB/PI/entendiendo-file-sink/output_test/build/CMakeFiles/output_test.dir
