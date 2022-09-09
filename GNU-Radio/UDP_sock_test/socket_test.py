@@ -1,8 +1,6 @@
-from ctypes import sizeof
+from signal import pause
 import socket
 import time
-from traceback import print_tb
-from turtle import delay
 
 import numpy as np
 
@@ -14,21 +12,39 @@ serverAddress = ("127.0.0.1", 7070)
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-contador = 0
+contador = np.int32(0)
 fs = 32000
 f = 1000
 packet_size = 1472
 
-nValues = packet_size/4
+nValues = packet_size /8/ 2 #El /2 lo agrego para testeo del stream demux
+
+contNValues = packet_size / 4
 
 while True:
     # Send data
     n = np.arange(contador*nValues, (contador+1)*nValues)
-    seno = 2**10*(np.sin(2*np.pi*f*n/fs))
-    seno = seno.astype(np.int32)
-    sock.sendto(seno, serverAddress)
+    z = np.exp(1j*2*np.pi*f*n/fs)
+    y = np.exp(1j*2*np.pi*f*3*n/fs)
+    x = np.append(z,y)
+    x = x.astype(np.complex64).tobytes()
+    print(len(x))
+    sock.sendto(x, serverAddress)
+    #print("Sending packet: ", contador)
     contador += 1
     time.sleep(0.1)
+
+    # x = np.sin(2*np.pi*f*n/fs)
+    # data = x.astype(np.float32).tostring()
+    # sent = sock.sendto(data, serverAddress)
+    # n = np.arange(contador*contNValues, (contador+1)*contNValues)
+    # cont = n.astype(np.int32)
+    # c = cont.tobytes()
+    # sent = sock.sendto(c, serverAddress)
+    # print(cont)
+    # time.sleep(1)
+    # contador += 1
+    #pause()
     
     # # Send data
     # seno = int(2**10*(np.sin(2*np.pi*f*contador/fs)))
