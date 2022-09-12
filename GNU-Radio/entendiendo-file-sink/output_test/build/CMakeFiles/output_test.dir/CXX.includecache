@@ -1,0 +1,26 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/media/fran/46FAA90DFAA8FA77/Ventanas/IB/PI/entendiendo-file-sink/output_test/output_test.cpp
+output_test.hpp
+/media/fran/46FAA90DFAA8FA77/Ventanas/IB/PI/entendiendo-file-sink/output_test/output_test.hpp
+
+/media/fran/46FAA90DFAA8FA77/Ventanas/IB/PI/entendiendo-file-sink/output_test/output_test.hpp
+gnuradio/top_block.h
+-
+gnuradio/blocks/file_sink.h
+-
+gnuradio/blocks/file_source.h
+-
+gnuradio/blocks/float_to_complex.h
+-
+gnuradio/blocks/short_to_float.h
+-
+gnuradio/blocks/throttle.h
+-
+

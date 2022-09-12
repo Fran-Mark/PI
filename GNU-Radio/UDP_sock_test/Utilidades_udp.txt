@@ -1,0 +1,22 @@
+Netcat
+
+Escuchar una conexión
+nc -u -l <port>
+-l -> listen
+-u -> udp
+
+Abrir una conexión
+nc -u <ip> <port>
+
+--------------------------------------------------------------
+
+Tcpdump
+
+sudo tcpdump -i <interface> <protocol> port <port> <flags>
+Ej:
+Dumpear paquetes udp de la interfaz de loopback en el puerto 9875
+$ sudo tcpdump -i lo udp port 9875 -XAvvv
+Flags:
+-X -> Imprimir en hexa
+-A -> Imprimir en ASCII
+-vvv -> muy verboso con info de cada paquete
