@@ -10,15 +10,9 @@ def cli():
 def soc():
     pass
 
-# @soc.command()
-# def init():
-#     SoCActions.init()
-#     # click.echo("Initializing SoC...")
-
 @soc.command()
 def status():
     #TODO
-    SoCActions.cat_config()
     click.echo("SoC status...")
 
 @soc.group()

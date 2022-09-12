@@ -9,3 +9,5 @@ ignore
 test
 Informe
 *.pdf
+*.zip
+build
