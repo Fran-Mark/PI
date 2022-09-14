@@ -9,12 +9,31 @@ La definición de la especificación de la cadena de RF es una parte fundamental
 La cadena de recepción propuesta se muestra en la figura FIGURA. Allí se observa que se compone de los siguientes elementos:
 \begin{itemize}
     \item Un tramo de cable de aproximadamente 50~cm desde los elementos radiantes hasta el híbrido.
-    \item Un híbrido en cuadratura el cual combina              
+    \item Un híbrido en cuadratura el cual combina dos elementos radiantes lineales para lograr una polarización circular.
+    \item Un tramo de 5~cm de cable aproximadamente, el cual conecta el híbrido con el resto de la cadena de RF.
+    \item Un filtro grueso preselector de 25~MHz de ancho de banda para proteger al LNA evitando que sature y, además, realizar una selección gruesa de la banda de interés.
+    \item Un LNA de ganancia moderada. Su figura de ruido determina la del sistema por ley de Friis, es por esto que es relevante minimizarla.
+    \item Un tramo de cable de aproximadamente 2 metros para conectar con el resto del sistema.
+    \item Una etapa de gran ganancia $G$, la cual acondiciona la potencia de la señal de manera de cumplir con los requerimientos del demodulador.
+    \item Un último tramo de cable de alrededor de 30~cm para conectar el final de la cadena de recepción a la entrada del sistema de adquisición.
 \end{itemize}
 
-un híbrido, seguido de una etapa de filtrado, dos etapas de amplificación y un segundo filtrado.
 \section{Análisis de potencia} 
+Se comenzó realizando un análisis de potencia en la antena receptora con el objetivo de determinar la SNR de partida para luego, en base a esta, realizar los cálculos subsiguientes para la determinación de la ganancia $G$. La potencia en la antena receptora viene dada por la ecuación \ref{eq::potencias}:
 
+\begin{equation}
+    P_\textrm{ant} = P_\textrm{sat} - L_\textrm{FS} - L_\textrm{pol} + G_\textrm{el} (\theta),
+    \label{eq::potencias}
+\end{equation}
+
+donde $P_\textrm{ant}$ es la potencia recibida en la antena del receptor, $P_\textrm{sat} = 27~\un{dBm}$ es la potencia transmitida por la misión de referencia, $L_\textrm{FS} = 20 \log \left(\frac{4 \pi d}{\lambda}\right)$ representa las pérdidas de espacio libre, $L_\textrm{pol} = 3~dB$ son las pérdidas por polarización ya que la misión de referencia transmite en polarización lineal, y $G_\textrm{el} (\theta)$ es la ganancia por elemento para un dado ángulo.
+
+A continuación se calculó la SNR a la entrada del receptor como la resta en dB de la potencia en la antena dada por la ecuación \ref{eq::potencias} y la potencia de ruido en el ancho de banda de entrada dada por la ecuación \ref{eq::potenciaRuido}:
+\begin{equation}
+    N = N_0 B = k T_\textrm{ant} \cdot 25\un{MHz},
+    \label{eq::potenciaRuido}
+\end{equation}
+donde $k$ es la constante de Boltzmann, $T_\textrm{ant}$ la temperatura de la antena receptora y $B = 25\un{MHz}$ es el ancho de banda del primer filtro grueso de la cadena de recepción.
 \subsection{Peor caso}
 \subsection{Mejor caso}
 
