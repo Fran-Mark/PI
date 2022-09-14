@@ -191,7 +191,7 @@ blocks:
     alias: ''
     begin_tag: pmt.PMT_NIL
     comment: ''
-    file: /media/fran/46FAA90DFAA8FA77/Ventanas/IB/PI/GitHub/DOA/test/submuestreada_complex_trimmed.npy
+    file: /run/media/fran/46FAA90DFAA8FA77/Ventanas/IB/PI/GitHub/DOA/test/submuestreada_complex_trimmed.npy
     length: '0'
     maxoutbuf: '0'
     minoutbuf: '0'

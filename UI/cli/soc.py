@@ -25,13 +25,15 @@ def cat_config():
     soc.close()
     print("disconnected!")
 
+def tune_channel():
+    pass
 
 def __init__():
     soc = SSHClient()
 
     try:
         soc.connect('192.168.0.22', username='root', password=None)	
-    except Exception as err:
+    except Exception as _:
         print('using transport')
         soc.set_missing_host_key_policy(AutoAddPolicy())
         soc.get_transport().auth_none('root')
