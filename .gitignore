@@ -11,3 +11,5 @@ Informe
 *.pdf
 *.zip
 build
+__pycache__
+*egg-info

@@ -20,42 +20,45 @@
 #include "../../src/helpers.h"
 #include <unistd.h>
 #include "../../src/access_controller.h"
+#include "../../src/tle_parser.h"
 // class Server;
 
-class Server{
-    class Client{
+class Server
+{
+    class Client
+    {
         int socketFd;
         std::thread th;
-        Server* server;
+        Server *server;
         std::string filename;
         std::string filenameWithPath;
+
     public:
-        Client(int fd, Server* server_, void handler (Client* client));
+        Client(int fd, Server *server_, void handler(Client *client));
         ~Client();
         int getSocketFd();
         TLE readTLE();
         float readFreq();
         void requestToDie();
-        void captureData(float freq, TLE tle, AccessController* accessController);
+        void captureData(float freq, TLE tle, AccessController *accessController);
         void launchCapturingThread(float freq, TLE tle);
-        void streamProcessedData(AccessController* accessController);
+        void streamProcessedData(AccessController *accessController);
         void setFilename(std::string filename_);
     };
 
     int socketFd;
     int portNo;
     sockaddr_in serverAddress;
-    std::set<Client*> clients;
+    std::set<Client *> clients;
     std::mutex mutex;
     std::condition_variable cv;
-    std::queue<Client*> clientsToKill;
+    std::queue<Client *> clientsToKill;
     std::thread mainThread;
     std::thread cleanerThread;
     bool _isRunning;
     void setUpSocket();
     void cleanClients();
     void killAllClients();
-
 
 public:
     Server(int portNo_);
@@ -70,10 +73,7 @@ public:
     bool isRunning();
 
     void registerNewClients();
-    static void handleClient(Client* client);
+    static void handleClient(Client *client);
 
-    void addClientToKill(Client* client);
-
+    void addClientToKill(Client *client);
 };
-
-
