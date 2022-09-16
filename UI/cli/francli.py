@@ -1,5 +1,7 @@
 import click
+import multiprocessing as mp
 import soc as SoCActions
+import server as ServerActions
 
 @click.group()
 def cli():
@@ -70,8 +72,11 @@ def server():
 
 @server.command()
 def init():
-    #TODO
     click.echo("Initializing server")
+    #start in a new process
+    p = mp.Process(target=ServerActions.init, daemon=False)
+    p.start()
+
 
 @server.command()
 def status():

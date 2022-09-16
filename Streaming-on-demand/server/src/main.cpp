@@ -1,34 +1,30 @@
 #include <signal.h>
-#include <condition_variable>
+
 #include "server.h"
 #include <pybind11/embed.h>
+#include <iostream>
 
-std::condition_variable globalCv;
-std::mutex globalMutex;
-std::unique_lock<std::mutex> globalLk(globalMutex);
+bool _isRunning;
 void catchSignal(int _){
-    globalCv.notify_all();
+    _isRunning = false;
 }
 
-// int main(int argc, char* argv[]){
-//     Server server(2222);
-//     signal(SIGINT, catchSignal);
-//     server.start();
-//     globalCv.wait(globalLk);   
-//     server.stop();
-
-//     return 0;
-// }
-
-void init(){
+void run(){
     Server server(2222);
     signal(SIGINT, catchSignal);
     server.start();
-    globalCv.wait(globalLk);   
+    _isRunning = true;
+    std::string input;
+    while(_isRunning){
+        std::cin >> input;
+        if(input == "stop"){
+            _isRunning = false;
+        }
+    }  
     server.stop();
 }
 
 PYBIND11_MODULE(streaming_server, m) {
-    m.doc() = "Server init on port 2222"; // optional module docstring
-    m.def("init", &init, "Initializes the server on port 2222");
+    m.doc() = "Server run on port 2222"; // optional module docstring
+    m.def("run", &run, "runializes the server on port 2222");
 }

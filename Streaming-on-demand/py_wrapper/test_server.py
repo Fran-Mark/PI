@@ -1,3 +1,3 @@
 import streaming_server
 
-streaming_server.init()
+streaming_server.run()

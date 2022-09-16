@@ -70,7 +70,7 @@ void Server::registerNewClients()
         timeout.tv_usec = 0;
         int isReady = select(socketFd + 1, &fdSet, NULL, NULL, &timeout);
         helpers::throwErrorIf(isReady == -1, "Error:: Select failed");
-        if (isReady == 1)
+        if (isReady == 1 && _isRunning)
         {
             int clientSocketFd = accept(socketFd, (struct sockaddr *)&clientAddress, &clientAddressLen);
             helpers::throwErrorIf(clientSocketFd < 0, "Error:: Accept failed");

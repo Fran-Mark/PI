@@ -1,14 +1,13 @@
 from paramiko import SSHClient, AutoAddPolicy,Transport
 
 
-
-
 # Alternativa si no anda en linux
 # transport = Transport('192.168.0.22') 
 # transport.connect()
 # transport.auth_none('root')
 
 def cat_config():
+    soc = init()
     stdin, stdout, stderr = soc.exec_command("cat /mnt/client_config")
     lines = stdout.readlines()
 
@@ -28,20 +27,20 @@ def cat_config():
 def tune_channel():
     pass
 
-def __init__():
+def init():
     soc = SSHClient()
 
     try:
-        soc.connect('192.168.0.22', username='root', password=None)	
+        soc.connect('192.168.0.22', username='root', password=None, timeout=1)	
     except Exception as _:
         print('using transport')
-        soc.set_missing_host_key_policy(AutoAddPolicy())
-        soc.get_transport().auth_none('root')
+        try:
+            soc.set_missing_host_key_policy(AutoAddPolicy())
+            soc.get_transport().auth_none('root')
+        except Exception as _:
+            print('error')
+            return
 
     return soc
 
-
-
-if __name__ == 'soc':
-    soc = __init__()
 

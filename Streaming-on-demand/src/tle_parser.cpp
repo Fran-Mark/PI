@@ -29,7 +29,7 @@ std::chrono::time_point<std::chrono::system_clock> getNextPass(TLE tle)
         return stringToTimePoint(res);
     }
     catch (py::error_already_set const &e)
-    {
+    {   
         std::cout << "Error in python script" << std::endl;
         return ERROR_TIME_POINT;
     }
