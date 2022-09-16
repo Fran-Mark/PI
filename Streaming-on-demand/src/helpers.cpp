@@ -48,7 +48,12 @@ void helpers::writeNBytes(int fd, void* message, size_t nBytes){
 }
 
 bool helpers::parseTLE(TLE tle){
-    //Siempre devuelve true hasta arreglar la lectura de los TLEs
+    std::string test;
+    //ask for user input
+    std::cout << "Parser: \n";
+    std::cin >> test;
+    std::cout << "Parser: " << test << "\n";
+
     bool value = true;
     if (tle.getName() == "invalido"){
         value = false;

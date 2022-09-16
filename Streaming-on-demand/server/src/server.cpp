@@ -130,6 +130,8 @@ int Server::Client::getSocketFd(){
 void Server::Client::setFilename(std::string filename_){
             filename = filename_;
             filenameWithPath = "../captures/server_side/" + filename_;
+
+            
 }
 
 TLE Server::Client::readTLE(){
@@ -277,6 +279,7 @@ void Server::handleClient(Client* client){
 
             std::string filename = tle.getName() + "_" + helpers::generateTimestamp();
             std::string filenameWithPath = "../captures/server_side/" + filename;
+
             client->setFilename(filename);
             std::cout << "Filename: " << filenameWithPath << "\n";
 

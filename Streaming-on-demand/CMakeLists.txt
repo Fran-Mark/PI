@@ -20,7 +20,11 @@ project(Marquinez-tp-redes)
 # add_subdirectory(gnuradio)
 
 set(CMAKE_CXX_STANDARD 14)
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -lrt")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -lrt -fPIC")
+
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../bin)
 
 include(FetchContent)
 FetchContent_Declare(
@@ -36,20 +40,17 @@ set(CLIENT_CPPS "client/src/client.cpp" "src/helpers.cpp" "src/tle.cpp" "client/
 set(SERVER_CPPS "server/src/server.cpp" "src/helpers.cpp" "src/tle.cpp" "server/src/main.cpp" "src/sample.cpp" "src/access_controller.cpp")
 
 #add_subdirectory(pybind11)
-
-set(TARGET_NA)
-
 pybind11_add_module(streaming_server ${SERVER_CPPS})
 target_compile_features(streaming_server PUBLIC cxx_std_14)
-set_target_properties(${target_name} PROPERTIES SUFFIX ".so")
+set_target_properties(streaming_server PROPERTIES SUFFIX ".so")
 
-pybind11_add_module(streaming_client ${Client_CPPS})
+pybind11_add_module(streaming_client ${CLIENT_CPPS})
 target_compile_features(streaming_client PUBLIC cxx_std_14)
 set_target_properties(streaming_client PROPERTIES SUFFIX ".so")
 
 find_library(LIBRT rt) 
 if(LIBRT)
-target_link_libraries(${target_name} ${LIBRT})
+target_link_libraries(streaming_server PRIVATE ${LIBRT})
 endif()
-target_link_libraries(${target_name} Beamformer)
+target_link_libraries(streaming_server PRIVATE Beamformer)
 add_subdirectory(gnuradio)

@@ -24,97 +24,97 @@ Beamformer::Beamformer (const char* fname)
     {
         this->hilbert_fc_0_0_1_0 = filter::hilbert_fc::make(
             16*4,
-            gr::fft::window::WIN_HAMMING,
+            filter::firdes::WIN_HAMMING,
             6.76);
     }
     {
         this->hilbert_fc_0_0_1 = filter::hilbert_fc::make(
             16*4,
-            gr::fft::window::WIN_HAMMING,
+            filter::firdes::WIN_HAMMING,
             6.76);
     }
     {
         this->hilbert_fc_0_0_0_0_0_0_1_0_0_0_0_0_0 = filter::hilbert_fc::make(
             16*4,
-            gr::fft::window::WIN_HAMMING,
+            filter::firdes::WIN_HAMMING,
             6.76);
     }
     {
         this->hilbert_fc_0_0_0_0_0_0_1_0_0_0_0_0 = filter::hilbert_fc::make(
             16*4,
-            gr::fft::window::WIN_HAMMING,
+            filter::firdes::WIN_HAMMING,
             6.76);
     }
     {
         this->hilbert_fc_0_0_0_0_0_0_1_0_0_0_0 = filter::hilbert_fc::make(
             16*4,
-            gr::fft::window::WIN_HAMMING,
+            filter::firdes::WIN_HAMMING,
             6.76);
     }
     {
         this->hilbert_fc_0_0_0_0_0_0_1_0_0_0 = filter::hilbert_fc::make(
             16*4,
-            gr::fft::window::WIN_HAMMING,
+            filter::firdes::WIN_HAMMING,
             6.76);
     }
     {
         this->hilbert_fc_0_0_0_0_0_0_1_0_0 = filter::hilbert_fc::make(
             16*4,
-            gr::fft::window::WIN_HAMMING,
+            filter::firdes::WIN_HAMMING,
             6.76);
     }
     {
         this->hilbert_fc_0_0_0_0_0_0_1_0 = filter::hilbert_fc::make(
             16*4,
-            gr::fft::window::WIN_HAMMING,
+            filter::firdes::WIN_HAMMING,
             6.76);
     }
     {
         this->hilbert_fc_0_0_0_0_0_0_1 = filter::hilbert_fc::make(
             16*4,
-            gr::fft::window::WIN_HAMMING,
+            filter::firdes::WIN_HAMMING,
             6.76);
     }
     {
         this->hilbert_fc_0_0_0_0_0_0_0 = filter::hilbert_fc::make(
             16*4,
-            gr::fft::window::WIN_HAMMING,
+            filter::firdes::WIN_HAMMING,
             6.76);
     }
     {
         this->hilbert_fc_0_0_0_0_0_0 = filter::hilbert_fc::make(
             16*4,
-            gr::fft::window::WIN_HAMMING,
+            filter::firdes::WIN_HAMMING,
             6.76);
     }
     {
         this->hilbert_fc_0_0_0_0_0 = filter::hilbert_fc::make(
             16*4,
-           gr::fft::window::WIN_HAMMING,
+           filter::firdes::WIN_HAMMING,
             6.76);
     }
     {
         this->hilbert_fc_0_0_0_0 = filter::hilbert_fc::make(
             16*4,
-           gr::fft::window::WIN_HAMMING,
+           filter::firdes::WIN_HAMMING,
             6.76);
     }
     {
         this->hilbert_fc_0_0_0 = filter::hilbert_fc::make(
             16*4,
-           gr::fft::window::WIN_HAMMING,
+           filter::firdes::WIN_HAMMING,
             6.76);
     }
     {
         this->hilbert_fc_0_0 = filter::hilbert_fc::make(
             16*4,
-           gr::fft::window::WIN_HAMMING,
+           filter::firdes::WIN_HAMMING,
             6.76);
     }
     {
         this->hilbert_fc_0 = filter::hilbert_fc::make(
             16*4,
-           gr::fft::window::WIN_HAMMING,
+           filter::firdes::WIN_HAMMING,
             6.76);
     }
     {
