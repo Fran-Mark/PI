@@ -3,10 +3,10 @@
 
 \chapter{Determinación de la cadena de acondicionamiento de RF}
 
-La definición de la especificación de la cadena de RF es una parte fundamental en el diseño del receptor. Para todos los cálculos realizados en este capítulo se tomó como referencia la misión BEESAT-9 \cite{BEESAT-9} de la Universidad de Berlín. La razón de esta elección radica en que se trata de un satélite LEO a 530~km de altura el cual opera en la banda de interés, más específicamente a una frecuencia central $f_0 = 435.95\un{MHz}$.
+La definición de la especificación de la cadena de RF es una parte fundamental en el diseño del receptor. Para todos los cálculos realizados en este capítulo se tomó como referencia la misión BEESAT-9 \cite{BEESAT-9} de la Universidad de Berlín. La razón de esta elección radica en que se trata de un satélite LEO a $h = 530\un{km}$ de altura el cual opera en la banda de interés, más específicamente a una frecuencia central $f_0 = 435.95\un{MHz}$.
 
 \section{Planteo del front-end de RF}
-La cadena de recepción propuesta se muestra en la figura FIGURA. Allí se observa que se compone de los siguientes elementos:
+La cadena de recepción propuesta se muestra en la figura \ref{fig::cadenaRecepcion}. Allí se observa que se compone de los siguientes elementos:
 \begin{itemize}
     \item Un tramo de cable de aproximadamente 50~cm desde los elementos radiantes hasta el híbrido.
     \item Un híbrido en cuadratura el cual combina dos elementos radiantes lineales para lograr una polarización circular.
@@ -18,6 +18,8 @@ La cadena de recepción propuesta se muestra en la figura FIGURA. Allí se obser
     \item Un último tramo de cable de alrededor de 30~cm para conectar el final de la cadena de recepción a la entrada del sistema de adquisición.
 \end{itemize}
 
+\change{Agregar imagen cadena de recepción}
+
 \section{Análisis de potencia} 
 Se comenzó realizando un análisis de potencia en la antena receptora con el objetivo de determinar la SNR de partida para luego, en base a esta, realizar los cálculos subsiguientes para la determinación de la ganancia $G$. La potencia en la antena receptora viene dada por la ecuación \ref{eq::potencias}:
 
@@ -28,15 +30,35 @@ Se comenzó realizando un análisis de potencia en la antena receptora con el ob
 
 donde $P_\textrm{ant}$ es la potencia recibida en la antena del receptor, $P_\textrm{sat} = 27~\un{dBm}$ es la potencia transmitida por la misión de referencia, $L_\textrm{FS} = 20 \log \left(\frac{4 \pi d}{\lambda}\right)$ representa las pérdidas de espacio libre, $L_\textrm{pol} = 3~dB$ son las pérdidas por polarización ya que la misión de referencia transmite en polarización lineal, y $G_\textrm{el} (\theta)$ es la ganancia por elemento para un dado ángulo.
 
+La distancia $d$ empleada para calcular $L_\textrm{FS}$ representa la distancia del satélite al arreglo y puede calcularse mediante el teorema del coseno para un ángulo de elevación $\theta$ respecto al horizonte de acuerdo a la ecuación \ref{eq::distSatelite}:
+
+\begin{equation}
+    d(\theta) = 50\left[\sqrt{9961 - 7200 \cos(2 \theta)} - 120 \sin(\theta)\right]
+    \label{eq::distSatelite}
+\end{equation}
+\change{Esta fórmula está mal, fue hecha con re=6000 km}
+
 A continuación se calculó la SNR a la entrada del receptor como la resta en dB de la potencia en la antena dada por la ecuación \ref{eq::potencias} y la potencia de ruido en el ancho de banda de entrada dada por la ecuación \ref{eq::potenciaRuido}:
 \begin{equation}
     N = N_0 B = k T_\textrm{ant} \cdot 25\un{MHz},
     \label{eq::potenciaRuido}
 \end{equation}
 donde $k$ es la constante de Boltzmann, $T_\textrm{ant}$ la temperatura de la antena receptora y $B = 25\un{MHz}$ es el ancho de banda del primer filtro grueso de la cadena de recepción.
-\subsection{Peor caso}
-\subsection{Mejor caso}
 
+Se consideraron dos configuraciones extremas para cubrir los posibles rangos de valores de $L_\textrm{FS}$ y $G_\textrm{el}(\theta)$. La primera de estas corresponde al considerado el peor caso; el cual se tiene al al arreglo a $45\degree$ y el satélite se encuentra a $10\degree$ sobre la línea del horizonte como se observa en la figura \ref{fig::peorCaso}.\change{Agregar imagen}
+
+Por otro lado, la segunda configuración analizada representa el mejor caso, esto es, aquel en el cual el arreglo de antenas se encuentra horizontal sobre la tierra y el satélite se posiciona en el zénit como se muestra en la figura \ref{fig::mejorCaso}.\change{Agregar imagen}
+%\figura{mejorCaso}{mejor caso!}
+
+\subsection{Evaluación del peor caso}
+Para esta configuración la distancia de la misión de referencia al satélite según la ecuación \ref{eq::distSatelite} es de aproximadamente $1800\un{km}$, como puede verse en la figura \ref{fig::peorCaso}. Esta distancia representa unas pérdidas de espacio libre $L_\textrm{FS} = 150\un{dB}$. Por otro lado, la ganancia de cada elemento en estas condiciones fue determinado mediante simulaciones \unsure{Lo pongo en el apéndice? Ver docs de Nico}, donde se obtuvo que la ganancia $G_\textrm{el}(10\degree) = 3\un{dBi}$.
+
+Al sustituir los valores recién obtenidos en la ecuación \ref{eq::potencias} se obtiene que la potencia de señal que alcanza a cada elemento es $P_\textrm{ant} = -123\un{dBm}$.
+
+\todo{Agregar el análisis de la potencia de ruido}
+
+
+\subsection{Evaluación del mejor caso}
 \section{Análisis de SNR}
 \subsection{Requerimiento a la entrada del demodulador}
 \subsection{Ganancias por procesamiento}
