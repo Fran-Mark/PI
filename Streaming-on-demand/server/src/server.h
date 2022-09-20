@@ -21,7 +21,15 @@
 #include <unistd.h>
 #include "../../src/access_controller.h"
 #include "../../src/tle_parser.h"
-// class Server;
+
+//enum with client state
+enum ClientState{
+    IDLE,
+    WAITING_FOR_TLE,
+    WAITING_FOR_FREQ,
+    WAITING_FOR_NEXT_PASS,
+    STREAMING
+};
 
 class Server
 {
@@ -32,6 +40,8 @@ class Server
         Server *server;
         std::string filename;
         std::string filenameWithPath;
+        float freq;
+        ClientState state;
 
     public:
         Client(int fd, Server *server_, void handler(Client *client));
@@ -44,6 +54,9 @@ class Server
         void launchCapturingThread(float freq, TLE tle);
         void streamProcessedData(AccessController *accessController);
         void setFilename(std::string filename_);
+        void setState(ClientState state_);
+        ClientState getState();
+        std::string getStateAsString();
     };
 
     int socketFd;
@@ -76,4 +89,6 @@ public:
     static void handleClient(Client *client);
 
     void addClientToKill(Client *client);
+
+    void printStatus();
 };

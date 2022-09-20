@@ -1,7 +1,11 @@
+#!/usr/bin/python3 -u
+from tkinter.tix import Tree
 import click
-import multiprocessing as mp
+import subprocess as sp
 import soc as SoCActions
 import server as ServerActions
+from threading import *
+import daemon
 
 @click.group()
 def cli():
@@ -73,9 +77,8 @@ def server():
 @server.command()
 def init():
     click.echo("Initializing server")
-    #start in a new process
-    p = mp.Process(target=ServerActions.init, daemon=False)
-    p.start()
+    with daemon.DaemonContext():
+        ServerActions.run()
 
 
 @server.command()

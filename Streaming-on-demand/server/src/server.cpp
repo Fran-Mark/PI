@@ -118,6 +118,15 @@ bool Server::isRunning()
     return _isRunning;
 }
 
+void Server::printStatus()
+{
+    std::cout << "Number of clients: " << clients.size() << std::endl;
+    for (auto client : clients)
+    {
+        std::cout << "Client fd: " << client->getSocketFd() << '\t' << client->getStateAsString() << std::endl;
+    }
+}
+
 //****End Server Class****//
 
 //****Begin Client Class****//
@@ -126,6 +135,7 @@ Server::Client::Client(int fd, Server *server_, void handler(Client *client))
     server = server_;
     socketFd = fd;
     th = std::thread(handler, this);
+    state = ClientState::IDLE;
 }
 
 Server::Client::~Client()
@@ -153,6 +163,7 @@ void Server::Client::setFilename(std::string filename_)
 
 TLE Server::Client::readTLE()
 {
+    state = ClientState::WAITING_FOR_TLE;
 
     char name[TLE_LINE_LENGTH];
     helpers::readNBytes(socketFd, name, TLE_LINE_LENGTH);
@@ -170,6 +181,7 @@ TLE Server::Client::readTLE()
 
 float Server::Client::readFreq()
 {
+    state = ClientState::WAITING_FOR_FREQ;
     float freq;
     helpers::readNBytes(socketFd, &freq, sizeof(freq));
     return freq * 1000000;
@@ -227,6 +239,7 @@ void Server::Client::streamProcessedData(AccessController *accessController)
 
     // open
     accessController->startReading();
+    state = ClientState::STREAMING;
     int fd = open(filenameWithPath.c_str(), O_RDONLY);
     helpers::throwErrorIf(fd < 0, "ERROR opening file");
     accessController->setFd(fd);
@@ -278,6 +291,35 @@ void Server::Client::streamProcessedData(AccessController *accessController)
     close(streamingSocketFd);
     std::cout << "Client: streaming socket closed\n";
 }
+
+void Server::Client::setState(ClientState state_)
+{
+    state = state_;
+}
+
+ClientState Server::Client::getState()
+{
+    return state;
+}
+
+std::string Server::Client::getStateAsString()
+{
+    switch (state)
+    {
+    case ClientState::IDLE:
+        return "Idle";
+    case ClientState::WAITING_FOR_TLE:
+        return "Waiting for TLE";
+    case ClientState::WAITING_FOR_FREQ:
+        return "Waiting for frequency";
+    case ClientState::WAITING_FOR_NEXT_PASS:
+        return "Waiting for next pass";
+    case ClientState::STREAMING:
+        return "Streaming";
+    default:
+        return "UNKNOWN";
+    }
+}
 //****End Client Class****//
 
 void Server::handleClient(Client *client)
@@ -291,11 +333,13 @@ void Server::handleClient(Client *client)
     {
         TLE tle = client->readTLE();
         auto nextPass = getNextPass(tle);
+
         bool isTLEValid;
         if (nextPass == ERROR_TIME_POINT)
             isTLEValid = false;
         else
             isTLEValid = true;
+
         std::cout << "TLE válida: " << isTLEValid << "\n";
         helpers::writeNBytes(client->getSocketFd(), &isTLEValid, sizeof(isTLEValid));
         if (isTLEValid)
@@ -304,6 +348,7 @@ void Server::handleClient(Client *client)
             float freq = client->readFreq();
             std::cout << "Frecuencia [MHz]: " << freq << "\n";
 
+            client->setState(ClientState::WAITING_FOR_NEXT_PASS);
             helpers::waitUntil(nextPass);
 
             std::string filename = tle.getName() + "_" + helpers::generateTimestamp();

@@ -4,27 +4,45 @@
 #include <pybind11/embed.h>
 #include <iostream>
 
-bool _isRunning;
-void catchSignal(int _){
-    _isRunning = false;
-}
+bool _isActive;
+// void catchSignal(int _){
+//     _isActive = false;
+// }
 
-void run(){
+void run()
+{
     Server server(2222);
-    signal(SIGINT, catchSignal);
+    // signal(SIGINT, catchSignal);
     server.start();
-    _isRunning = true;
+    _isActive = true;
     std::string input;
-    while(_isRunning){
-        std::cin >> input;
-        if(input == "stop"){
-            _isRunning = false;
+    while (_isActive)
+    {
+        //read line
+        std::getline(std::cin, input);   
+        //std::cin >> input;
+        std::cout << "You entered: " << input << std::endl;
+        if (input == "stop")
+        {
+            _isActive = false;
         }
-    }  
+        if (input == "status")
+        {
+            std::cout << "Server is running" << std::endl;
+            server.printStatus();
+        }
+    }
     server.stop();
 }
 
-PYBIND11_MODULE(streaming_server, m) {
+void stop()
+{
+    _isActive = false;
+}
+
+PYBIND11_MODULE(streaming_server, m)
+{
     m.doc() = "Server run on port 2222"; // optional module docstring
     m.def("run", &run, "runializes the server on port 2222");
+    m.def("stop", &stop, "stops the server");
 }
