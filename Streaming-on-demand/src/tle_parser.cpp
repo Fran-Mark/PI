@@ -2,7 +2,7 @@
 namespace py = pybind11;
 using namespace py::literals;
 
-std::chrono::time_point<std::chrono::system_clock> stringToTimePoint(std::string timeString)
+time_point<system_clock> TLEParser::stringToTimePoint(std::string timeString)
 {
     std::tm tm = {};
 
@@ -14,9 +14,9 @@ std::chrono::time_point<std::chrono::system_clock> stringToTimePoint(std::string
     tm.tm_sec = std::stoi(timeString.substr(17, 2));
 
     std::time_t t = std::mktime(&tm);
-    return std::chrono::system_clock::from_time_t(t);
+    return system_clock::from_time_t(t);
 }
-std::chrono::time_point<std::chrono::system_clock> getNextPass(TLE tle)
+time_point<system_clock> TLEParser::getNextPass(TLE tle)
 {
     py::gil_scoped_release release;
     py::gil_scoped_acquire acquire;
@@ -26,7 +26,7 @@ std::chrono::time_point<std::chrono::system_clock> getNextPass(TLE tle)
         py::object result = tle_parser.attr("getNextPass")(tle.getLine1(), tle.getLine2());
         std::string res = result.cast<std::string>();
         std::cout << res << std::endl;
-        return stringToTimePoint(res);
+        return TLEParser::stringToTimePoint(res);
     }
     catch (py::error_already_set const &e)
     {   

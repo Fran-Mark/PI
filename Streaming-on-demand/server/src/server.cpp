@@ -332,7 +332,7 @@ void Server::handleClient(Client *client)
     while (1)
     {
         TLE tle = client->readTLE();
-        auto nextPass = getNextPass(tle);
+        auto nextPass = TLEParser::getNextPass(tle);
 
         bool isTLEValid;
         if (nextPass == ERROR_TIME_POINT)

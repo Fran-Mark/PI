@@ -7,5 +7,9 @@
 
 #define ERROR_TIME_POINT std::chrono::time_point<std::chrono::system_clock>(std::chrono::system_clock::duration::max())
 
-std::chrono::time_point<std::chrono::system_clock> getNextPass(TLE tle);
-std::chrono::time_point<std::chrono::system_clock> stringToTimePoint(std::string timeString);
+using namespace std::chrono;
+namespace TLEParser
+{
+time_point<system_clock> getNextPass(TLE tle);
+time_point<system_clock> stringToTimePoint(std::string timeString);
+}
