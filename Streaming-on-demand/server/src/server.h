@@ -51,7 +51,6 @@ class Server
         float readFreq();
         void requestToDie();
         void captureData(float freq, TLE tle, AccessController *accessController);
-        void launchCapturingThread(float freq, TLE tle);
         void streamProcessedData(AccessController *accessController);
         void setFilename(std::string filename_);
         void setState(ClientState state_);

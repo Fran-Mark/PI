@@ -8,7 +8,7 @@ class MainWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("🍫🍓Fran(g)ui 🍓🍫")
+        self.setWindowTitle("🍫🍓FranUI🍓🍫")
 
         ## Processes
         self.server, self.serverMessenger = self.setUpProcess("server")
