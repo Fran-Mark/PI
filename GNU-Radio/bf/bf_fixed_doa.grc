@@ -1,0 +1,519 @@
+options:
+  parameters:
+    author: fran
+    category: '[GRC Hier Blocks]'
+    cmake_opt: ''
+    comment: ''
+    copyright: ''
+    description: ''
+    gen_cmake: 'On'
+    gen_linking: dynamic
+    generate_options: qt_gui
+    hier_block_src_path: '.:'
+    id: bf_fixed_doa
+    max_nouts: '0'
+    output_language: python
+    placement: (0,0)
+    qt_qss_theme: ''
+    realtime_scheduling: ''
+    run: 'True'
+    run_command: '{python} -u {filename}'
+    run_options: prompt
+    sizing_mode: fixed
+    thread_safe_setters: ''
+    title: BF for fixed DOA
+    window_size: (1000,1000)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 8]
+    rotation: 0
+    state: enabled
+
+blocks:
+- name: samp_rate
+  id: variable
+  parameters:
+    comment: ''
+    value: '32000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [184, 12]
+    rotation: 0
+    state: enabled
+- name: beamforming_beamformer_0
+  id: beamforming_beamformer
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    idx: '0'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    mx: '4'
+    my: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [880, 176.0]
+    rotation: 0
+    state: disabled
+- name: beamforming_doaesprit_py_cf_0
+  id: beamforming_doaesprit_py_cf
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    element_separation: '34379.869036697244'
+    fc: 436e1
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    mx: '4'
+    my: '4'
+    n: '1'
+    spd: '128'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [504, 40.0]
+    rotation: 0
+    state: disabled
+- name: blocks_file_source_0
+  id: blocks_file_source
+  parameters:
+    affinity: ''
+    alias: ''
+    begin_tag: pmt.PMT_NIL
+    comment: ''
+    file: /run/media/fran/46FAA90DFAA8FA77/Ventanas/IB/PI/entendiendo-doa-esprit/binarios/simulated_signal_theta_30_phi_60_dos.npy
+    length: '0'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    offset: '0'
+    repeat: 'True'
+    type: complex
+    vlen: '16'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [184, 272.0]
+    rotation: 0
+    state: true
+- name: blocks_message_debug_0
+  id: blocks_message_debug
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1184, 256.0]
+    rotation: 0
+    state: enabled
+- name: blocks_null_sink_0
+  id: blocks_null_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    bus_structure_sink: '[[0,],]'
+    comment: ''
+    num_inputs: '1'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [672, 552.0]
+    rotation: 0
+    state: true
+- name: blocks_null_sink_0_0
+  id: blocks_null_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    bus_structure_sink: '[[0,],]'
+    comment: ''
+    num_inputs: '1'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [848, 928.0]
+    rotation: 0
+    state: true
+- name: blocks_null_sink_0_0_0
+  id: blocks_null_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    bus_structure_sink: '[[0,],]'
+    comment: ''
+    num_inputs: '1'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [856, 872.0]
+    rotation: 0
+    state: true
+- name: blocks_null_sink_0_0_0_0
+  id: blocks_null_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    bus_structure_sink: '[[0,],]'
+    comment: ''
+    num_inputs: '1'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [880, 752.0]
+    rotation: 0
+    state: true
+- name: blocks_null_sink_0_0_0_1
+  id: blocks_null_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    bus_structure_sink: '[[0,],]'
+    comment: ''
+    num_inputs: '1'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [912, 608.0]
+    rotation: 0
+    state: true
+- name: blocks_null_sink_0_0_1
+  id: blocks_null_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    bus_structure_sink: '[[0,],]'
+    comment: ''
+    num_inputs: '1'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [872, 808.0]
+    rotation: 0
+    state: true
+- name: blocks_null_sink_0_0_1_0
+  id: blocks_null_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    bus_structure_sink: '[[0,],]'
+    comment: ''
+    num_inputs: '1'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [928, 544.0]
+    rotation: 0
+    state: true
+- name: blocks_null_sink_0_0_1_0_0
+  id: blocks_null_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    bus_structure_sink: '[[0,],]'
+    comment: ''
+    num_inputs: '1'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [800, 496.0]
+    rotation: 0
+    state: true
+- name: blocks_null_sink_0_0_2
+  id: blocks_null_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    bus_structure_sink: '[[0,],]'
+    comment: ''
+    num_inputs: '1'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [904, 664.0]
+    rotation: 0
+    state: true
+- name: blocks_null_sink_0_1
+  id: blocks_null_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    bus_structure_sink: '[[0,],]'
+    comment: ''
+    num_inputs: '1'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [744, 872.0]
+    rotation: 0
+    state: true
+- name: blocks_null_sink_0_1_0
+  id: blocks_null_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    bus_structure_sink: '[[0,],]'
+    comment: ''
+    num_inputs: '1'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [768, 752.0]
+    rotation: 0
+    state: true
+- name: blocks_null_sink_0_1_1
+  id: blocks_null_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    bus_structure_sink: '[[0,],]'
+    comment: ''
+    num_inputs: '1'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [792, 608.0]
+    rotation: 0
+    state: true
+- name: blocks_null_sink_0_2
+  id: blocks_null_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    bus_structure_sink: '[[0,],]'
+    comment: ''
+    num_inputs: '1'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [752, 808.0]
+    rotation: 0
+    state: true
+- name: blocks_null_sink_0_2_0
+  id: blocks_null_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    bus_structure_sink: '[[0,],]'
+    comment: ''
+    num_inputs: '1'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [760, 440.0]
+    rotation: 0
+    state: true
+- name: blocks_null_sink_0_3
+  id: blocks_null_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    bus_structure_sink: '[[0,],]'
+    comment: ''
+    num_inputs: '1'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [784, 664.0]
+    rotation: 0
+    state: true
+- name: blocks_throttle_0
+  id: blocks_throttle
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    ignoretag: 'True'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samples_per_second: samp_rate
+    type: complex
+    vlen: '16'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [416, 296.0]
+    rotation: 0
+    state: true
+- name: blocks_vector_to_streams_0
+  id: blocks_vector_to_streams
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_streams: '16'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [512, 448.0]
+    rotation: 0
+    state: true
+- name: my_beamformer_beamformer_from_angles_0
+  id: my_beamformer_beamformer_from_angles
+  parameters:
+    affinity: ''
+    alias: ''
+    azimuth: '60'
+    comment: ''
+    elevation: '30'
+    freq: 436e-5
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    separation: 299792458/436e6/2
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [608, 288.0]
+    rotation: 0
+    state: enabled
+- name: qtgui_sink_x_0
+  id: qtgui_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    bw: samp_rate
+    comment: ''
+    fc: 436e1
+    fftsize: '1024'
+    gui_hint: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    name: '""'
+    plotconst: 'True'
+    plotfreq: 'True'
+    plottime: 'True'
+    plotwaterfall: 'True'
+    rate: '10'
+    showports: 'False'
+    showrf: 'False'
+    type: complex
+    wintype: firdes.WIN_BLACKMAN_hARRIS
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [848, 272.0]
+    rotation: 0
+    state: true
+- name: qtgui_sink_x_0_0
+  id: qtgui_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    bw: samp_rate
+    comment: ''
+    fc: 436e1
+    fftsize: '1024'
+    gui_hint: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    name: '""'
+    plotconst: 'True'
+    plotfreq: 'True'
+    plottime: 'True'
+    plotwaterfall: 'True'
+    rate: '10'
+    showports: 'False'
+    showrf: 'False'
+    type: complex
+    wintype: firdes.WIN_BLACKMAN_hARRIS
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1008, 600.0]
+    rotation: 0
+    state: true
+
+connections:
+- [beamforming_beamformer_0, '0', qtgui_sink_x_0, '0']
+- [beamforming_doaesprit_py_cf_0, doa_port, beamforming_beamformer_0, doa_port]
+- [beamforming_doaesprit_py_cf_0, doa_port, blocks_message_debug_0, print]
+- [blocks_file_source_0, '0', blocks_throttle_0, '0']
+- [blocks_file_source_0, '0', blocks_vector_to_streams_0, '0']
+- [blocks_throttle_0, '0', beamforming_beamformer_0, '0']
+- [blocks_throttle_0, '0', beamforming_doaesprit_py_cf_0, '0']
+- [blocks_throttle_0, '0', my_beamformer_beamformer_from_angles_0, '0']
+- [blocks_vector_to_streams_0, '0', blocks_null_sink_0_2_0, '0']
+- [blocks_vector_to_streams_0, '1', blocks_null_sink_0_0_1_0_0, '0']
+- [blocks_vector_to_streams_0, '10', blocks_null_sink_0_0_1, '0']
+- [blocks_vector_to_streams_0, '11', blocks_null_sink_0_2, '0']
+- [blocks_vector_to_streams_0, '12', blocks_null_sink_0_0_0, '0']
+- [blocks_vector_to_streams_0, '13', blocks_null_sink_0_1, '0']
+- [blocks_vector_to_streams_0, '14', blocks_null_sink_0_0, '0']
+- [blocks_vector_to_streams_0, '15', qtgui_sink_x_0_0, '0']
+- [blocks_vector_to_streams_0, '2', blocks_null_sink_0_0_1_0, '0']
+- [blocks_vector_to_streams_0, '3', blocks_null_sink_0, '0']
+- [blocks_vector_to_streams_0, '4', blocks_null_sink_0_0_0_1, '0']
+- [blocks_vector_to_streams_0, '5', blocks_null_sink_0_1_1, '0']
+- [blocks_vector_to_streams_0, '6', blocks_null_sink_0_0_2, '0']
+- [blocks_vector_to_streams_0, '7', blocks_null_sink_0_3, '0']
+- [blocks_vector_to_streams_0, '8', blocks_null_sink_0_0_0_0, '0']
+- [blocks_vector_to_streams_0, '9', blocks_null_sink_0_1_0, '0']
+- [my_beamformer_beamformer_from_angles_0, '0', qtgui_sink_x_0, '0']
+
+metadata:
+  file_format: 1

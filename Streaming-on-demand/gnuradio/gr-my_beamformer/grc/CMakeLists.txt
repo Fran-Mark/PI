@@ -18,5 +18,6 @@
 # the Free Software Foundation, Inc., 51 Franklin Street,
 # Boston, MA 02110-1301, USA.
 install(FILES
-    my_beamformer_beamformer_from_tle.block.yml DESTINATION share/gnuradio/grc/blocks
+    my_beamformer_beamformer_from_tle.block.yml
+    my_beamformer_beamformer_from_angles.block.yml DESTINATION share/gnuradio/grc/blocks
 )

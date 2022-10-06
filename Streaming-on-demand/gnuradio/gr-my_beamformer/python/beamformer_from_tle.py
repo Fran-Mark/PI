@@ -51,12 +51,15 @@ class beamformer_from_tle(gr.decim_block):
         self.elevation = 0
         self.azimuth = 0
 
-        gr.decim_block.__init__(self,
+        gr.basic_block.__init__(
+            self,
             name="beamformer_from_tle",
             in_sig=[(np.complex64, 16)],
-            out_sig=[np.complex64], 
-            decim=16)
+            out_sig=[np.complex64]
+            )
 
+    def forecast(self, noutput_items, ninput_items_required):
+        ninput_items_required[0] = noutput_items
 
     def work(self, input_items, output_items):
         in0 = input_items[0]
@@ -64,7 +67,6 @@ class beamformer_from_tle(gr.decim_block):
         
         #Every 1000 iteratrions 
         if self.nitems_read(0) % 1000 == 0:
-            #self.lat, self.lon, self.alt = getCoordinates(self.predictor)
             self.dopplerFactor = getDopplerFactor(self.predictor, ET_CENTRO_ATOMICO)   
             self.azimuth, self.elevation = getAzimuthElevation(self.predictor, ET_CENTRO_ATOMICO)
         #Calculate Doppler shift
@@ -74,12 +76,12 @@ class beamformer_from_tle(gr.decim_block):
         correctedSamples = in0 * np.exp(-1j*2*np.pi*dopplerShift*self.nitems_read(0))
      
         #Do digital beamforming
-        exponents = np.zeros(16, dtype=np.complex64)
-        for mx in range(4):
-            for my in range(4):
-                exponents[4*mx + my] = (mx - 1)*np.cos(self.elevation)*np.cos(self.azimuth) + (my - 1)*np.cos(self.elevation)*np.sin(self.azimuth)
+        coefs = np.zeros(16, dtype=np.complex64)
+        for j in range(4): 
+            for i in range(4):
+                #0.55 lambda is the distance between antennas in meters
+                coefs[j * 4 + i] = np.exp(-1j * 2 * np.pi * 0.55 * np.cos(self.elevation)*(j*np.cos(self.azimuth) + i*np.sin(self.azimuth)))
 
-        coefs = np.exp(-1j*2*np.pi*0.55*exponents)
-        out[:] = np.average(correctedSamples*coefs)
+        out[:] = np.dot(correctedSamples, coefs)/16
         return len(output_items[0])
 

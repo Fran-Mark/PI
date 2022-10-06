@@ -1,10 +1,10 @@
-id: my_beamformer_beamformer_from_tle
-label: beamformer_from_tle
+id: my_beamformer_beamformer_from_angles
+label: beamformer_from_angles
 category: '[my_beamformer]'
 
 templates:
   imports: import my_beamformer
-  make: my_beamformer.beamformer_from_tle(${line1}, ${line2}, ${freq})
+  make: my_beamformer.beamformer_from_angles(${azimuth}, ${elevation}, ${freq})
 
 #  Make one 'parameters' list entry for every parameter you want settable from the GUI.
 #     Keys include:
@@ -12,18 +12,18 @@ templates:
 #     * label (label shown in the GUI)
 #     * dtype (e.g. int, float, complex, byte, short, xxx_vector, ...)
 parameters:
-- id: line1
-  label: line1
-  dtype: string
-  default: ""
-
-- id: line2
-  label: line2
-  dtype: string
-  default: ""
-
+- id: azimuth
+  label: azimuth (deg)
+  dtype: float
+- id: elevation
+  label: elevation (deg)
+  dtype: float
 - id: freq
   label: freq (MHz)
+  dtype: float
+  default: 0
+- id: separation
+  label: separation (m)
   dtype: float
   default: 0
 

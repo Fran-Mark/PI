@@ -40,6 +40,7 @@ except module_not_found_error:
 
 # import any pure python here
 from .beamformer_from_tle import beamformer_from_tle
+from .beamformer_from_angles import beamformer_from_angles
 
 
 #
