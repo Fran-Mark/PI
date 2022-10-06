@@ -1,6 +1,6 @@
 \documentclass[../../main.tex]{subfiles}
 \begin{document}
-
+\graphicspath{{./figures}}
 \chapter{Determinación de la cadena de acondicionamiento de RF}
 
 La definición de la especificación de la cadena de RF es una parte fundamental en el diseño del receptor. Para todos los cálculos realizados en este capítulo se tomó como referencia la misión BEESAT-9 \cite{BEESAT-9} de la Universidad de Berlín. La razón de esta elección radica en que se trata de un satélite LEO a $h = 530\un{km}$ de altura el cual opera en la banda de interés, más específicamente a una frecuencia central $f_0 = 435.95\un{MHz}$.
@@ -42,13 +42,14 @@ A continuación se calculó la SNR a la entrada del receptor como la resta en dB
 \begin{equation}
     N = N_0 B = k T_\textrm{ant} \cdot 25\un{MHz},
     \label{eq::potenciaRuido}
-\end{equation}
+\end{equation} 
 donde $k$ es la constante de Boltzmann, $T_\textrm{ant}$ la temperatura de la antena receptora y $B = 25\un{MHz}$ es el ancho de banda del primer filtro grueso de la cadena de recepción.
 
 Se consideraron dos configuraciones extremas para cubrir los posibles rangos de valores de $L_\textrm{FS}$ y $G_\textrm{el}(\theta)$. La primera de estas corresponde al considerado el peor caso; el cual se tiene al al arreglo a $45\degree$ y el satélite se encuentra a $10\degree$ sobre la línea del horizonte como se observa en la figura \ref{fig::peorCaso}.\change{Agregar imagen}
 
 Por otro lado, la segunda configuración analizada representa el mejor caso, esto es, aquel en el cual el arreglo de antenas se encuentra horizontal sobre la tierra y el satélite se posiciona en el zénit como se muestra en la figura \ref{fig::mejorCaso}.\change{Agregar imagen}
-%\figura{mejorCaso}{mejor caso!}
+
+\figura[0.5]{mejorCaso}{mejor caso posta!}
 
 \subsection{Evaluación del peor caso}
 Para esta configuración la distancia de la misión de referencia al satélite según la ecuación \ref{eq::distSatelite} es de aproximadamente $1800\un{km}$, como puede verse en la figura \ref{fig::peorCaso}. Esta distancia representa unas pérdidas de espacio libre $L_\textrm{FS} = 150\un{dB}$. Por otro lado, la ganancia de cada elemento en estas condiciones fue determinado mediante simulaciones \unsure{Lo pongo en el apéndice? Ver docs de Nico}, donde se obtuvo que la ganancia $G_\textrm{el}(10\degree) = 3\un{dBi}$.
