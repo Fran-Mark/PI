@@ -1,0 +1,39 @@
+\documentclass[../../main.tex]{subfiles}
+\begin{document}
+\graphicspath{{./figures}}
+\chapter{Planteamiento del receptor}
+El receptor de la estación terrena se diseñará para la recepción de señales de satélites LEO en la banda amateur de UHF, que abarca desde los 435~MHz hasta los 438~MHz. El mismo consta de cinco partes principales como se muestra en la figura \ref{fig::receptor}, estas son:
+
+\begin{enumerate}
+    \item El arreglo de antenas. Se consideró para este proyecto un arreglo de 16 antenas dispuestas geométricamente formando un cuadrado de 4 por 4.
+    \item El \textit{front-end} de RF que incorpora etapas de filtrado grueso y amplificación.
+    \item El sistema de adquisición, el cual se compone por un ADC y una placa que incorpora un \textit{System on a Chip} (SoC).
+    \item La etapa de procesamiento externo, donde se realizará la conformación de haz.
+    \item El servidor de \textit{streaming} de capturas en tiempo real.
+\end{enumerate} 
+
+Como se mencionó en la Introducción, en el presente proyecto integrador se trabaja sobre el desarrollo en algunas áreas del receptor, habiendo otras que quedan fuera del alcance del mismo. El objetivo de este capítulo es el de brindar una visión global del diseño del receptor, y establecer de manera clara las áreas de trabajo de este proyecto.
+
+\change{Agregar imagen de la charlita de avance (desde PowerPoint)}
+
+\section{Arreglo de antenas}
+El arreglo de antenas seleccionado para este proyecto consiste en 16 elementos dispuestos de forma rectangular, formando un cuadrado como se muestra en la figura \ref{fig::array-grigo}.
+
+El diseño y fabricación del mismo no forman parte del presente proyecto. Sin embargo, resulta importante conocer la geometría del arreglo y determinadas características de los elementos ya que esto tendrá importancia a la hora de diseñar el algoritmo de conformación de haz o para hacer los cálculos del enlace satelital.
+
+Se mencionan a continuación algunas especificaciones relevantes:
+
+\change{Poner distancia entre elementos, temperatura?, ganancia?}
+
+\figura[0.7]{array-grigo}{Arreglo de 16 elementos considerado para este proyecto. Imagen tomada de \cite{proyecto-grigo}.}
+
+\section{Front-end de RF}
+El diseño y la puesta en marcha del \textit{front-end} de RF tampoco son objeto de este proyecto. No obstante, es necesario conocer sus componentes básicos para poder posteriormente realizar el cálculo del enlace satelital. 
+
+Un esquema del diseño se muestra en la figura \ref{fig::front-end-rf}. En dicha imagen se observa una primera etapa de filtrado con un filtro grueso preselector de 25~MHz, seguido por dos etapas de amplificación, la primera de bajo ruido y la segunda de gran ganancia $G$. Finalmente, se incorpora otro filtrado de 25~MHz para limpiar la señal de salida.
+
+\figura[0.8]{front-end-rf}{Front end de RF.}
+
+
+
+\end{document}
