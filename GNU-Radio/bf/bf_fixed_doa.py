@@ -131,7 +131,7 @@ class bf_fixed_doa(gr.top_block, Qt.QWidget):
         self.blocks_null_sink_0_0 = blocks.null_sink(gr.sizeof_gr_complex*1)
         self.blocks_null_sink_0 = blocks.null_sink(gr.sizeof_gr_complex*1)
         self.blocks_message_debug_0 = blocks.message_debug()
-        self.blocks_file_source_0 = blocks.file_source(gr.sizeof_gr_complex*16, '/run/media/fran/46FAA90DFAA8FA77/Ventanas/IB/PI/entendiendo-doa-esprit/binarios/simulated_signal_theta_30_phi_60_dos.npy', True, 0, 0)
+        self.blocks_file_source_0 = blocks.file_source(gr.sizeof_gr_complex*16, '/run/media/fran/46FAA90DFAA8FA77/Ventanas/IB/PI/GitHub/GNU-Radio/bin/simulated_signal_theta_30_phi_60_dos.npy', True, 0, 0)
         self.blocks_file_source_0.set_begin_tag(pmt.PMT_NIL)
 
 
@@ -139,7 +139,7 @@ class bf_fixed_doa(gr.top_block, Qt.QWidget):
         # Connections
         ##################################################
         self.connect((self.blocks_file_source_0, 0), (self.blocks_throttle_0, 0))
-        self.connect((self.blocks_file_source_0, 0), (self.blocks_vector_to_streams_0, 0))
+        self.connect((self.blocks_throttle_0, 0), (self.blocks_vector_to_streams_0, 0))
         self.connect((self.blocks_throttle_0, 0), (self.my_beamformer_beamformer_from_angles_0, 0))
         self.connect((self.blocks_vector_to_streams_0, 3), (self.blocks_null_sink_0, 0))
         self.connect((self.blocks_vector_to_streams_0, 14), (self.blocks_null_sink_0_0, 0))

@@ -59,7 +59,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [880, 176.0]
+    coordinate: [1144, 96.0]
     rotation: 0
     state: disabled
 - name: beamforming_doaesprit_py_cf_0
@@ -80,7 +80,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [504, 40.0]
+    coordinate: [760, 48.0]
     rotation: 0
     state: disabled
 - name: blocks_file_source_0
@@ -90,7 +90,7 @@ blocks:
     alias: ''
     begin_tag: pmt.PMT_NIL
     comment: ''
-    file: /run/media/fran/46FAA90DFAA8FA77/Ventanas/IB/PI/entendiendo-doa-esprit/binarios/simulated_signal_theta_30_phi_60_dos.npy
+    file: /run/media/fran/46FAA90DFAA8FA77/Ventanas/IB/PI/GitHub/GNU-Radio/bin/simulated_signal_theta_30_phi_60_dos.npy
     length: '0'
     maxoutbuf: '0'
     minoutbuf: '0'
@@ -102,7 +102,24 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [184, 272.0]
+    coordinate: [184, 216.0]
+    rotation: 0
+    state: disabled
+- name: blocks_interleaved_short_to_complex_0
+  id: blocks_interleaved_short_to_complex
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    swap: 'False'
+    vector_input: 'False'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [424, 528.0]
     rotation: 0
     state: true
 - name: blocks_message_debug_0
@@ -115,7 +132,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1184, 256.0]
+    coordinate: [1432, 56.0]
     rotation: 0
     state: enabled
 - name: blocks_null_sink_0
@@ -132,7 +149,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [672, 552.0]
+    coordinate: [968, 560.0]
     rotation: 0
     state: true
 - name: blocks_null_sink_0_0
@@ -149,7 +166,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [848, 928.0]
+    coordinate: [1144, 936.0]
     rotation: 0
     state: true
 - name: blocks_null_sink_0_0_0
@@ -166,7 +183,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [856, 872.0]
+    coordinate: [1152, 880.0]
     rotation: 0
     state: true
 - name: blocks_null_sink_0_0_0_0
@@ -183,7 +200,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [880, 752.0]
+    coordinate: [1176, 760.0]
     rotation: 0
     state: true
 - name: blocks_null_sink_0_0_0_1
@@ -200,7 +217,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [912, 608.0]
+    coordinate: [1208, 616.0]
     rotation: 0
     state: true
 - name: blocks_null_sink_0_0_1
@@ -217,7 +234,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [872, 808.0]
+    coordinate: [1168, 816.0]
     rotation: 0
     state: true
 - name: blocks_null_sink_0_0_1_0
@@ -234,7 +251,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [928, 544.0]
+    coordinate: [1224, 552.0]
     rotation: 0
     state: true
 - name: blocks_null_sink_0_0_1_0_0
@@ -251,7 +268,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [800, 496.0]
+    coordinate: [1096, 504.0]
     rotation: 0
     state: true
 - name: blocks_null_sink_0_0_2
@@ -268,7 +285,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [904, 664.0]
+    coordinate: [1200, 672.0]
     rotation: 0
     state: true
 - name: blocks_null_sink_0_1
@@ -285,7 +302,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [744, 872.0]
+    coordinate: [1040, 880.0]
     rotation: 0
     state: true
 - name: blocks_null_sink_0_1_0
@@ -302,7 +319,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [768, 752.0]
+    coordinate: [1064, 760.0]
     rotation: 0
     state: true
 - name: blocks_null_sink_0_1_1
@@ -319,7 +336,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [792, 608.0]
+    coordinate: [1088, 616.0]
     rotation: 0
     state: true
 - name: blocks_null_sink_0_2
@@ -336,7 +353,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [752, 808.0]
+    coordinate: [1048, 816.0]
     rotation: 0
     state: true
 - name: blocks_null_sink_0_2_0
@@ -353,7 +370,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [760, 440.0]
+    coordinate: [1056, 448.0]
     rotation: 0
     state: true
 - name: blocks_null_sink_0_3
@@ -370,9 +387,46 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [784, 664.0]
+    coordinate: [1080, 672.0]
     rotation: 0
     state: true
+- name: blocks_stream_to_tagged_stream_0
+  id: blocks_stream_to_tagged_stream
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    len_tag_key: '"packet_len"'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    packet_len: ''
+    type: byte
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [264, 992.0]
+    rotation: 0
+    state: disabled
+- name: blocks_stream_to_vector_0
+  id: blocks_stream_to_vector
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_items: '16'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [600, 536.0]
+    rotation: 0
+    state: enabled
 - name: blocks_throttle_0
   id: blocks_throttle
   parameters:
@@ -389,7 +443,44 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [416, 296.0]
+    coordinate: [584, 288.0]
+    rotation: 0
+    state: disabled
+- name: blocks_udp_source_0
+  id: blocks_udp_source
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    eof: 'True'
+    ipaddr: 127.0.0.1
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    port: '1234'
+    psize: '1432'
+    type: short
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [48, 440.0]
+    rotation: 0
+    state: enabled
+- name: blocks_vector_sink_x_0
+  id: blocks_vector_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    reserve_items: '1024'
+    type: short
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [472, 408.0]
     rotation: 0
     state: true
 - name: blocks_vector_to_streams_0
@@ -407,9 +498,43 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [512, 448.0]
+    coordinate: [808, 456.0]
     rotation: 0
     state: true
+- name: digital_crc32_async_bb_0
+  id: digital_crc32_async_bb
+  parameters:
+    affinity: ''
+    alias: ''
+    check: 'True'
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [576, 176.0]
+    rotation: 0
+    state: true
+- name: digital_crc32_bb_0
+  id: digital_crc32_bb
+  parameters:
+    affinity: ''
+    alias: ''
+    check: 'True'
+    comment: ''
+    lengthtagname: '"packet_len"'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    packed: 'True'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [504, 992.0]
+    rotation: 0
+    state: disabled
 - name: my_beamformer_beamformer_from_angles_0
   id: my_beamformer_beamformer_from_angles
   parameters:
@@ -426,7 +551,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [608, 288.0]
+    coordinate: [1016, 280.0]
     rotation: 0
     state: enabled
 - name: qtgui_sink_x_0
@@ -455,7 +580,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [848, 272.0]
+    coordinate: [1288, 272.0]
     rotation: 0
     state: true
 - name: qtgui_sink_x_0_0
@@ -484,19 +609,43 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1008, 600.0]
+    coordinate: [1304, 608.0]
     rotation: 0
     state: true
+- name: stream_demux_stream_demux_0
+  id: stream_demux_stream_demux
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    lengths: (44, 672)
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_outputs: '2'
+    type: short
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [256, 456.0]
+    rotation: 0
+    state: enabled
 
 connections:
 - [beamforming_beamformer_0, '0', qtgui_sink_x_0, '0']
 - [beamforming_doaesprit_py_cf_0, doa_port, beamforming_beamformer_0, doa_port]
 - [beamforming_doaesprit_py_cf_0, doa_port, blocks_message_debug_0, print]
 - [blocks_file_source_0, '0', blocks_throttle_0, '0']
-- [blocks_file_source_0, '0', blocks_vector_to_streams_0, '0']
+- [blocks_interleaved_short_to_complex_0, '0', blocks_stream_to_vector_0, '0']
+- [blocks_stream_to_tagged_stream_0, '0', digital_crc32_bb_0, '0']
+- [blocks_stream_to_vector_0, '0', blocks_vector_to_streams_0, '0']
+- [blocks_stream_to_vector_0, '0', my_beamformer_beamformer_from_angles_0, '0']
 - [blocks_throttle_0, '0', beamforming_beamformer_0, '0']
 - [blocks_throttle_0, '0', beamforming_doaesprit_py_cf_0, '0']
+- [blocks_throttle_0, '0', blocks_vector_to_streams_0, '0']
 - [blocks_throttle_0, '0', my_beamformer_beamformer_from_angles_0, '0']
+- [blocks_udp_source_0, '0', stream_demux_stream_demux_0, '0']
 - [blocks_vector_to_streams_0, '0', blocks_null_sink_0_2_0, '0']
 - [blocks_vector_to_streams_0, '1', blocks_null_sink_0_0_1_0_0, '0']
 - [blocks_vector_to_streams_0, '10', blocks_null_sink_0_0_1, '0']
@@ -514,6 +663,8 @@ connections:
 - [blocks_vector_to_streams_0, '8', blocks_null_sink_0_0_0_0, '0']
 - [blocks_vector_to_streams_0, '9', blocks_null_sink_0_1_0, '0']
 - [my_beamformer_beamformer_from_angles_0, '0', qtgui_sink_x_0, '0']
+- [stream_demux_stream_demux_0, '0', blocks_vector_sink_x_0, '0']
+- [stream_demux_stream_demux_0, '1', blocks_interleaved_short_to_complex_0, '0']
 
 metadata:
   file_format: 1
