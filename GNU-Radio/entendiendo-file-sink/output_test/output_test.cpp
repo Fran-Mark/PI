@@ -31,7 +31,7 @@ output_test::output_test () {
         this->blocks_file_source_0 =blocks::file_source::make(sizeof(short)*1, "NotImplemented", true, 0, 0);
     }
     {
-        this->blocks_file_sink_0 = blocks::file_sink::make(sizeof(gr_complex)*1, "/home/fran/Desktop/test1", false);
+        this->blocks_file_sink_0 = blocks::file_sink::make(sizeof(gr_complex)*1, '/home/fran/Desktop/test1', false);
     }
 
 // Connections:
