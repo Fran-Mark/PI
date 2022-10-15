@@ -25,15 +25,95 @@ Se mencionan a continuación algunas especificaciones relevantes:
 
 \change{Poner distancia entre elementos, temperatura?, ganancia?}
 
-\figura[0.7]{array-grigo}{Arreglo de 16 elementos considerado para este proyecto. Imagen tomada de \cite{proyecto-grigo}.}
+\figura[0.7]{array-grigo}{Arreglo de 16 elementos considerado para este proyecto \cite{proyecto-grigo}.}
 
 \section{Front-end de RF}
-El diseño y la puesta en marcha del \textit{front-end} de RF tampoco son objeto de este proyecto. No obstante, es necesario conocer sus componentes básicos para poder posteriormente realizar el cálculo del enlace satelital. 
+El diseño y la puesta en marcha del \textit{front-end} de RF tampoco son alcanzados por este proyecto. No obstante, es necesario conocer sus componentes básicos para poder posteriormente realizar el cálculo del enlace satelital. 
 
-Un esquema del diseño se muestra en la figura \ref{fig::front-end-rf}. En dicha imagen se observa una primera etapa de filtrado con un filtro grueso preselector de 25~MHz, seguido por dos etapas de amplificación, la primera de bajo ruido y la segunda de gran ganancia $G$. Finalmente, se incorpora otro filtrado de 25~MHz para limpiar la señal de salida.
+Un esquema del diseño se muestra en la figura \ref{fig::front-end-rf}. En dicha imagen se observa una primera etapa de filtrado empleando un filtro grueso preselector de 25~MHz, seguido por dos etapas de amplificación, la primera de bajo ruido y la segunda de gran ganancia $G$. Finalmente, se incorpora otro filtrado de 25~MHz para limpiar la señal de salida.
+
+La primera etapa de amplificación, correspondiente al LNA, tiene una ganancia de 27~dB \unsure{Esto es así?}, la cual no fue determinada en este proyecto y se toma como dato de partida para posteriormente calcular la ganancia $G$ necesaria. Esto se hará en el capítulo siguiente \change{Referencia estática!}.
 
 \figura[0.8]{front-end-rf}{Front end de RF.}
 
+\section{Sistema de adquisición}
+El sistema de adquisición debe ser capaz de:
+\begin{enumerate}
+    \item Recibir las señales de las 16 antenas.
+    \item Convertirlas al dominio digital a través de un muestreo.
+    \item Incluir una etapa de preprocesamiento en el dominio digital.
+    \item Empaquetar los datos.
+    \item Enviarlos al sistema de procesamiento externo.
+\end{enumerate}
 
+\subsection{AD9249}
+El hardware empleado para los requerimientos 1 y 2 fue el conversor analógico digital (ADC) AD9249 de Analog Devices \cite{AD9249}, una imagen del mismo se muestra en la figura \ref{fig::ADC}.
+
+Se mencionan a continuación algunas características relevantes del mismo para este proyecto:
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|ll|}
+    \hline
+    \multicolumn{2}{|c|}{\textbf{Características relevantes del AD9249}}                      \\ \hline
+    \multicolumn{1}{|l|}{\textbf{Parámetro}}                                          & \textbf{Valor}          \\ \hline
+    \multicolumn{1}{|l|}{Resolución}                                         & 14 bits        \\ \hline
+    \multicolumn{1}{|l|}{Número de canales}                                  & 16             \\ \hline
+    \multicolumn{1}{|l|}{Frecuencia máxima de muestreo}                      & 65 MSamples/s  \\ \hline
+    \multicolumn{1}{|l|}{Incertidumbre en la apertura}                       & 135 fs         \\ \hline
+    \multicolumn{1}{|l|}{\textit{Jitter} del reloj externo} & 1 ps           \\ \hline
+    \multicolumn{1}{|l|}{Potencia máxima de entrada}                         & 10 dBm (2 Vpp) \\ \hline
+    \multicolumn{1}{|l|}{Ancho de banda analógico}                           & 650 MHz        \\ \hline
+    \end{tabular}
+    \caption{Parámetros relevantes del AD9249.}
+    \label{tab::ADC}
+\end{table}
+
+De la tabla \ref{tab::ADC} se observa que se dispone de 16 canales en el ADC, este parámetro es el que representa una resticción en la cantidad de elementos que se pueden utilizar para el arreglo de antenas a ser utilizado en el receptor. La disponibilidad de 16 canales determina el uso de un arreglo de 16 elementos.
+
+Como se mencionó al principio del capítulo, el receptor trabajará en la banda amateur de UHF, desde los 435 a los 438 MHz. Este rango se encuentra dentro del ancho de banda analógico especificado en la tabla \ref{tab::ADC}.
+
+\figura[0.7]{ADC}{Conversor analógico digital AD9249 de Analog Devices \cite{AD9249}.}
+
+\subsubsection{Submuestreo}
+Las señales en la banda de UHF serán muestreadas a la máxima tasa de muestreo especificada en la tabla \ref{tab::ADC}, esto es, $f_s = 65\un{MSps}$. Este es un caso de submuestreo o muestreo pasabanda, ya que la tasa de toma de muestras no cumple con el teorema del muestreo de Nyquist-Shannon \cite{teorema-del-muestreo}.
+
+En particular, este es un muestreo pasabanda en la séptima zona de Nyquist. Al referenciar los extremos de la banda de interés a la primera zona de Nyquist\footnote{La primera zona de Nyquist se extiende desde $-f_s/2$ hasta $f_s/2$.} se obtiene:
+
+\begin{equation}
+\!
+\begin{aligned}
+438\un{MHz} - 7 \cdot 65\un{MSps} = -17\un{MHz} \\
+435\un{MHz} - 7 \cdot 65\un{MSps} = -20\un{MHz} 
+\end{aligned}
+\label{eq::freqs-submuestreadas}
+\end{equation}
+
+De la ecuación \ref{eq::freqs-submuestreadas} se concluye que tras el muestreo la copia de la banda de interés en la primera zona de Nyquist se ubicará desde los 17~MHz hasta los 20~MHz. 
+
+Resulta relevante notar que el espectro estará espejado respecto al original. No obstante, dado que las señales a recibir son reales en banda base,\unsure{Puedo asegurar que son reales en BB?? GMSK lo es. Reformular esta oración.} que el espectro esté espejado no tiene implicaciones en el sistema. \change{Esto está feo}
+
+Una consecuencia a tener en cuenta del submuestreo es la superposición espectral de ruido y posibles señales interferentes sobre la copia de la banda de interés en la primera zona de Nyquist. Esto se desprende del hecho de que existen infinitas bandas de frecuencias $\Delta f_k$ de 3~MHz de ancho de banda cuya copia en la primera zona de Nyquist coincide con la de la banda de interés.
+
+En la figura \ref{fig::submuestreo} se ilustra este fenómeno mediante el submuestreo de una señal ruidosa en la banda de interés.
+
+\unsure{Debería mostrar el muestreo?}
+
+
+\subsection{CIAA-ACC}
+Los requerimientos 3, 4 y 5 listados al principio de esta sección se llevarán a cabo en la plataforma de aplicaciones de Alto Costo Comptacional (ACC) \cite{CIAA-ACC} del proyecto Computadora Abierta Industrial Argentina (CIAA) \cite{CIAA}.
+
+\change{Incluir foto de la CIAA-ACC}
+
+En la figura \ref{fig::diagrama-ciaa} se observa un diagrama de bloques de la placa con sus principales componentes e interfaces. Entre ellos se tiene una interfaz Ethernet de 1~Gbps, la cual se empleará para comunicarse con una computadora externa y un conector FMC HPC (\textit{High Pin Count}) el cual se utilizará para recibir las muestras del ADC.
+
+\subsubsection{SoC Zynq-7030}
+El corazón \unsure{Muy informal?} de la CIAA-ACC es el SoC Zynq-7030 de Xilinx \cite{SoC}, el cual consiste de un sistema de procesamiento (PS) y lógica programable (PL), como puede verse en la figura \ref{fig::diagrama-ciaa}. La PL consiste en una FPGA de la familia Kintex-7 \cite{Kintex-7}, mientras que el PS cuenta con dos procesadores ARM Cortex-A9.
+
+\unsure{Incluyo la foto del esquemático del Zynq?}
+
+\figura[0.8]{diagrama-ciaa}{Diagrama de bloques de la plataforma CIAA-ACC \cite{CIAA-ACC}.}
+
+\subsection{Diseño del sistema}
+Las muestras adquiridas por el ADC ingresan a la CIAA-ACC a través del conector FMC como se mencionó anteriormente. Desde allí
 
 \end{document}
