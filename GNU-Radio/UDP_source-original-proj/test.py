@@ -32,6 +32,7 @@ import signal
 from argparse import ArgumentParser
 from gnuradio.eng_arg import eng_float, intx
 from gnuradio import eng_notation
+from stream_demux import stream_demux_swig
 
 from gnuradio import qtgui
 
@@ -76,8 +77,10 @@ class test(gr.top_block, Qt.QWidget):
         ##################################################
         # Blocks
         ##################################################
+        self.stream_demux_stream_demux_2 = stream_demux_swig.stream_demux(gr.sizeof_int*1, 16*(1,))
+        self.stream_demux_stream_demux_1 = stream_demux_swig.stream_demux(gr.sizeof_int*1, (16000,22))
         self.qtgui_time_sink_x_0_0 = qtgui.time_sink_f(
-            1024, #size
+            4096, #size
             samp_rate, #samp_rate
             "", #name
             1 #number of inputs
@@ -89,14 +92,14 @@ class test(gr.top_block, Qt.QWidget):
 
         self.qtgui_time_sink_x_0_0.enable_tags(True)
         self.qtgui_time_sink_x_0_0.set_trigger_mode(qtgui.TRIG_MODE_FREE, qtgui.TRIG_SLOPE_POS, 0.0, 0, 0, "")
-        self.qtgui_time_sink_x_0_0.enable_autoscale(False)
+        self.qtgui_time_sink_x_0_0.enable_autoscale(True)
         self.qtgui_time_sink_x_0_0.enable_grid(False)
         self.qtgui_time_sink_x_0_0.enable_axis_labels(True)
-        self.qtgui_time_sink_x_0_0.enable_control_panel(False)
-        self.qtgui_time_sink_x_0_0.enable_stem_plot(False)
+        self.qtgui_time_sink_x_0_0.enable_control_panel(True)
+        self.qtgui_time_sink_x_0_0.enable_stem_plot(True)
 
 
-        labels = ['Signal 1', 'Signal 2', 'Signal 3', 'Signal 4', 'Signal 5',
+        labels = ['Todas las señales', 'Signal 2', 'Signal 3', 'Signal 4', 'Signal 5',
             'Signal 6', 'Signal 7', 'Signal 8', 'Signal 9', 'Signal 10']
         widths = [1, 1, 1, 1, 1,
             1, 1, 1, 1, 1]
@@ -124,7 +127,7 @@ class test(gr.top_block, Qt.QWidget):
         self._qtgui_time_sink_x_0_0_win = sip.wrapinstance(self.qtgui_time_sink_x_0_0.pyqwidget(), Qt.QWidget)
         self.top_layout.addWidget(self._qtgui_time_sink_x_0_0_win)
         self.qtgui_time_sink_x_0 = qtgui.time_sink_f(
-            1024, #size
+            4096, #size
             samp_rate, #samp_rate
             "", #name
             1 #number of inputs
@@ -136,14 +139,14 @@ class test(gr.top_block, Qt.QWidget):
 
         self.qtgui_time_sink_x_0.enable_tags(True)
         self.qtgui_time_sink_x_0.set_trigger_mode(qtgui.TRIG_MODE_FREE, qtgui.TRIG_SLOPE_POS, 0.0, 0, 0, "")
-        self.qtgui_time_sink_x_0.enable_autoscale(False)
-        self.qtgui_time_sink_x_0.enable_grid(False)
+        self.qtgui_time_sink_x_0.enable_autoscale(True)
+        self.qtgui_time_sink_x_0.enable_grid(True)
         self.qtgui_time_sink_x_0.enable_axis_labels(True)
-        self.qtgui_time_sink_x_0.enable_control_panel(False)
-        self.qtgui_time_sink_x_0.enable_stem_plot(False)
+        self.qtgui_time_sink_x_0.enable_control_panel(True)
+        self.qtgui_time_sink_x_0.enable_stem_plot(True)
 
 
-        labels = ['Signal 1', 'Signal 2', 'Signal 3', 'Signal 4', 'Signal 5',
+        labels = ['Una sola señal', 'Signal 2', 'Signal 3', 'Signal 4', 'Signal 5',
             'Signal 6', 'Signal 7', 'Signal 8', 'Signal 9', 'Signal 10']
         widths = [1, 1, 1, 1, 1,
             1, 1, 1, 1, 1]
@@ -170,50 +173,57 @@ class test(gr.top_block, Qt.QWidget):
 
         self._qtgui_time_sink_x_0_win = sip.wrapinstance(self.qtgui_time_sink_x_0.pyqwidget(), Qt.QWidget)
         self.top_layout.addWidget(self._qtgui_time_sink_x_0_win)
-        self.blocks_vector_to_streams_0 = blocks.vector_to_streams(gr.sizeof_float*1, 16)
-        self.blocks_udp_source_0_0_0 = blocks.udp_source(gr.sizeof_int*1, '192.168.0.21', 12345, 1472, True)
-        self.blocks_stream_to_vector_0 = blocks.stream_to_vector(gr.sizeof_float*1, 16)
-        self.blocks_null_sink_0_3 = blocks.null_sink(gr.sizeof_float*1)
-        self.blocks_null_sink_0_2_0 = blocks.null_sink(gr.sizeof_float*1)
-        self.blocks_null_sink_0_2 = blocks.null_sink(gr.sizeof_float*1)
-        self.blocks_null_sink_0_1_1 = blocks.null_sink(gr.sizeof_float*1)
-        self.blocks_null_sink_0_1_0 = blocks.null_sink(gr.sizeof_float*1)
-        self.blocks_null_sink_0_1 = blocks.null_sink(gr.sizeof_float*1)
-        self.blocks_null_sink_0_0_2 = blocks.null_sink(gr.sizeof_float*1)
-        self.blocks_null_sink_0_0_1_0_0 = blocks.null_sink(gr.sizeof_float*1)
-        self.blocks_null_sink_0_0_1_0 = blocks.null_sink(gr.sizeof_float*1)
-        self.blocks_null_sink_0_0_1 = blocks.null_sink(gr.sizeof_float*1)
-        self.blocks_null_sink_0_0_0_1 = blocks.null_sink(gr.sizeof_float*1)
-        self.blocks_null_sink_0_0_0_0 = blocks.null_sink(gr.sizeof_float*1)
-        self.blocks_null_sink_0_0_0 = blocks.null_sink(gr.sizeof_float*1)
-        self.blocks_null_sink_0_0 = blocks.null_sink(gr.sizeof_float*1)
-        self.blocks_null_sink_0 = blocks.null_sink(gr.sizeof_float*1)
+        self.blocks_udp_source_0_0_0 = blocks.udp_source(gr.sizeof_int*1, '192.168.0.21', 12345, 64088, True)
+        self.blocks_null_sink_1 = blocks.null_sink(gr.sizeof_int*1)
+        self.blocks_null_sink_0_0_3_3 = blocks.null_sink(gr.sizeof_int*1)
+        self.blocks_null_sink_0_0_3_2_0 = blocks.null_sink(gr.sizeof_int*1)
+        self.blocks_null_sink_0_0_3_2 = blocks.null_sink(gr.sizeof_int*1)
+        self.blocks_null_sink_0_0_3_1_1 = blocks.null_sink(gr.sizeof_int*1)
+        self.blocks_null_sink_0_0_3_1_0_0 = blocks.null_sink(gr.sizeof_int*1)
+        self.blocks_null_sink_0_0_3_1_0 = blocks.null_sink(gr.sizeof_int*1)
+        self.blocks_null_sink_0_0_3_1 = blocks.null_sink(gr.sizeof_int*1)
+        self.blocks_null_sink_0_0_3_0_2 = blocks.null_sink(gr.sizeof_int*1)
+        self.blocks_null_sink_0_0_3_0_1_0 = blocks.null_sink(gr.sizeof_int*1)
+        self.blocks_null_sink_0_0_3_0_1 = blocks.null_sink(gr.sizeof_int*1)
+        self.blocks_null_sink_0_0_3_0_0_1 = blocks.null_sink(gr.sizeof_int*1)
+        self.blocks_null_sink_0_0_3_0_0_0_0 = blocks.null_sink(gr.sizeof_int*1)
+        self.blocks_null_sink_0_0_3_0_0_0 = blocks.null_sink(gr.sizeof_int*1)
+        self.blocks_null_sink_0_0_3_0_0 = blocks.null_sink(gr.sizeof_int*1)
+        self.blocks_null_sink_0_0_3_0 = blocks.null_sink(gr.sizeof_int*1)
+        self.blocks_null_sink_0_0_3 = blocks.null_sink(gr.sizeof_int*1)
+        self.blocks_int_to_float_0_0 = blocks.int_to_float(1, 1)
         self.blocks_int_to_float_0 = blocks.int_to_float(1, 1)
+        self.blocks_file_sink_0 = blocks.file_sink(gr.sizeof_int*1, '/run/media/fran/46FAA90DFAA8FA77/Ventanas/IB/PI/GitHub/GNU-Radio/UDP_sock_test/UDP_to_file_sink/file_py', False)
+        self.blocks_file_sink_0.set_unbuffered(True)
 
 
         ##################################################
         # Connections
         ##################################################
-        self.connect((self.blocks_int_to_float_0, 0), (self.blocks_stream_to_vector_0, 0))
-        self.connect((self.blocks_int_to_float_0, 0), (self.qtgui_time_sink_x_0_0, 0))
-        self.connect((self.blocks_stream_to_vector_0, 0), (self.blocks_vector_to_streams_0, 0))
-        self.connect((self.blocks_udp_source_0_0_0, 0), (self.blocks_int_to_float_0, 0))
-        self.connect((self.blocks_vector_to_streams_0, 3), (self.blocks_null_sink_0, 0))
-        self.connect((self.blocks_vector_to_streams_0, 14), (self.blocks_null_sink_0_0, 0))
-        self.connect((self.blocks_vector_to_streams_0, 12), (self.blocks_null_sink_0_0_0, 0))
-        self.connect((self.blocks_vector_to_streams_0, 8), (self.blocks_null_sink_0_0_0_0, 0))
-        self.connect((self.blocks_vector_to_streams_0, 4), (self.blocks_null_sink_0_0_0_1, 0))
-        self.connect((self.blocks_vector_to_streams_0, 10), (self.blocks_null_sink_0_0_1, 0))
-        self.connect((self.blocks_vector_to_streams_0, 2), (self.blocks_null_sink_0_0_1_0, 0))
-        self.connect((self.blocks_vector_to_streams_0, 1), (self.blocks_null_sink_0_0_1_0_0, 0))
-        self.connect((self.blocks_vector_to_streams_0, 6), (self.blocks_null_sink_0_0_2, 0))
-        self.connect((self.blocks_vector_to_streams_0, 13), (self.blocks_null_sink_0_1, 0))
-        self.connect((self.blocks_vector_to_streams_0, 9), (self.blocks_null_sink_0_1_0, 0))
-        self.connect((self.blocks_vector_to_streams_0, 5), (self.blocks_null_sink_0_1_1, 0))
-        self.connect((self.blocks_vector_to_streams_0, 11), (self.blocks_null_sink_0_2, 0))
-        self.connect((self.blocks_vector_to_streams_0, 0), (self.blocks_null_sink_0_2_0, 0))
-        self.connect((self.blocks_vector_to_streams_0, 7), (self.blocks_null_sink_0_3, 0))
-        self.connect((self.blocks_vector_to_streams_0, 15), (self.qtgui_time_sink_x_0, 0))
+        self.connect((self.blocks_int_to_float_0, 0), (self.qtgui_time_sink_x_0, 0))
+        self.connect((self.blocks_int_to_float_0_0, 0), (self.qtgui_time_sink_x_0_0, 0))
+        self.connect((self.blocks_udp_source_0_0_0, 0), (self.blocks_file_sink_0, 0))
+        self.connect((self.blocks_udp_source_0_0_0, 0), (self.stream_demux_stream_demux_1, 0))
+        self.connect((self.stream_demux_stream_demux_1, 0), (self.blocks_int_to_float_0_0, 0))
+        self.connect((self.stream_demux_stream_demux_1, 1), (self.blocks_null_sink_1, 0))
+        self.connect((self.stream_demux_stream_demux_1, 0), (self.stream_demux_stream_demux_2, 0))
+        self.connect((self.stream_demux_stream_demux_2, 15), (self.blocks_int_to_float_0, 0))
+        self.connect((self.stream_demux_stream_demux_2, 1), (self.blocks_null_sink_0_0_3, 0))
+        self.connect((self.stream_demux_stream_demux_2, 0), (self.blocks_null_sink_0_0_3_0, 0))
+        self.connect((self.stream_demux_stream_demux_2, 2), (self.blocks_null_sink_0_0_3_0_0, 0))
+        self.connect((self.stream_demux_stream_demux_2, 6), (self.blocks_null_sink_0_0_3_0_0_0, 0))
+        self.connect((self.stream_demux_stream_demux_2, 14), (self.blocks_null_sink_0_0_3_0_0_0_0, 0))
+        self.connect((self.stream_demux_stream_demux_2, 10), (self.blocks_null_sink_0_0_3_0_0_1, 0))
+        self.connect((self.stream_demux_stream_demux_2, 4), (self.blocks_null_sink_0_0_3_0_1, 0))
+        self.connect((self.stream_demux_stream_demux_2, 12), (self.blocks_null_sink_0_0_3_0_1_0, 0))
+        self.connect((self.stream_demux_stream_demux_2, 8), (self.blocks_null_sink_0_0_3_0_2, 0))
+        self.connect((self.stream_demux_stream_demux_2, 3), (self.blocks_null_sink_0_0_3_1, 0))
+        self.connect((self.stream_demux_stream_demux_2, 7), (self.blocks_null_sink_0_0_3_1_0, 0))
+        self.connect((self.stream_demux_stream_demux_2, 15), (self.blocks_null_sink_0_0_3_1_0_0, 0))
+        self.connect((self.stream_demux_stream_demux_2, 11), (self.blocks_null_sink_0_0_3_1_1, 0))
+        self.connect((self.stream_demux_stream_demux_2, 5), (self.blocks_null_sink_0_0_3_2, 0))
+        self.connect((self.stream_demux_stream_demux_2, 13), (self.blocks_null_sink_0_0_3_2_0, 0))
+        self.connect((self.stream_demux_stream_demux_2, 9), (self.blocks_null_sink_0_0_3_3, 0))
 
 
     def closeEvent(self, event):
