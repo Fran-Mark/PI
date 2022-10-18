@@ -2,19 +2,19 @@
 \begin{document}
 \graphicspath{{./figures}}
 \chapter{Planteamiento del receptor}
-El receptor de la estación terrena se diseñará para la recepción de señales de satélites LEO en la banda amateur de UHF, que abarca desde los 435~MHz hasta los 438~MHz. El mismo consta de cinco partes principales como se muestra en la figura \ref{fig::receptor}, estas son:
+El receptor de la estación terrena se diseñará para la recepción de señales de satélites LEO en la banda amateur de UHF, que abarca desde los 435~MHz hasta los 438~MHz. El mismo consta de cinco partes principales como se muestra en la figura \ref{fig::planteo-receptor}, estas son:
 
 \begin{enumerate}
     \item El arreglo de antenas. Se consideró para este proyecto un arreglo de 16 antenas dispuestas geométricamente formando un cuadrado de 4 por 4.
     \item El \textit{front-end} de RF que incorpora etapas de filtrado grueso y amplificación.
     \item El sistema de adquisición, el cual se compone por un ADC y una placa que incorpora un \textit{System on a Chip} (SoC).
     \item La etapa de procesamiento externo, donde se realizará la conformación de haz.
-    \item El servidor de \textit{streaming} de capturas en tiempo real.
+    \item El servidor de \textit{streaming} de capturas en tiempo real para el envío de las mismas a clientes.
 \end{enumerate} 
 
 Como se mencionó en la Introducción, en el presente proyecto integrador se trabaja sobre el desarrollo en algunas áreas del receptor, habiendo otras que quedan fuera del alcance del mismo. El objetivo de este capítulo es el de brindar una visión global del diseño del receptor, y establecer de manera clara las áreas de trabajo de este proyecto.
 
-\change{Agregar imagen de la charlita de avance (desde PowerPoint)}
+\figura{planteo-receptor}{Diagrama de bloques conceptual de los subsistemas principales del receptor.}
 
 \section{Arreglo de antenas}
 El arreglo de antenas seleccionado para este proyecto consiste en 16 elementos dispuestos de forma rectangular, formando un cuadrado como se muestra en la figura \ref{fig::array-grigo}.
@@ -30,11 +30,11 @@ Se mencionan a continuación algunas especificaciones relevantes:
 \section{Front-end de RF}
 El diseño y la puesta en marcha del \textit{front-end} de RF tampoco son alcanzados por este proyecto. No obstante, es necesario conocer sus componentes básicos para poder posteriormente realizar el cálculo del enlace satelital. 
 
-Un esquema del diseño se muestra en la figura \ref{fig::front-end-rf}. En dicha imagen se observa una primera etapa de filtrado empleando un filtro grueso preselector de 25~MHz, seguido por dos etapas de amplificación, la primera de bajo ruido y la segunda de gran ganancia $G$. Finalmente, se incorpora otro filtrado de 25~MHz para limpiar la señal de salida.
+Un esquema del diseño se muestra en la figura \ref{fig::front-end-rf-16}. En dicha imagen se observa una primera etapa de filtrado empleando un filtro grueso preselector de 25~MHz, seguido por dos etapas de amplificación, la primera de bajo ruido y la segunda de gran ganancia $G$. Finalmente, se incorpora otro filtrado de 25~MHz para limpiar la señal de salida.
 
 La primera etapa de amplificación, correspondiente al LNA, tiene una ganancia de 27~dB \unsure{Esto es así?}, la cual no fue determinada en este proyecto y se toma como dato de partida para posteriormente calcular la ganancia $G$ necesaria. Esto se hará en el capítulo siguiente \change{Referencia estática!}.
 
-\figura[0.8]{front-end-rf}{Front end de RF.}
+\figura[0.8]{front-end-rf-16}{Front end de RF.}
 
 \section{Sistema de adquisición}
 El sistema de adquisición debe ser capaz de:
@@ -92,11 +92,10 @@ De la ecuación \ref{eq::freqs-submuestreadas} se concluye que tras el muestreo 
 
 Resulta relevante notar que el espectro estará espejado respecto al original. No obstante, dado que las señales a recibir son reales en banda base,\unsure{Puedo asegurar que son reales en BB?? GMSK lo es. Reformular esta oración.} que el espectro esté espejado no tiene implicaciones en el sistema. \change{Esto está feo}
 
-Una consecuencia a tener en cuenta del submuestreo es la superposición espectral de ruido y posibles señales interferentes sobre la copia de la banda de interés en la primera zona de Nyquist. Esto se desprende del hecho de que existen infinitas bandas de frecuencias $\Delta f_k$ de 3~MHz de ancho de banda cuya copia en la primera zona de Nyquist coincide con la de la banda de interés.
+Una consecuencia a tener en cuenta en el submuestreo es la superposición espectral de ruido y de posibles señales interferentes sobre la copia de la banda de interés en la primera zona de Nyquist. Esto se desprende del hecho de que existen infinitas bandas de frecuencias $\Delta f_k$ de 3~MHz de ancho de banda cuya copia en la primera zona de Nyquist coincide con la de la banda de interés. 
+En la figura \ref{fig::submuestreo} se ilustra este fenómeno mediante el submuestreo de una señal ruidosa sintética en la banda de interés. Para aplacar este problema debe realizarse un filtrado pasabanda antes del submuestreo.
 
-En la figura \ref{fig::submuestreo} se ilustra este fenómeno mediante el submuestreo de una señal ruidosa en la banda de interés.
-
-\unsure{Debería mostrar el muestreo?}
+\figura[0.8]{submuestreo}{Submuestreo a 65~Msps de una señal sintética ruidosa en la banda amateur de UHF.}
 
 
 \subsection{CIAA-ACC}
@@ -114,6 +113,39 @@ El corazón \unsure{Muy informal?} de la CIAA-ACC es el SoC Zynq-7030 de Xilinx 
 \figura[0.8]{diagrama-ciaa}{Diagrama de bloques de la plataforma CIAA-ACC \cite{CIAA-ACC}.}
 
 \subsection{Diseño del sistema}
-Las muestras adquiridas por el ADC ingresan a la CIAA-ACC a través del conector FMC como se mencionó anteriormente. Desde allí
+Las muestras adquiridas por el ADC ingresan a la CIAA-ACC a través del conector FMC como se mencionó anteriormente. Desde allí pasan por el siguiente \textit{pipeline}, el cual además se ilustra en la figura \ref{fig::pipeline-ciaa}:
 
+\begin{enumerate}
+    \item Retardos de entrada: corrigen diferencias en el ruteo de los 16 canales dentro de la FPGA.
+    \item Deserializador: el AD9249 entrega los datos en formato serie, esta etapa combina los 14 bits de cada muestra.
+    \item Preprocesamiento: aquí se incluyen etapas de decimación, filtrado y selección de banda y de canal. \change{Mencionar esto en algún lado de la introducción}
+    \item FIFO: las muestras capturadas por la PL se almacenan aquí para ser leídas por la PS.
+    \item Interfaz AXI: a través de esta interfaz se comunican la PL y la PS.
+    \item Empaquetamiento: las muestras adquiridas son empaquetadas por software.
+    \item Envío a un servidor externo: los paquetes se envían hacia el exterior mediante un socket UDP.
+\end{enumerate}
+
+Este \textit{pipeline} ya fue implementado en \cite{proyecto-jose} con la excepción del punto 3, referido al preprocesamiento. Más adelante en este proyecto se abordará este punto, diseñándose e implementandose en el hardware.
+
+\figura{pipeline-ciaa}{Cadena de bloques que atraviesan las muestras adquiridas dentro de la CIAA-ACC hasta ser enviadas.}
+
+\section{Procesamiento externo}
+Los paquetes enviados por el sistema de adquisición se reciben a través de un socket UDP en un servidor externo, como por ejemplo una computadora, para realizar procesamiento digital sobre las muestras. Esto incluye a las etapas de estimación de dirección de arribo y conformación digital de haz.
+
+El procesamiento se realiza empleando GNU Radio, un proyecto libre y de código abierto para el desarrollo de SDR \cite{GNURadio}. La elección de este software fue hecha en \cite{proyecto-grigo}, donde se usó para implementar algoritmos de detección de DOA y de \textit{beamforming} digital.
+
+Esta etapa consta de cuatro partes principales, estas son:
+\begin{enumerate}
+    \item La resolución de la interfaz con el sistema de adquisición. Se deben capturar y leer correctamente los paquetes transmitidos por la CIAA-ACC por un socket UDP.
+    \item La corrección del corrimiento Doppler. Los satélites LEO tienen un movimiento relativo respecto a la ET, en consecuencia habrá que analizar el corrimiento Doppler generado.
+    \item La resolución de la dirección de arribo ya sea por medio de los TLE o empleando algoritmos de detección de DOA. Esto es crucial para realizar la conformación de haz.
+    \item La conformación digital de haz partiendo de la estimación de la DOA, y conociendo la geometría del arreglo.
+\end{enumerate}
+
+Los puntos 1 y 2 se desarrollarán más adelante en este proyecto. Por otro lado, los puntos 3 y 4 fueron implementados y evaluados en \cite{proyecto-grigo}, pero de todas formas serán verificados y modificados más adelante en el presente proyecto.
+
+\section{Servidor de capturas en tiempo real}
+La parte final del planteo presentado al principio del capítulo incluye el desarrollo de un servidor de \textit{streaming} de capturas en tiempo real. Este servidor debe ser capaz de soportar múltiples conexiones simultáneas, como se muestra en la figura \ref{fig::streaming-server}, y además transmitir datos capturados y procesados en tiempo real. 
+
+\figura[0.7]{streaming-server}{Esquema conceptual de un servidor de \textit{streaming} que soporta múltiples conexiones simultáneas.}
 \end{document}

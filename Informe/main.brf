@@ -1,19 +1,23 @@
-\backcite {proyecto-grigo}{{\es@scroman {iv}}{(document)}{Doc-Start}}
-\backcite {AD9249}{{\es@scroman {iv}}{(document)}{Doc-Start}}
-\backcite {CIAA-ACC}{{\es@scroman {iv}}{(document)}{Doc-Start}}
+\backcite {proyecto-grigo}{{\es@scroman {v}}{(document)}{Doc-Start}}
+\backcite {AD9249}{{\es@scroman {v}}{(document)}{Doc-Start}}
+\backcite {CIAA-ACC}{{\es@scroman {v}}{(document)}{Doc-Start}}
 \backcite {LeoConstellation}{{1}{1}{chapter.1}}
 \backcite {proyecto-jose}{{3}{1.2}{section.1.2}}
 \backcite {proyecto-grigo}{{3}{1.2}{section.1.2}}
 \backcite {proyecto-jose}{{3}{1.2}{section.1.2}}
 \backcite {proyecto-grigo}{{4}{1.2}{section.1.2}}
 \backcite {github}{{4}{1.3}{section.1.3}}
-\backcite {proyecto-grigo}{{6}{2.1}{figure.caption.20}}
+\backcite {proyecto-grigo}{{6}{2.2}{figure.caption.20}}
 \backcite {AD9249}{{7}{2.3.1}{subsection.2.3.1}}
-\backcite {AD9249}{{7}{2.3}{figure.caption.25}}
+\backcite {AD9249}{{8}{2.4}{figure.caption.25}}
 \backcite {teorema-del-muestreo}{{8}{2.3.1}{section*.26}}
-\backcite {CIAA-ACC}{{8}{2.3.2}{subsection.2.3.2}}
-\backcite {CIAA}{{8}{2.3.2}{subsection.2.3.2}}
-\backcite {SoC}{{8}{2.3.2}{section*.32}}
-\backcite {Kintex-7}{{8}{2.3.2}{section*.32}}
-\backcite {CIAA-ACC}{{9}{2.4}{figure.caption.33}}
-\backcite {BEESAT-9}{{10}{3}{chapter.3}}
+\backcite {CIAA-ACC}{{9}{2.3.2}{subsection.2.3.2}}
+\backcite {CIAA}{{9}{2.3.2}{subsection.2.3.2}}
+\backcite {SoC}{{9}{2.3.2}{section*.32}}
+\backcite {Kintex-7}{{9}{2.3.2}{section*.32}}
+\backcite {CIAA-ACC}{{9}{2.6}{figure.caption.34}}
+\backcite {proyecto-jose}{{10}{2.3.3}{Item.17}}
+\backcite {GNURadio}{{10}{2.4}{section.2.4}}
+\backcite {proyecto-grigo}{{10}{2.4}{section.2.4}}
+\backcite {proyecto-grigo}{{11}{2.4}{Item.21}}
+\backcite {BEESAT-9}{{12}{3}{chapter.3}}
