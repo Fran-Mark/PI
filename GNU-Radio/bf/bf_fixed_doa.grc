@@ -36,7 +36,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '32000'
+    value: 65e6
   states:
     bus_sink: false
     bus_source: false
@@ -105,6 +105,22 @@ blocks:
     coordinate: [184, 216.0]
     rotation: 0
     state: disabled
+- name: blocks_float_to_complex_0
+  id: blocks_float_to_complex
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [336, 808.0]
+    rotation: 0
+    state: disabled
 - name: blocks_interleaved_short_to_complex_0
   id: blocks_interleaved_short_to_complex
   parameters:
@@ -119,9 +135,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [424, 528.0]
+    coordinate: [456, 448.0]
     rotation: 0
-    state: true
+    state: enabled
 - name: blocks_message_debug_0
   id: blocks_message_debug
   parameters:
@@ -288,6 +304,23 @@ blocks:
     coordinate: [1200, 672.0]
     rotation: 0
     state: true
+- name: blocks_null_sink_0_0_3
+  id: blocks_null_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    bus_structure_sink: '[[0,],]'
+    comment: ''
+    num_inputs: '1'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1016, 968.0]
+    rotation: 0
+    state: true
 - name: blocks_null_sink_0_1
   id: blocks_null_sink
   parameters:
@@ -390,6 +423,40 @@ blocks:
     coordinate: [1080, 672.0]
     rotation: 0
     state: true
+- name: blocks_short_to_float_0
+  id: blocks_short_to_float
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    scale: '1'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [160, 792.0]
+    rotation: 0
+    state: disabled
+- name: blocks_short_to_float_0_0
+  id: blocks_short_to_float
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    scale: '1'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [152, 856.0]
+    rotation: 0
+    state: disabled
 - name: blocks_stream_to_tagged_stream_0
   id: blocks_stream_to_tagged_stream
   parameters:
@@ -457,7 +524,7 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
     port: '12345'
-    psize: '32044'
+    psize: '64088'
     type: short
     vlen: '1'
   states:
@@ -467,6 +534,27 @@ blocks:
     coordinate: [48, 440.0]
     rotation: 0
     state: enabled
+- name: blocks_udp_source_0_0_0_0
+  id: blocks_udp_source
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    eof: 'True'
+    ipaddr: 192.168.0.21
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    port: '12345'
+    psize: '1432'
+    type: short
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [40, 592.0]
+    rotation: 0
+    state: disabled
 - name: blocks_vector_sink_x_0
   id: blocks_vector_sink_x
   parameters:
@@ -480,7 +568,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [472, 408.0]
+    coordinate: [440, 640.0]
     rotation: 0
     state: enabled
 - name: blocks_vector_to_streams_0
@@ -498,23 +586,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [808, 456.0]
-    rotation: 0
-    state: true
-- name: digital_crc32_async_bb_0
-  id: digital_crc32_async_bb
-  parameters:
-    affinity: ''
-    alias: ''
-    check: 'True'
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [488, 168.0]
+    coordinate: [760, 464.0]
     rotation: 0
     state: true
 - name: digital_crc32_bb_0
@@ -569,7 +641,7 @@ blocks:
     alpha7: '1.0'
     alpha8: '1.0'
     alpha9: '1.0'
-    autoscale: 'True'
+    autoscale: 'False'
     average: '1.0'
     axislabels: 'True'
     bw: samp_rate
@@ -591,7 +663,7 @@ blocks:
     grid: 'False'
     gui_hint: ''
     label: Relative Gain
-    label1: ''
+    label1: Freq
     label10: ''''''
     label2: ''''''
     label3: ''''''
@@ -678,7 +750,7 @@ blocks:
     alpha7: '1.0'
     alpha8: '1.0'
     alpha9: '1.0'
-    autoscale: 'True'
+    autoscale: 'False'
     axislabels: 'True'
     color1: blue
     color10: dark blue
@@ -691,13 +763,13 @@ blocks:
     color8: dark red
     color9: dark green
     comment: ''
-    ctrlpanel: 'False'
+    ctrlpanel: 'True'
     entags: 'True'
-    grid: 'False'
+    grid: 'True'
     gui_hint: ''
-    label1: Signal 1
+    label1: Real (t)
     label10: Signal 10
-    label2: Signal 2
+    label2: imag (t)
     label3: Signal 3
     label4: Signal 4
     label5: Signal 5
@@ -720,7 +792,7 @@ blocks:
     nconnections: '1'
     size: '1024'
     srate: samp_rate
-    stemplot: 'False'
+    stemplot: 'True'
     style1: '1'
     style10: '1'
     style2: '1'
@@ -766,7 +838,7 @@ blocks:
     affinity: ''
     alias: ''
     comment: ''
-    lengths: (44, 32000)
+    lengths: (32000, 44)
     maxoutbuf: '0'
     minoutbuf: '0'
     num_outputs: '2'
@@ -779,13 +851,54 @@ blocks:
     coordinate: [256, 456.0]
     rotation: 0
     state: enabled
+- name: stream_demux_stream_demux_1_0
+  id: stream_demux_stream_demux
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    lengths: (672,44)
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_outputs: '2'
+    type: short
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [248, 608.0]
+    rotation: 0
+    state: disabled
+- name: stream_demux_stream_demux_1_0_0
+  id: stream_demux_stream_demux
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    lengths: (1,1)
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_outputs: '2'
+    type: short
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [152, 712.0]
+    rotation: 0
+    state: disabled
 
 connections:
 - [beamforming_beamformer_0, '0', qtgui_sink_x_0, '0']
 - [beamforming_doaesprit_py_cf_0, doa_port, beamforming_beamformer_0, doa_port]
 - [beamforming_doaesprit_py_cf_0, doa_port, blocks_message_debug_0, print]
 - [blocks_file_source_0, '0', blocks_throttle_0, '0']
+- [blocks_float_to_complex_0, '0', blocks_stream_to_vector_0, '0']
 - [blocks_interleaved_short_to_complex_0, '0', blocks_stream_to_vector_0, '0']
+- [blocks_short_to_float_0, '0', blocks_float_to_complex_0, '0']
+- [blocks_short_to_float_0_0, '0', blocks_float_to_complex_0, '1']
 - [blocks_stream_to_tagged_stream_0, '0', digital_crc32_bb_0, '0']
 - [blocks_stream_to_vector_0, '0', blocks_vector_to_streams_0, '0']
 - [blocks_stream_to_vector_0, '0', my_beamformer_beamformer_from_angles_0, '0']
@@ -794,15 +907,17 @@ connections:
 - [blocks_throttle_0, '0', blocks_vector_to_streams_0, '0']
 - [blocks_throttle_0, '0', my_beamformer_beamformer_from_angles_0, '0']
 - [blocks_udp_source_0, '0', stream_demux_stream_demux_0, '0']
+- [blocks_udp_source_0_0_0_0, '0', stream_demux_stream_demux_1_0, '0']
 - [blocks_vector_to_streams_0, '0', blocks_null_sink_0_2_0, '0']
 - [blocks_vector_to_streams_0, '1', blocks_null_sink_0_0_1_0_0, '0']
 - [blocks_vector_to_streams_0, '10', blocks_null_sink_0_0_1, '0']
 - [blocks_vector_to_streams_0, '11', blocks_null_sink_0_2, '0']
 - [blocks_vector_to_streams_0, '12', blocks_null_sink_0_0_0, '0']
 - [blocks_vector_to_streams_0, '13', blocks_null_sink_0_1, '0']
+- [blocks_vector_to_streams_0, '13', qtgui_freq_sink_x_0, '0']
+- [blocks_vector_to_streams_0, '13', qtgui_time_sink_x_0, '0']
 - [blocks_vector_to_streams_0, '14', blocks_null_sink_0_0, '0']
-- [blocks_vector_to_streams_0, '15', qtgui_freq_sink_x_0, '0']
-- [blocks_vector_to_streams_0, '15', qtgui_time_sink_x_0, '0']
+- [blocks_vector_to_streams_0, '15', blocks_null_sink_0_0_3, '0']
 - [blocks_vector_to_streams_0, '2', blocks_null_sink_0_0_1_0, '0']
 - [blocks_vector_to_streams_0, '3', blocks_null_sink_0, '0']
 - [blocks_vector_to_streams_0, '4', blocks_null_sink_0_0_0_1, '0']
@@ -812,8 +927,13 @@ connections:
 - [blocks_vector_to_streams_0, '8', blocks_null_sink_0_0_0_0, '0']
 - [blocks_vector_to_streams_0, '9', blocks_null_sink_0_1_0, '0']
 - [my_beamformer_beamformer_from_angles_0, '0', qtgui_sink_x_0, '0']
-- [stream_demux_stream_demux_0, '0', blocks_vector_sink_x_0, '0']
-- [stream_demux_stream_demux_0, '1', blocks_interleaved_short_to_complex_0, '0']
+- [stream_demux_stream_demux_0, '0', blocks_interleaved_short_to_complex_0, '0']
+- [stream_demux_stream_demux_0, '0', stream_demux_stream_demux_1_0_0, '0']
+- [stream_demux_stream_demux_0, '1', blocks_vector_sink_x_0, '0']
+- [stream_demux_stream_demux_1_0, '0', blocks_interleaved_short_to_complex_0, '0']
+- [stream_demux_stream_demux_1_0, '1', blocks_vector_sink_x_0, '0']
+- [stream_demux_stream_demux_1_0_0, '0', blocks_short_to_float_0, '0']
+- [stream_demux_stream_demux_1_0_0, '1', blocks_short_to_float_0_0, '0']
 
 metadata:
   file_format: 1
