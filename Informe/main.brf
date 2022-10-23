@@ -2,6 +2,8 @@
 \backcite {AD9249}{{\es@scroman {v}}{(document)}{Doc-Start}}
 \backcite {CIAA-ACC}{{\es@scroman {v}}{(document)}{Doc-Start}}
 \backcite {AD9249}{{\es@scroman {v}}{(document)}{Doc-Start}}
+\backcite {ruidos-adc}{{\es@scroman {v}}{(document)}{Doc-Start}}
+\backcite {ruidos-adc}{{\es@scroman {v}}{(document)}{Doc-Start}}
 \backcite {haykin}{{\es@scroman {v}}{(document)}{Doc-Start}}
 \backcite {LeoConstellation}{{1}{1}{chapter.1}}
 \backcite {itu-banda-amateur}{{3}{1.2}{section.1.2}}
@@ -24,8 +26,14 @@
 \backcite {proyecto-grigo}{{10}{2.4}{section.2.4}}
 \backcite {proyecto-grigo}{{11}{2.4}{Item.21}}
 \backcite {BEESAT-9}{{12}{3}{chapter.3}}
+\backcite {ruidos-adc}{{15}{3.3}{section.3.3}}
 \backcite {AD9249}{{15}{3.3}{section.3.3}}
-\backcite {AD9249}{{15}{3.3}{figure.caption.49}}
-\backcite {haykin}{{16}{3.4.1}{equation.3.4.4}}
-\backcite {BEESAT-9}{{17}{3.4.1}{equation.3.4.6}}
-\backcite {haykin}{{17}{3.5}{figure.caption.54}}
+\backcite {AD9249}{{15}{3.3}{figure.caption.48}}
+\backcite {formula-cuantizacion}{{16}{3.3.2}{subsection.3.3.2}}
+\backcite {formula-cuantizacion}{{16}{3.3.2}{subsection.3.3.2}}
+\backcite {ruidos-adc}{{16}{3.4}{figure.caption.50}}
+\backcite {ruidos-adc}{{16}{3.5}{figure.caption.51}}
+\backcite {formula-jitter}{{17}{3.3.3}{subsection.3.3.3}}
+\backcite {haykin}{{19}{3.4.1}{equation.3.4.8}}
+\backcite {BEESAT-9}{{19}{3.4.1}{equation.3.4.10}}
+\backcite {haykin}{{20}{3.9}{figure.caption.59}}

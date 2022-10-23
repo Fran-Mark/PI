@@ -69,7 +69,7 @@ Por otro lado, la segunda configuración analizada representa el mejor caso, est
 Para la configuración mostrada en la figura \ref{fig::peor-caso}, la distancia de la misión de referencia al satélite según la ecuación \ref{eq::distSatelite} es de aproximadamente $1800\un{km}$. Esta distancia se calcula a partir de la ecuación \ref{eq::distSatelite} y representa unas pérdidas de espacio libre de $L_\textrm{FS} = 150\un{dB}$. 
 Por otro lado, la ganancia de cada elemento en estas condiciones fue determinado mediante simulaciones \unsure{Lo pongo en el apéndice? Ver docs de Nico}, donde se obtuvo $G_\textrm{el}(10\degree) = 3\un{dBi}$. Al sustituir los valores recién obtenidos en la ecuación \ref{eq::potencias} se obtiene que la potencia de señal que alcanza a cada elemento es $P_\textrm{ant} = -123\un{dBm}$.
 
-Para calcular la potencia de ruido empleando la ecuación \ref{eq::potenciaRuido} se debe determinar la temperatura de ruido de la antena\footnote{Esto es de cada elemento, no el arreglo.}.
+Para calcular la potencia de ruido empleando la ecuación \ref{eq::potenciaRuido} se debe determinar la temperatura de ruido de la antena\footnote{Esto es de cada elemento, no del arreglo entero.}.
 \todo{Poner como se determinó la temperatura de la antena.}
 \todo{Poner la SNR obtenida restando los valores y labelar la eq}
 
@@ -81,7 +81,7 @@ Para esta configuración, la temperatura de cada antena es
 \todo{Poner la SNR obtenida restando los valores y labelar la eq}
 
 \section{Ruido introducido por el ADC}
-El conversor analógico-digital es un dispositivo complejo con numerosas fuentes de ruido. En este análisis se consideran las tres fuentes principales en términos del nivel de ruido aportado en la frecuencia de trabajo de la misión de referencia \cite{AD9249}. Estas son:
+El conversor analógico-digital es un dispositivo complejo con numerosas fuentes de ruido \cite{ruidos-adc}. En este análisis se consideran las tres fuentes principales en términos del nivel de ruido aportado en la frecuencia de trabajo de la misión de referencia \cite{AD9249}. Estas son:
 \begin{itemize}
     \item Ruido térmico.
     \item Ruido de cuantización.
@@ -89,12 +89,63 @@ El conversor analógico-digital es un dispositivo complejo con numerosas fuentes
 \end{itemize}
 
 \subsection{Ruido térmico}
-En la figura \ref{fig::ruido-termico} se muestra el ruido térmico del ADC en función de la frecuencia de la señal de entrada. Se observa que para el caso bajo análisis de $f_0 = 435.95\un{MHz}$, el ruido en dBFS es de aproximadamente 65~dBFS.
-\change{Redactar mejor}
+En la figura \ref{fig::ruido-termico} se muestra la SNR en dBFS en función de la frecuencia. Se observa que, para el caso bajo análisis de $f_0 = 435.95\un{MHz}$, la SNR es de aproximadamente 65~dBFS. Esto implica que el ruido térmico o ruido Johnson en dBFS es de -65~dBFS. Esto es:
+\begin{equation}
+    N_T = -65\un{dBFS}
+    \label{eq::ruido-termico}
+\end{equation}
 
-\figura[0.7]{ruido-termico}{Ruido térmico del AD9249 en función de la frecuencia de entrada \cite{AD9249}.}
-\change{No es exactamente el ruido térmico lo que se muestra.}
+\figura[0.65]{ruido-termico}{SNR del AD9249 en función de la frecuencia de entrada \cite{AD9249}.}
 
+\subsection{Ruido de cuantización}
+Al muestrear una señal se discretiza una magnitud física, en este caso esta magnitud es la tensión. De esta manera, dado que con N bits se pueden representar hasta $2^N$ valores, se comete inevitablemente un error al realizar el muestreo de una variable continua; esto se ilustra en las figuras \ref{fig::cuantizacion} y \ref{fig::sampleo}. Dicho error recibe el nombre de error de cuantización.
+
+Este error puede modelarse como una variable aleatoria con distribución uniforme en el intervalo $[-\textrm{FSR}/{2^{N_\textrm{b} + 1}}, \textrm{FSR}/{2^{N_\textrm{b} + 1}}]$ \cite{formula-cuantizacion}, donde $N_\textrm{b}$ es el número de bits efectivos del usados en el muestreo. Luego, para una señal de entrada sinusoidal \textit{full scale} se obtiene que la potencia de ruido de cuantización (que deriva del error de cuantización) puede calcularse de acuerdo a la siguiente fórmula \cite{formula-cuantizacion}:
+\begin{equation}
+    N_q = - (1.763 + 6.02 N_\textrm{b})\un{dBFS},
+    \label{eq::ruido-cuantizacion-formula}
+\end{equation}
+\unsure{Lo de bits efectivos está relacionado con el oversampling, ver si lo dejo o no.}
+
+El AD9249 posee una resolución de 14 bits como se indicó en la tabla \ref{tab::ADC}. Luego, de la ecuación \ref{eq::ruido-cuantizacion-formula}, el ruido de cuantización es:
+\begin{equation}
+    N_q = -86\un{dBFS}.
+    \label{eq::ruido-cuantizacion}
+\end{equation}
+
+\figura[0.55]{cuantizacion}{Código de cuantización con 4 bits \cite{ruidos-adc}.}
+
+\figura[0.55]{sampleo}{Señal analógica y señal muestreada junto con el error del bit menos significativo \cite{ruidos-adc}.}
+
+\subsection{Ruido por \textit{jitter}}
+Existen dos fuentes de incertidumbre en el momento de la conversión, el \textit{jitter} del reloj externo de muestreo y la incertidumbre en el tiempo de apertura del ADC, ambos valores se especifican en la table \ref{tab::ADC}.
+
+Dado que se trata de efectos independientes, se calcula el \textit{jitter} $t_j$ resultante como la suma en cuadratura de ambos efectos:
+\[t_j = \sqrt{{(1\un{ps})}^2 + {(135\un{fs})}^2} \approx 1\un{ps}\]
+
+La potencia de ruido de \textit{jitter} para una entrada sinusoidal puede calcularse como \cite{formula-jitter}:
+\begin{equation}
+    N_j = 20 \log{\left(2 \pi  f_{\textrm{in}} t_j\right)}\un{dBc} = -51\un{dBc},
+    \label{eq::jitter-formula}
+\end{equation}
+para $f_{\textrm{in}} = 435.95\un{MHz}$, la frecuencia de operación de la misión de referencia. Resulta relevante notar que, a diferencia del ruido térmico y el de cuantización analizados anteriormente, el ruido de \textit{jitter} se expresa en dBc, es decir, la potencia de ruido de \textit{jitter} siempre estará 51~dB por debajo de la potencia de portadora.
+
+\subsection{SNR a la salida del ADC en función de la ganancia $G$}
+El parámetro libre en este análisis es la ganancia $G$ de la segunda etapa de amplificación, la cual puede verse en la figura \ref{fig::cadena-de-recepcion}. Por esto resulta de relevancia analizar las implicancias que tiene la variación de este parámetro en el sistema.
+Empleando \textit{full scale} como $1~V_\textrm{pp}$, se tiene que 
+$$0\un{dBFS} \approx 4\un{dBm},$$ 
+\unsure{Hace falta que explique de donde sale?} 
+lo cual según las ecuaciones \ref{eq::ruido-termico} y \ref{eq::ruido-cuantizacion} implica que los ruidos térmico y de cuantizacion resultan:
+\[N_T = -61\un{dBm},\] \[N_q = -82\un{dBm}.\]
+
+En la figura \ref{fig::ruidovsG} se muestra la potencia en dBm de la señal de entrada y los términos de ruido del ADC y el ruido de RF para el peor caso de recepción (ver figura \ref{fig::peor-caso}) en función de la ganancia $G$. Se incluye además en dicho gráfico la suma en cuadratura de todos los términos\footnote{Se realiza la suma en cuadratura bajo la suposición de que estos efectos son independientes.} de ruido en representación del ruido total del sistema.
+
+La SNR está representada en la figura \ref{fig::ruidovsG} por la diferencia entre $P_{in}$ y $N_{tot}$. Se observa a simple vista que aumentar el valor de $G$ mejora la SNR inicialmente hasta cierto punto donde la diferencia entre las curvas parece permanecer constante. Esto se ve con mayor claridad en la figura \ref{fig::SNRvsG} donde se grafica la SNR en función de la ganancia $G$ para el peor caso de recepción. Se ve que aumentar la ganancia $G$ por encima de los 55~dB no representa mejoras a la SNR.
+
+\figura[0.7]{ruidovsG}{Potencia en dBm en función de la ganancia para la señal de entrada, los términos de ruido generados por el ADC y la suma en cuadratura de estos últimos. Se tomó como entrada una senoidal de 1~$V_\textrm{pp}$.}
+
+\figura[0.7]{SNRvsG}{Relación señal a ruido en función de la ganancia $G$.}
+\change{Sacar las líneas rojas}
 
 \section{Determinación de la ganancia de la cadena de acondicionamiento}
 El parámetro libre en este análisis es la ganancia $G$ de la segunda etapa de amplificación, la cual puede verse en la figura \ref{fig::cadena-de-recepcion}. Para determinar este parámetro se debe definir algún criterio de diseño, en el presente análisis este rol lo cumple la tasa de error de bit (BER) a la salida del demodulador. Se platea obtener una BER de $10^{-5}$.
@@ -177,6 +228,18 @@ Finalmente, reemplazando las ganancias calculadas en la ecuación \ref{eq::SRN2S
     \label{eq::SNRreqADC}
 \end{equation}
 
+\subsubsection{Ganancia por Oversampling}
+\unsure{La incluimos? Debo convencerme todavía si está o no dentro de la de filtrado}
 
+\subsection{Rango de valores posibles de $G$}
+Para hallar un rango de valores posibles de la ganancia $G$ se deben encontrar dos cotas, una superior y una inferior.
 
+La cota superior viene dada por el ADC ya que la máxima potencia de entrada admitida por el AD9249 es de 10~dBm, como se especifica en la tabla \ref{tab::ADC}. Para la determinación de esta cota debe considerarse el mejor caso de recepción posible (ver figura \ref{fig::mejor-caso}) dado que es en este caso que la potencia de entrada es máxima.
+
+Para una potencia de entrada de $-107\un{dBm}$, según se terminó en el análisis del mejor caso, el máximo valor de ganancia es:
+\[G_\textrm{max} = 10 + 107 = 117\un{dB}.\]
+
+Por otro lado, la cota inferior se desprende del análsis recién realizado donde se determinó el valor de $\textrm{SNR}^\textrm{req}_\textrm{ADC}$. Luego, empleando el gráfico mostrado en la figura \ref{fig::SNRvsG}, el cual muestra la SNR a la salida del ADC en función de la ganancia $G$, puede hallarse el mínimo valor de $G$ tal que la SNR a la salida del ADC sea mayor o igual a $\textrm{SNR}^\textrm{req}_\textrm{ADC}$, dicho valor es la cota inferior.
+
+\todo{Ampliar con el valor obtenido}
 \end{document}
