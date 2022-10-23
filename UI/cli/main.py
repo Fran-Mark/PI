@@ -1,8 +1,14 @@
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QPushButton, QPlainTextEdit,
-                                QVBoxLayout, QWidget, QTabWidget, QLineEdit, QMessageBox)
+from PyQt5.QtWidgets import *
+
+# (QApplication, QMainWindow, QPushButton, QPlainTextEdit,
+#                                 QVBoxLayout, QWidget, QTabWidget, QLineEdit, QMessageBox)
 from PyQt5.QtCore import QProcess
 import sys
 
+def textClickHandler(window : QMainWindow, qline : QLineEdit, proc : QProcess):
+    window.write(proc, f'{qline.text()}\n')
+    qline.clear()
+            
 
 class MainWindow(QMainWindow):
 
@@ -11,42 +17,44 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("🍫🍓FranUI🍓🍫")
 
         ## Processes
+        self.sshClient, self.sshClientMessenger = self.setUpProcess("sshClient")
+        #self.gnuradio, self.gnuradioMessenger = self.setUpProcess("gnuradio")
         self.server, self.serverMessenger = self.setUpProcess("server")
-        self.dummy, self.dummyMessenger = self.setUpProcess("dummy")
-
-        self.writeServerButton = QPushButton("Write command to server")
-        self.writeDummyButton = QPushButton("Write command to dummy")
 
         self.serverText = QLineEdit()
         self.serverText.setPlaceholderText("Write command to server")
-        self.serverText.returnPressed.connect(lambda: self.write(self.server, f'{self.serverText.text()}\n'))
+        self.serverText.returnPressed.connect(lambda: textClickHandler(self, self.serverText, self.server))
 
-        self.dummyText = QLineEdit()
-        self.dummyText.setPlaceholderText("Write command to dummy")
-        self.dummyText.returnPressed.connect(lambda: self.write(self.dummy, f'{self.dummyText.text()}\n'))
+        self.sshClientText = QLineEdit()
+        self.sshClientText.setPlaceholderText("Write command to CIAA")
+        self.sshClientText.returnPressed.connect(lambda: textClickHandler(self, self.sshClientText, self.sshClient))
 
-        self.writeServerButton.clicked.connect(lambda: self.write(self.server, f'{self.serverText.text()}\n'))
-        self.writeDummyButton.clicked.connect(lambda: self.write(self.dummy, f'{self.dummyText.text()}\n'))
+
+        # self.writeServerButton = QPushButton("Write command to server")
+        # self.writesshClientButton = QPushButton("Write command to sshClient")
+        # self.writeServerButton.clicked.connect(lambda: self.write(self.server, f'{self.serverText.text()}\n'))
+        # self.writesshClientButton.clicked.connect(lambda: self.write(self.sshClient, f'{self.sshClientText.text()}\n'))
 
         ## Tabs
         self.tab1 = QWidget()
         self.tab2 = QWidget()
 
+        tab1row = QHBoxLayout()
+        tab1row.addWidget(self.serverMessenger)
+        tab1row.addWidget(self.serverText)  
         tab1Layout = QVBoxLayout()
+        tab1Layout.addLayout(tab1row)
         tab1Layout.addWidget(self.serverText)
-        tab1Layout.addWidget(self.writeServerButton)
-        tab1Layout.addWidget(self.serverMessenger)
         self.tab1.setLayout(tab1Layout)
 
         tab2Layout = QVBoxLayout()
-        tab2Layout.addWidget(self.dummyText)
-        tab2Layout.addWidget(self.writeDummyButton)
-        tab2Layout.addWidget(self.dummyMessenger)
+        tab2Layout.addWidget(self.sshClientMessenger)
+        tab2Layout.addWidget(self.sshClientText)
         self.tab2.setLayout(tab2Layout)
 
         tabs = QTabWidget()
         tabs.addTab(self.tab1, "Server")
-        tabs.addTab(self.tab2, "Dummy")
+        tabs.addTab(self.tab2, "sshClient")
 
         ## Window
         windowLayout = QVBoxLayout()
@@ -56,7 +64,7 @@ class MainWindow(QMainWindow):
         w.setLayout(windowLayout)
 
         self.setCentralWidget(w)
-
+        
     def setUpProcess(self, name):
         proc = self.startProcess(name)
         messenger = self.createMessanger()
@@ -66,7 +74,7 @@ class MainWindow(QMainWindow):
     def handleCommunications(self, process : QProcess, messenger):
         process.readyReadStandardOutput.connect(lambda: self.handleStdout(process, messenger))
         process.readyReadStandardError.connect(lambda: self.handleStderr(process, messenger))
-        process.stateChanged.connect(lambda state: self.handle_state(state, messenger))
+        #process.stateChanged.connect(lambda state: self.handle_state(state, messenger))
 
     def createMessanger(self):
         msg = QPlainTextEdit()
@@ -91,14 +99,14 @@ class MainWindow(QMainWindow):
         stdout = bytes(data).decode("utf8")
         messenger.appendPlainText(stdout)
 
-    def handle_state(self, state, messenger):
-        states = {
-            QProcess.NotRunning: 'Not running',
-            QProcess.Starting: 'Starting',
-            QProcess.Running: 'Running',
-        }
-        state_name = states[state]
-        messenger.appendPlainText(f"State changed: {state_name}")
+    # def handle_state(self, state, messenger):
+    #     states = {
+    #         QProcess.NotRunning: 'Not running',
+    #         QProcess.Starting: 'Starting',
+    #         QProcess.Running: 'Running',
+    #     }
+    #     state_name = states[state]
+    #     messenger.appendPlainText(f"State changed: {state_name}")
 
     def closeEvent(self, event):
         quit_msg = "Seguro que querés salir?"
@@ -107,7 +115,7 @@ class MainWindow(QMainWindow):
         if reply == QMessageBox.Yes:
             self.write(self.server, "stop\n")
             self.server.close()
-            self.dummy.close()
+            self.sshClient.close()
             event.accept()
         else:
             event.ignore()

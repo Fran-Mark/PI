@@ -72,7 +72,7 @@ class test(gr.top_block, Qt.QWidget):
         ##################################################
         # Variables
         ##################################################
-        self.samp_rate = samp_rate = 32000
+        self.samp_rate = samp_rate = 162.5e3
 
         ##################################################
         # Blocks
@@ -143,7 +143,7 @@ class test(gr.top_block, Qt.QWidget):
         self.qtgui_time_sink_x_0.enable_grid(True)
         self.qtgui_time_sink_x_0.enable_axis_labels(True)
         self.qtgui_time_sink_x_0.enable_control_panel(True)
-        self.qtgui_time_sink_x_0.enable_stem_plot(True)
+        self.qtgui_time_sink_x_0.enable_stem_plot(False)
 
 
         labels = ['Una sola señal', 'Signal 2', 'Signal 3', 'Signal 4', 'Signal 5',
@@ -207,7 +207,7 @@ class test(gr.top_block, Qt.QWidget):
         self.connect((self.stream_demux_stream_demux_1, 0), (self.blocks_int_to_float_0_0, 0))
         self.connect((self.stream_demux_stream_demux_1, 1), (self.blocks_null_sink_1, 0))
         self.connect((self.stream_demux_stream_demux_1, 0), (self.stream_demux_stream_demux_2, 0))
-        self.connect((self.stream_demux_stream_demux_2, 15), (self.blocks_int_to_float_0, 0))
+        self.connect((self.stream_demux_stream_demux_2, 0), (self.blocks_int_to_float_0, 0))
         self.connect((self.stream_demux_stream_demux_2, 1), (self.blocks_null_sink_0_0_3, 0))
         self.connect((self.stream_demux_stream_demux_2, 0), (self.blocks_null_sink_0_0_3_0, 0))
         self.connect((self.stream_demux_stream_demux_2, 2), (self.blocks_null_sink_0_0_3_0_0, 0))

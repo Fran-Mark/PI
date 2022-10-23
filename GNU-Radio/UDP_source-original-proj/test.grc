@@ -36,7 +36,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '32000'
+    value: 162.5e3
   states:
     bus_sink: false
     bus_source: false
@@ -484,7 +484,7 @@ blocks:
     nconnections: '1'
     size: '4096'
     srate: samp_rate
-    stemplot: 'True'
+    stemplot: 'False'
     style1: '1'
     style10: '1'
     style2: '1'
@@ -656,7 +656,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [384, 448.0]
+    coordinate: [392, 448.0]
     rotation: 0
     state: disabled
 - name: stream_demux_stream_demux_2
@@ -692,6 +692,7 @@ connections:
 - [stream_demux_stream_demux_1_0, '0', blocks_int_to_float_0_0, '0']
 - [stream_demux_stream_demux_1_0, '0', stream_demux_stream_demux_2, '0']
 - [stream_demux_stream_demux_1_0, '1', blocks_null_sink_1, '0']
+- [stream_demux_stream_demux_2, '0', blocks_int_to_float_0, '0']
 - [stream_demux_stream_demux_2, '0', blocks_null_sink_0_0_3_0, '0']
 - [stream_demux_stream_demux_2, '1', blocks_null_sink_0_0_3, '0']
 - [stream_demux_stream_demux_2, '10', blocks_null_sink_0_0_3_0_0_1, '0']
@@ -699,7 +700,6 @@ connections:
 - [stream_demux_stream_demux_2, '12', blocks_null_sink_0_0_3_0_1_0, '0']
 - [stream_demux_stream_demux_2, '13', blocks_null_sink_0_0_3_2_0, '0']
 - [stream_demux_stream_demux_2, '14', blocks_null_sink_0_0_3_0_0_0_0, '0']
-- [stream_demux_stream_demux_2, '15', blocks_int_to_float_0, '0']
 - [stream_demux_stream_demux_2, '15', blocks_null_sink_0_0_3_1_0_0, '0']
 - [stream_demux_stream_demux_2, '2', blocks_null_sink_0_0_3_0_0, '0']
 - [stream_demux_stream_demux_2, '3', blocks_null_sink_0_0_3_1, '0']
