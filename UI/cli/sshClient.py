@@ -3,16 +3,18 @@ import re
 
 class ShellHandler:
     def __init__(self):
+        self.isConnected = False
         self.ssh = paramiko.SSHClient()
         try:
             self.ssh.connect('192.168.0.22', username='root', password=None, timeout=1)
+            self.isConnected = True
         except Exception as _:
             try:
                 self.ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
                 self.ssh.get_transport().auth_none('root')
-                print('Connection established')
+                self.isConnected = True
             except Exception as _:
-                print('Unable to connect to CIAA')
+                self.isConnected = False
                 return
 
         channel = self.ssh.invoke_shell()
@@ -85,6 +87,10 @@ class ShellHandler:
 
 if __name__ == '__main__':
     shell = ShellHandler()
+    if shell.isConnected == False:
+        print('Unable to connect to CIAA')
+        exit(1)
+    print('Connected to CIAA')
     while True:
         cmd = input()
         shell.execute(cmd)

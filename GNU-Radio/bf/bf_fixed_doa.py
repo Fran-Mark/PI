@@ -95,7 +95,7 @@ class bf_fixed_doa(gr.top_block, Qt.QWidget):
         self.qtgui_time_sink_x_0.enable_grid(True)
         self.qtgui_time_sink_x_0.enable_axis_labels(True)
         self.qtgui_time_sink_x_0.enable_control_panel(True)
-        self.qtgui_time_sink_x_0.enable_stem_plot(True)
+        self.qtgui_time_sink_x_0.enable_stem_plot(False)
 
 
         labels = ['Real (t)', 'imag (t)', 'Signal 3', 'Signal 4', 'Signal 5',
@@ -169,9 +169,10 @@ class bf_fixed_doa(gr.top_block, Qt.QWidget):
         self._qtgui_freq_sink_x_0_win = sip.wrapinstance(self.qtgui_freq_sink_x_0.pyqwidget(), Qt.QWidget)
         self.top_layout.addWidget(self._qtgui_freq_sink_x_0_win)
         self.blocks_vector_to_streams_0 = blocks.vector_to_streams(gr.sizeof_gr_complex*1, 16)
-        self.blocks_vector_sink_x_0 = blocks.vector_sink_s(1, 1024)
         self.blocks_udp_source_0 = blocks.udp_source(gr.sizeof_short*1, '192.168.0.21', 12345, 64088, True)
         self.blocks_stream_to_vector_0 = blocks.stream_to_vector(gr.sizeof_gr_complex*1, 16)
+        self.blocks_short_to_char_0 = blocks.short_to_char(1)
+        self.blocks_null_sink_1 = blocks.null_sink(gr.sizeof_char*1)
         self.blocks_null_sink_0_3 = blocks.null_sink(gr.sizeof_gr_complex*1)
         self.blocks_null_sink_0_2_0 = blocks.null_sink(gr.sizeof_gr_complex*1)
         self.blocks_null_sink_0_2 = blocks.null_sink(gr.sizeof_gr_complex*1)
@@ -196,6 +197,7 @@ class bf_fixed_doa(gr.top_block, Qt.QWidget):
         # Connections
         ##################################################
         self.connect((self.blocks_interleaved_short_to_complex_0, 0), (self.blocks_stream_to_vector_0, 0))
+        self.connect((self.blocks_short_to_char_0, 0), (self.blocks_null_sink_1, 0))
         self.connect((self.blocks_stream_to_vector_0, 0), (self.blocks_vector_to_streams_0, 0))
         self.connect((self.blocks_udp_source_0, 0), (self.stream_demux_stream_demux_0, 0))
         self.connect((self.blocks_vector_to_streams_0, 3), (self.blocks_null_sink_0, 0))
@@ -214,10 +216,10 @@ class bf_fixed_doa(gr.top_block, Qt.QWidget):
         self.connect((self.blocks_vector_to_streams_0, 11), (self.blocks_null_sink_0_2, 0))
         self.connect((self.blocks_vector_to_streams_0, 0), (self.blocks_null_sink_0_2_0, 0))
         self.connect((self.blocks_vector_to_streams_0, 7), (self.blocks_null_sink_0_3, 0))
-        self.connect((self.blocks_vector_to_streams_0, 13), (self.qtgui_freq_sink_x_0, 0))
-        self.connect((self.blocks_vector_to_streams_0, 13), (self.qtgui_time_sink_x_0, 0))
+        self.connect((self.blocks_vector_to_streams_0, 1), (self.qtgui_freq_sink_x_0, 0))
+        self.connect((self.blocks_vector_to_streams_0, 1), (self.qtgui_time_sink_x_0, 0))
         self.connect((self.stream_demux_stream_demux_0, 0), (self.blocks_interleaved_short_to_complex_0, 0))
-        self.connect((self.stream_demux_stream_demux_0, 1), (self.blocks_vector_sink_x_0, 0))
+        self.connect((self.stream_demux_stream_demux_0, 1), (self.blocks_short_to_char_0, 0))
 
 
     def closeEvent(self, event):
