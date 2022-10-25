@@ -29,7 +29,7 @@ Se mencionan a continuación algunas especificaciones relevantes:
 
 \figura[0.7]{array-grigo}{Arreglo de 16 elementos considerado para este proyecto \cite{proyecto-grigo}.}
 
-\section{Front-end de RF}
+\section{Front-end de RF}\label{sec::planteo-front-end}
 El diseño y la puesta en marcha del \textit{front-end} de RF tampoco son alcanzados por este proyecto. No obstante, es necesario conocer sus componentes básicos para poder posteriormente realizar el cálculo del enlace satelital. 
 
 Un esquema del diseño se muestra en la figura \ref{fig::front-end-rf-16}. En dicha imagen se observa una primera etapa de filtrado empleando un filtro grueso preselector de 25~MHz, seguido por dos etapas de amplificación, la primera de bajo ruido y la segunda de gran ganancia $G$. Finalmente, se incorpora otro filtrado de 25~MHz para limpiar la señal de salida.
@@ -38,7 +38,7 @@ La primera etapa de amplificación, correspondiente al LNA, tiene una ganancia d
 
 \figura[0.8]{front-end-rf-16}{Front end de RF.}
 
-\section{Sistema de adquisición}
+\section{Sistema de adquisición} \label{sec::planteo-sist-adq}
 El sistema de adquisición debe ser capaz de:
 \begin{enumerate}
     \item Recibir las señales de las 16 antenas.

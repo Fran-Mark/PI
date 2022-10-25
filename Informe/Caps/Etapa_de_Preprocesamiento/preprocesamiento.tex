@@ -1,0 +1,39 @@
+\documentclass[../../main.tex]{subfiles}
+\begin{document}
+\graphicspath{{./figures}}
+\chapter{Preprocesamiento de los datos adquiridos}
+Las señales entrantes son muestreadas por el ADC a 65~MSps en un ancho de banda de 25~MHz como se desarrolló en el \cref{sec::planteo-front-end}. Sin embargo, los \textit{beams} de salida poseen un ancho de banda de apenas 25~kHz, de manera que puede reducirse considerablemente tanto el ancho de banda como la tasa de muestreo.
+\unsure{debería aclarar hasta donde -> teorema del muestreo}
+
+Como se dijo en el \cref{sec::planteo-sist-adq}, esta sección del \textit{core} de adquisición forma parte del presente proyecto. Su diseño, implementación y validación se realizaron primero de manera aislada e independiente a lo desarrollado en \cite{proyecto-jose} y, posteriormente, se integró dentro de dicho sistema.
+
+\section{Requerimientos de diseño}
+
+\section{Diseño conceptual}
+
+\subsection{Implementación en software}
+
+\section{Implementación en hardware}
+%Uso clk de 260 MHz
+\subsection{IPs empleadas}
+\subsection{Bloques desarrollados}
+\subsection{Filtros y decimación}
+\subsection{Herramientas de \textit{debug}}
+
+\section{Verificación con UVM}
+\subsection{Estructura de la simulación}
+\subsection{Resultados}
+
+\section{Integración con el sistema de adquisición}
+\subsection{Adaptaciones necesarias}
+%Clock a 260, CDCs
+%División en varios bloques para minimizar replicas (16 canales)
+%Aumento dato fifo (32 bits en lugar de 16)
+%Uso de dos shorts como complex
+\subsection{Otras modificaciones}
+%constraints - false paths
+%Uso de complemento a 2
+%Raw data path para calibracion
+%Cambio de índices
+\subsection{Herramientas de \textit{debug}}
+\end{document}

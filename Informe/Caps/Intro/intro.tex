@@ -39,7 +39,7 @@ con $k$ un número entero.
 \subsection{¿Por qué trabajar en el dominio digital?}
 
 La conformación de haz mostrada en la figura \ref{fig::phased-array} es analógica o en RF. Si bien se elimina la necesidad de realizar apuntamiento mecánico, aún tiene la limitación de seguir únicamente a un satélite a la vez. Para deshacerse de esta segunda limitación se necesitaría aplicar un conjunto de retrasos distintos a las señales provenientes de cada elemento del arreglo, de manera de conformar más de un haz.
-Si bien es posible realizar esto en RF \change{Esta bien decir RF?} por ejemplo, rápidamente se vuelve impráctico ya que requiere equipamiento adicional, y, además, implica incurrir en nuevos costos cada vez que se quiera hacer el seguimiento en simúltaneo de un nuevo haz.
+Si bien es posible realizar esto en RF \change{Esta bien decir RF?} por ejemplo, rápidamente se vuelve impráctico ya que requiere equipamiento adicional, y, además, implica incurrir en nuevos costos cada vez que se quiera hacer el seguimiento en simultáneo de un nuevo haz.
 Todas estas problemáticas pueden resolverse de manera más sencilla y menos costosa al pasar al dominio digital. 
 
 La conformación digital de haz o digital beamforming consiste en muestrear las señales ``crudas'' para luego, digitalmente, aplicar los retrasos correspondientes y poder apuntar simultáneamente a varios satélites sin necesidad de mover físicamente el arreglo de antenas como puede verse en la figura \ref{fig::digital-bf}. Esta fue la técnica empleada en este proyecto.
@@ -51,11 +51,11 @@ El presente proyecto integrador se enmarca dentro de un proyecto más amplio que
 para la recepción de señales de radiofrecuencia provenientes de satélites en órbita LEO que hacen uso de la banda de frecuencias asignada por la ITU para aplicaciones amateur, comprendida entre los 435 y 438 MHz \cite{itu-banda-amateur}.
 Este último fue comenzado y avanzado considerablemente en los proyectos integradores \cite{proyecto-jose}, en cuanto a la plataforma de adquisición de las señales, y \cite{proyecto-grigo}, respecto a la conformación de haz digital y la detección de la dirección de arribo de las señales. 
 
-Este proyecto es, en gran medida, una continuación e integración de ellos. En el mismo se busca continar con el desarrollo del \textit{core} de adquisición de señales comenzado en \cite{proyecto-jose}, y resolver la integración de dicho \textit{core} con los algoritmos de beamforming y detección de arribo desarrollados en \cite{proyecto-grigo}.
+Este proyecto es, en gran medida, una continuación e integración de ellos. En el mismo se busca continuar con el desarrollo del \textit{core} de adquisición de señales comenzado en \cite{proyecto-jose}, y resolver la integración de dicho \textit{core} con los algoritmos de beamforming y detección de arribo desarrollados en \cite{proyecto-grigo}.
 
 Por otro lado, también se plantea el desarrollo de un servidor capaz de transmitir en tiempo real las señales satelitales adquiridas a varios clientes simultáneamente.
 
-Por último, se propone el diseño e implementación de una interfaz de usuario que permita controlar y monitorear cada parte del sistema; esto incluye el sistema de adquisición, la etapa de procesamiento y conformaciónde haz y, por último, la etapa de \textit{streaming}.
+Por último, se propone el diseño e implementación de una interfaz de usuario que permita controlar y monitorear cada parte del sistema; esto incluye el sistema de adquisición, la etapa de procesamiento y conformación de haz y, por último, la etapa de \textit{streaming}.
 
 \section{Repositorio del proyecto}
 La realización del proyecto incorporó desarrollo digital y de software, incluyendo código de VHDL, SystemVerilog, Python y C++. Todo la base de código está alojada en el repositorio público de GitHub del proyecto \cite{github} que puede ser accedido por el lector en todo momento si desea obtener mayor detalle técnico sobre lo implementado.

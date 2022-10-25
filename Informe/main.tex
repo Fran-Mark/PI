@@ -1,4 +1,4 @@
-\documentclass[screen, pagebackref, oneside]{ibtesis}
+\documentclass[screen, pagebackref,oneside]{ibtesis}
 \usepackage{subfiles}
 \usepackage{preamble}
 
@@ -7,7 +7,7 @@
     \title{Receptor para estación terrena con conformación digital de haz}
     \author{Francisco Gabriel Marquinez}
     \director{Ing. Nicolás Catalano}
-    \codirector{Ing. José Ignacio Quinteros del Castillo}
+    \codirector{Ing. José Quinteros del Castillo}
     \carrera{Proyecto Integrador de la Carrera de Ingeniería en Telecomunicaciones}
     \grado{Estudiante}
     \laboratorio{Departamento de Ingeniería en Telecomunicaciones
@@ -52,7 +52,10 @@
             RABG &  Ruido Aditivo, Blanco y Gaussiano   \\
             LNA &   \textit{Low-Noise Amplifier}    \\
             LSB &   \textit{Least Significant bit}  \\
-            FSR &   \textit{Full Scale Range}
+            FSR &   \textit{Full Scale Range}   \\
+            UVM &   \textit{Universal Verification Methodology} \\
+            IP &    \textit{Intellectual Property}  \\
+            GUI &   \textit{Graphical user interface}
             \end{tabular}
         \end{table}    
     \end{abreviaturas}
@@ -66,10 +69,13 @@
 
 
 \subfile{Caps/Intro/intro.tex}
-
 \subfile{Caps/Planteamiento_del_receptor/planteamiento_receptor.tex}
-
 \subfile{Caps/Enlace/enlace.tex}
+\subfile{Caps/Etapa_de_Preprocesamiento/preprocesamiento.tex}
+\subfile{Caps/Integracion_con_Beamformer/beamformer.tex}
+\subfile{Caps/Captura_on_Demand/streaming.tex}
+\subfile{Caps/Interfaz_de_Usuario/ui.tex}
+\subfile{Caps/Conclusiones/conclusiones.tex}
 
 \begin{biblio}
     \bibliography{mibib}
