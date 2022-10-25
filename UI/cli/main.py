@@ -41,6 +41,7 @@ class MainWindow(QMainWindow):
 
         #Data source
         dataSelectorVLayout = QVBoxLayout()
+        dataSelectorVLayout.setAlignment(Qt.AlignTop)
         dataSourceLabel = QLabel("Data source")
         self.dataSourceSelector = QComboBox()
         self.dataSourceSelector.addItems([item.toString() for item in soc.DataSource])
@@ -54,9 +55,11 @@ class MainWindow(QMainWindow):
         self.FIFOInputSelector.currentIndexChanged.connect(lambda: self.write(self.sshClient, soc.setFIFOInputCmd(soc.FIFOInput(self.FIFOInputSelector.currentIndex()))))
         dataSelectorLayout.addWidget(FIFOInputLabel)
         dataSelectorLayout.addWidget(self.FIFOInputSelector)
+        dataSelectorLayout.addStretch(1)
 
         #Form
         dataSelectorFormLayout  = QFormLayout() 
+        dataSelectorFormLayout.setAlignment(Qt.AlignTop)
         ch1Layout = QHBoxLayout()
         ch1Label = QLabel("Current value: 0")
         ch1Slider = QSlider()
@@ -84,7 +87,7 @@ class MainWindow(QMainWindow):
         dataSelectorFormLayout.addRow("Channel 4", QLineEdit())
         dataSelectorFormLayout.addRow("Channel 5", QLineEdit())
         dataSelectorLayout.addLayout(dataSelectorFormLayout)
-        
+        dataSelectorLayout.addStretch(10)
 
 
         #GNU

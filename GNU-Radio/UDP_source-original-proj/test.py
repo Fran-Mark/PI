@@ -143,7 +143,7 @@ class test(gr.top_block, Qt.QWidget):
         self.qtgui_time_sink_x_0.enable_grid(True)
         self.qtgui_time_sink_x_0.enable_axis_labels(True)
         self.qtgui_time_sink_x_0.enable_control_panel(True)
-        self.qtgui_time_sink_x_0.enable_stem_plot(False)
+        self.qtgui_time_sink_x_0.enable_stem_plot(True)
 
 
         labels = ['Una sola señal', 'Signal 2', 'Signal 3', 'Signal 4', 'Signal 5',

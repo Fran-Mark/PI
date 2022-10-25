@@ -72,7 +72,7 @@ class bf_fixed_doa(gr.top_block, Qt.QWidget):
         ##################################################
         # Variables
         ##################################################
-        self.samp_rate = samp_rate = 65e6/8/50
+        self.samp_rate = samp_rate = 65e3
 
         ##################################################
         # Blocks
