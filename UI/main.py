@@ -1,16 +1,33 @@
 from PyQt5.QtWidgets import *
 
-# (QApplication, QMainWindow, QPushButton, QPlainTextEdit,
-#                                 QVBoxLayout, QWidget, QTabWidget, QLineEdit, QMessageBox)
 from PyQt5.QtCore import QProcess, Qt
 import sys
 
 import socCommands as soc
-import gnu_test as gnu
+import gnu_schematic as gnu
 
 def textClickHandler(window : QMainWindow, qline : QLineEdit, proc : QProcess):
     window.write(proc, f'{qline.text()}\n')
     qline.clear()
+
+class BeamFreqSetter:
+    def __init__(self, window : QMainWindow, beamNumber):
+        self.beamNumber = beamNumber
+        self.beamFreqSetter = QHBoxLayout()
+        self.beamFreqSetterLineEdit = QLineEdit()
+        self.beamFreqSetterLineEdit.setPlaceholderText("Freq")
+        self.beamFreqSetterLineEdit.returnPressed.connect(lambda: window.write(window.sshClient, soc.setBeamFreqCmd(self.beamNumber, float(self.beamFreqSetterLineEdit.text()))))
+        self.beamFreqSetter.addWidget(self.beamFreqSetterLineEdit,1)
+        self.beamFreqSetterSlider = QSlider(Qt.Horizontal)
+        self.beamFreqSetterSlider.setMinimum(435000)
+        self.beamFreqSetterSlider.setMaximum(438000)
+        self.beamFreqSetterSlider.valueChanged.connect(lambda: self.beamFreqSetterLineEdit.setText(str(self.beamFreqSetterSlider.value()/1000)))
+        self.beamFreqSetterSlider.sliderReleased.connect(lambda: window.write(window.sshClient, soc.setBeamFreqCmd(self.beamNumber, float(self.beamFreqSetterLineEdit.text()))))
+        self.beamFreqSetter.addWidget(self.beamFreqSetterSlider,2)
+
+    def getLayout(self):
+        return self.beamFreqSetter
+
             
 class MainWindow(QMainWindow):
 
@@ -57,37 +74,28 @@ class MainWindow(QMainWindow):
         dataSelectorLayout.addWidget(self.FIFOInputSelector)
         dataSelectorLayout.addStretch(1)
 
-        #Form
-        dataSelectorFormLayout  = QFormLayout() 
-        dataSelectorFormLayout.setAlignment(Qt.AlignTop)
-        ch1Layout = QHBoxLayout()
-        ch1Label = QLabel("Current value: 0")
-        ch1Slider = QSlider()
-        ch1Slider.setOrientation(Qt.Horizontal)
-        ch1Slider.valueChanged.connect(lambda: ch1Label.setText(f"Current value: {ch1Slider.value()}"))
-        ch1Layout.addWidget(ch1Label)
-        ch1Layout.addWidget(ch1Slider)
-        ch2Layout = QHBoxLayout()
-        ch2Label = QLabel("Current value: 0")
-        ch2Slider = QSlider()
-        ch2Slider.setOrientation(Qt.Horizontal)
-        ch2Slider.valueChanged.connect(lambda: ch2Label.setText(f"Current value: {ch2Slider.value()}"))
-        ch2Layout.addWidget(ch2Label)
-        ch2Layout.addWidget(ch2Slider)
-        ch3Layout = QHBoxLayout()
-        ch3Label = QLabel("Current value: 0")
-        ch3Slider = QSlider()
-        ch3Slider.setOrientation(Qt.Horizontal)
-        ch3Slider.valueChanged.connect(lambda: ch3Label.setText(f"Current value: {ch3Slider.value()}"))
-        ch3Layout.addWidget(ch3Label)
-        ch3Layout.addWidget(ch3Slider)
-        dataSelectorFormLayout.addRow("Channel 1", ch1Layout)
-        dataSelectorFormLayout.addRow("Channel 2", ch2Layout)
-        dataSelectorFormLayout.addRow("Channel 3", ch3Layout)
-        dataSelectorFormLayout.addRow("Channel 4", QLineEdit())
-        dataSelectorFormLayout.addRow("Channel 5", QLineEdit())
-        dataSelectorLayout.addLayout(dataSelectorFormLayout)
-        dataSelectorLayout.addStretch(10)
+        beamFreqSetterLayout = QVBoxLayout()
+        beamFreqSetterLayout.setAlignment(Qt.AlignTop)
+        beamFreqSetterLabel = QLabel("Beam frequency Selector")
+        beamFreqSetterLayout.addWidget(beamFreqSetterLabel)
+
+        self.beamFreqSetters = []
+        for i in range(5):
+            beamFreqSetterLayout.addWidget(QLabel(f"Beam {i+1} frequency [MHz]"))
+            beamFreqSetter = BeamFreqSetter(self, i)
+            beamFreqSetterLayout.addLayout(beamFreqSetter.getLayout())
+            self.beamFreqSetters.append(beamFreqSetter.getLayout())
+        
+        dataSelectorLayout.addLayout(beamFreqSetterLayout)
+        dataSelectorLayout.addStretch(1)
+
+
+        #Add button
+        launchButton = QPushButton("Launch")
+        dataSelectorLayout.addWidget(launchButton)
+        dataSelectorLayout.addStretch(1)
+        launchButton.clicked.connect(lambda: self.write(self.sshClient, soc.launchAcqCmd()))
+
 
 
         #GNU
@@ -166,15 +174,19 @@ class MainWindow(QMainWindow):
         else:
             event.ignore()
             
-    def runGnu(self, top_block_cls=gnu.gnu_test):
-        self.tb = top_block_cls()
-        self.tb.start()
-        self.win = QMainWindow()
-        self.main_widget = QWidget()
-        self.main_layout = QVBoxLayout()
-        self.main_widget.setLayout(self.main_layout)
-        self.dataVisualizerLayout.addWidget(self.tb.top_scroll)
-
+    def runGnu(self, top_block_cls=gnu.bf_fixed_doa):
+        try:
+            self.tb = top_block_cls()
+            self.tb.start()
+            self.win = QMainWindow()
+            self.main_widget = QWidget()
+            self.main_layout = QVBoxLayout()
+            self.main_widget.setLayout(self.main_layout)
+            self.dataVisualizerLayout.addWidget(self.tb.top_scroll)
+        except Exception as e:
+            print(e)
+            self.dataVisualizerLayout.addWidget(QLabel("No se pudo iniciar GNU, conecte la placa y reinicie el programa"))
+            
 
 app = QApplication(sys.argv)
 
@@ -182,7 +194,8 @@ w = MainWindow()
 w.show()
 
 def quitting():
-    w.tb.stop()
-    w.tb.wait()
+    if hasattr(w, 'tb'):
+        w.tb.stop()
+        w.tb.wait()
 app.aboutToQuit.connect(quitting)
 app.exec_()

@@ -274,5 +274,5 @@ def main(top_block_cls=bf_fixed_doa, options=None):
     qapp.aboutToQuit.connect(quitting)
     qapp.exec_()
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()

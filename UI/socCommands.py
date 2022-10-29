@@ -1,11 +1,12 @@
 from enum import Enum
 
 ELFS_LOCATION = '/mnt/currentVersions/'
-BASE_REG = 4000_0000
+BASE_REG = 0x43C3_0000
 FIFO_INPUT_MUX_OFFSET = 4
 DATA_SOURCE_MUX_OFFSET = 8
+BEAM_FREQ_SETTER_OFFSET = 0xC
 
-def formatCmd(reg, data):
+def axiWriteCmd(reg, data):
     cmd = ELFS_LOCATION + 'axi_rw_test.elf w {} {}\n'.format(reg, data)
     return cmd
 
@@ -27,9 +28,10 @@ class FIFOInput(Enum):
     PREPROC_DATA = 1
     COUNTER_POST_PROC = 2
     RAW_DATA = 3
-    BAND_MIXER = 4
-    CH_MIXER = 5
-    COUNTER_PREPROC = 6
+    MUX_DATA = 4
+    BAND_MIXER = 5
+    BAND_FILTER = 6
+    CH_MIXER = 7
 
     def toString(self):
         if self == FIFOInput.NONE:
@@ -40,14 +42,14 @@ class FIFOInput(Enum):
             return 'Postprocessing debug counter'
         elif self == FIFOInput.RAW_DATA:
             return 'Raw ADC data'
+        elif self == FIFOInput.MUX_DATA:
+            return 'Data directly from the mux'
         elif self == FIFOInput.BAND_MIXER:
-            return 'Band mixer'
+            return 'Band mixer output'
+        elif self == FIFOInput.BAND_FILTER:
+            return 'Band filter output'
         elif self == FIFOInput.CH_MIXER:
-            return 'Channel mixer'
-        elif self == FIFOInput.COUNTER_PREPROC:
-            return 'Preprocessing debug counter'
-
-
+            return 'Channel mixer output'
 
 _DataSource = DataSource.ADC_DATA
 _FIFOInput = FIFOInput.NONE
@@ -59,12 +61,22 @@ def getDataSource():
     return _DataSource
 
 def setDataSourceCmd(dataSource):
-    return formatCmd(BASE_REG + DATA_SOURCE_MUX_OFFSET, dataSource.value)
+    return axiWriteCmd(hex(BASE_REG + DATA_SOURCE_MUX_OFFSET)[2:], dataSource.value)
 
 def setFIFOInputCmd(FIFOInput):
     global _FIFOInput
     _FIFOInput = FIFOInput
-    return formatCmd(BASE_REG + FIFO_INPUT_MUX_OFFSET, FIFOInput.value)
+    return axiWriteCmd(hex(BASE_REG + FIFO_INPUT_MUX_OFFSET)[2:], FIFOInput.value)
 
 def startCmd():
-    return ELFS_LOCATION + 'startup_1000.elf\n'
+    return ELFS_LOCATION + 'startup.elf\n'
+
+def launchAcqCmd():
+    return ELFS_LOCATION + 'sist_adq_1024.elf ' + ELFS_LOCATION + 'client_config\n'
+
+def setBeamFreqCmd(beamNumber, freq : float):
+    freqUndersampled = freq - 7*65
+    freqBB = freqUndersampled + 18.5
+    freqConf = abs(freqBB * 32 / 260.0 * 2**32)
+    return axiWriteCmd(hex(BASE_REG + BEAM_FREQ_SETTER_OFFSET + beamNumber * 4)[2:], hex(int(freqConf))[2:])
+
