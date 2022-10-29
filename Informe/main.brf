@@ -20,6 +20,7 @@
 \backcite {CIAA}{{9}{2.3.2}{subsection.2.3.2}}
 \backcite {SoC}{{9}{2.3.2}{section*.33}}
 \backcite {Kintex-7}{{9}{2.3.2}{section*.33}}
+\backcite {AXI-4}{{9}{2.3.2}{section*.33}}
 \backcite {CIAA-ACC}{{9}{2.6}{figure.caption.35}}
 \backcite {proyecto-jose}{{10}{2.3.3}{Item.17}}
 \backcite {GNURadio}{{10}{2.4}{section.2.4}}
@@ -38,3 +39,17 @@
 \backcite {BEESAT-9}{{19}{3.4.1}{equation.3.4.10}}
 \backcite {haykin}{{20}{3.9}{figure.caption.59}}
 \backcite {proyecto-jose}{{22}{4}{section*.66}}
+\backcite {DDC}{{24}{4.3}{section.4.3}}
+\backcite {Butterworth}{{24}{4.3}{section.4.3}}
+\backcite {butter}{{24}{4.3}{section.4.3}}
+\backcite {scipy}{{24}{4.3}{section.4.3}}
+\backcite {lfilter}{{24}{4.3}{section.4.3}}
+\backcite {Nyquist-rate}{{24}{4.3}{section.4.3}}
+\backcite {vivado}{{25}{4.4}{section.4.4}}
+\backcite {vitis}{{25}{4.4}{section.4.4}}
+\backcite {cross-compilation}{{25}{4.4}{section.4.4}}
+\backcite {IP-Xilinx}{{25}{4.4.1}{subsection.4.4.1}}
+\backcite {axi-interconnect}{{25}{\caption@xref {??}{ on input line 83}}{table.caption.75}}
+\backcite {complex-mult}{{25}{\caption@xref {??}{ on input line 83}}{table.caption.75}}
+\backcite {dds-compiler}{{25}{\caption@xref {??}{ on input line 83}}{table.caption.75}}
+\backcite {fir-compiler}{{25}{\caption@xref {??}{ on input line 83}}{table.caption.75}}

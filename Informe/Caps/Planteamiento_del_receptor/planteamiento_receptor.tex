@@ -72,6 +72,13 @@ Se mencionan a continuación algunas características relevantes del mismo para 
 
 De la tabla \ref{tab::ADC} se observa que se dispone de 16 canales en el ADC, este parámetro es el que representa una resticción en la cantidad de elementos que se pueden utilizar para el arreglo de antenas a ser utilizado en el receptor. La disponibilidad de 16 canales determina el uso de un arreglo de 16 elementos.
 
+Las muestras tomadas por el AD9249 se generan en formato serie. Dado que cada muestra tiene 14 bits y la tasa de muestreo es 65~MSps, la frecuencia del reloj de datos (DCO) resulta
+\begin{equation}
+    f_\textrm{DCO} = \frac{65\un{MSps} \ 14\un{bits/S}}{2} = 455\un{MHz},
+    \label{eq::DCO}
+\end{equation}
+donde el factor 2 surge como consecuencia del uso de DDR, técnica que consiste en emplear tanto el flanco ascendente del reloj como el descendente para actualizar el dato.
+
 Como se mencionó al principio del capítulo, el receptor trabajará en la banda amateur de UHF, desde los 435 a los 438 MHz. Este rango se encuentra dentro del ancho de banda analógico especificado en la tabla \ref{tab::ADC}.
 
 \figura[0.7]{ADC}{Conversor analógico digital AD9249 de Analog Devices \cite{AD9249}.}
@@ -108,7 +115,7 @@ Los requerimientos 3, 4 y 5 listados al principio de esta sección se llevarán 
 En la figura \ref{fig::diagrama-ciaa} se observa un diagrama de bloques de la placa con sus principales componentes e interfaces. Entre ellos se tiene una interfaz Ethernet de 1~Gbps, la cual se empleará para comunicarse con una computadora externa y un conector FMC HPC (\textit{High Pin Count}) el cual se utilizará para recibir las muestras del ADC.
 
 \subsubsection{SoC Zynq-7030}
-El corazón \unsure{Muy informal?} de la CIAA-ACC es el SoC Zynq-7030 de Xilinx \cite{SoC}, el cual consiste de un sistema de procesamiento (PS) y lógica programable (PL), como puede verse en la figura \ref{fig::diagrama-ciaa}. La PL consiste en una FPGA de la familia Kintex-7 \cite{Kintex-7}, mientras que el PS cuenta con dos procesadores ARM Cortex-A9.
+El corazón \unsure{Muy informal?} de la CIAA-ACC es el SoC Zynq-7030 de Xilinx \cite{SoC}, el cual consiste de un sistema de procesamiento (PS) y lógica programable (PL), como puede verse en la figura \ref{fig::diagrama-ciaa}. La PL consiste en una FPGA de la familia Kintex-7 \cite{Kintex-7}, mientras que el PS cuenta con dos procesadores ARM Cortex-A9. La PL y el PS se comunican empleando el protocolo de bus AXI-4 \cite{AXI-4}.
 
 \unsure{Incluyo la foto del esquemático del Zynq?}
 

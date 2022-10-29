@@ -198,7 +198,7 @@ Luego, la ecuación \ref{eq::EbN02SNR} toma la forma
 \figura[0.5]{degradacion-bt}{Degradación de la BER en función del producto $B T_b$ \cite{haykin}.}
 \figura[0.6]{BERvsEbN0}{Probabilidad de error de bit en función de $\frac{E_b}{N_0}$ para GMSK con un factor $BT = 0.3$.}
 
-\subsection{Ganancias por procesamiento}
+\subsection{Ganancias por procesamiento} \label{sec::ganancias-por-preproc}
 Retomando lo ilustrado en la figura \ref{fig::cadena-de-recepcion}, ya habiendo calculado $\textrm{SNR}^\textrm{req}_\textrm{dem}$ se procede a calcular $\textrm{SNR}^\textrm{req}_\textrm{ADC}$ que es la SNR requerida a la salida del ADC. Para esto debe determinarse cómo se ve afectada la SNR al pasar por la etapa de preprocesamiento.
 
 Se asume que durante esta etapa, ya en el dominio digital, no existe degradación adicional de la señal; es decir, no se incoporan nuevos términos de ruido. 
