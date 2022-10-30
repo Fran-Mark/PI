@@ -3,6 +3,8 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import QProcess, Qt
 import sys
 
+from PyQt5.QtGui import QFont
+
 import socCommands as soc
 import gnu_schematic as gnu
 
@@ -14,7 +16,7 @@ class BeamFreqSetter:
     def __init__(self, window : QMainWindow, beamNumber):
         self.beamNumber = beamNumber
         self.beamFreqSetter = QHBoxLayout()
-        self.beamFreqSetterLineEdit = QLineEdit()
+        self.beamFreqSetterLineEdit = QLineEdit(alignment=Qt.AlignCenter)
         self.beamFreqSetterLineEdit.setPlaceholderText("Freq")
         self.beamFreqSetterLineEdit.returnPressed.connect(lambda: window.write(window.sshClient, soc.setBeamFreqCmd(self.beamNumber, float(self.beamFreqSetterLineEdit.text()))))
         self.beamFreqSetter.addWidget(self.beamFreqSetterLineEdit,1)
@@ -57,43 +59,79 @@ class MainWindow(QMainWindow):
         dataSelectorLayout = QVBoxLayout()
 
         #Data source
+        dataSelectorGroupBox = QGroupBox()
         dataSelectorVLayout = QVBoxLayout()
+        dataSelectorGroupBox.setLayout(dataSelectorVLayout)
+        dataSelectorLayout.addWidget(dataSelectorGroupBox)
+
         dataSelectorVLayout.setAlignment(Qt.AlignTop)
-        dataSourceLabel = QLabel("Data source")
-        self.dataSourceSelector = QComboBox()
+        dataSourceLabel = QLabel("Data source", font=QFont("Utopia", 12, QFont.Bold))
+        self.dataSourceSelector = QComboBox(font=QFont("Cantarell", 10))
         self.dataSourceSelector.addItems([item.toString() for item in soc.DataSource])
         self.dataSourceSelector.currentIndexChanged.connect(lambda: self.write(self.sshClient, soc.setDataSourceCmd(soc.DataSource(self.dataSourceSelector.currentIndex()))))
         dataSelectorVLayout.addWidget(dataSourceLabel)
         dataSelectorVLayout.addWidget(self.dataSourceSelector)
         dataSelectorLayout.addLayout(dataSelectorVLayout)
-        FIFOInputLabel = QLabel("FIFO input")
-        self.FIFOInputSelector = QComboBox()
+
+        FIFOInputGroupBox = QGroupBox()
+        FIFOInputVLayout = QVBoxLayout()
+        FIFOInputGroupBox.setLayout(FIFOInputVLayout)
+        dataSelectorLayout.addWidget(FIFOInputGroupBox)
+        FIFOInputLabel = QLabel("FIFO input", font=QFont("Utopia", 12, QFont.Bold))
+        self.FIFOInputSelector = QComboBox(font=QFont("Cantarell", 10))
         self.FIFOInputSelector.addItems([item.toString() for item in soc.FIFOInput])
         self.FIFOInputSelector.currentIndexChanged.connect(lambda: self.write(self.sshClient, soc.setFIFOInputCmd(soc.FIFOInput(self.FIFOInputSelector.currentIndex()))))
-        dataSelectorLayout.addWidget(FIFOInputLabel)
-        dataSelectorLayout.addWidget(self.FIFOInputSelector)
-        dataSelectorLayout.addStretch(1)
+        FIFOInputVLayout.addWidget(FIFOInputLabel)
+        FIFOInputVLayout.addWidget(self.FIFOInputSelector)
+        dataSelectorLayout.addLayout(FIFOInputVLayout)
 
+        localOscGroupBox = QGroupBox()
+        localOscFreqSetter = QVBoxLayout()
+        localOscGroupBox.setLayout(localOscFreqSetter)
+        dataSelectorLayout.addWidget(localOscGroupBox)
+        localOscSetterLabel = QLabel("Local oscillator frequency [MHz]", font=QFont("Utopia", 12, QFont.Bold))
+        localOscFreqSetter.addWidget(localOscSetterLabel)
+
+        localOscFreqSetterHLayout = QHBoxLayout()
+        localOscFreqSetterLineEdit = QLineEdit(alignment=Qt.AlignCenter)
+        localOscFreqSetterLineEdit.setPlaceholderText("Freq")
+        localOscFreqSetterLineEdit.returnPressed.connect(lambda: self.write(self.sshClient, soc.setLocalOscFreqCmd(float(localOscFreqSetterLineEdit.text()))))
+        localOscFreqSetterHLayout.addWidget(localOscFreqSetterLineEdit,1)
+        localOscFreqSetterSlider = QSlider(Qt.Horizontal)
+        localOscFreqSetterSlider.setMinimum(0)
+        localOscFreqSetterSlider.setMaximum(32500)
+        localOscFreqSetterSlider.valueChanged.connect(lambda: localOscFreqSetterLineEdit.setText(str(localOscFreqSetterSlider.value()/1000)))
+        localOscFreqSetterSlider.sliderReleased.connect(lambda: self.write(self.sshClient, soc.setLocalOscFreqCmd(float(localOscFreqSetterLineEdit.text()))))
+        localOscFreqSetterHLayout.addWidget(localOscFreqSetterSlider,2)
+        localOscFreqSetter.addLayout(localOscFreqSetterHLayout)
+        dataSelectorLayout.addLayout(localOscFreqSetter)
+
+        beamFreqSetterGroupBox = QGroupBox()
         beamFreqSetterLayout = QVBoxLayout()
-        beamFreqSetterLayout.setAlignment(Qt.AlignTop)
-        beamFreqSetterLabel = QLabel("Beam frequency Selector")
+        beamFreqSetterGroupBox.setLayout(beamFreqSetterLayout)
+        dataSelectorLayout.addWidget(beamFreqSetterGroupBox)
+        beamFreqSetterLabel = QLabel("Beam frequency selector [MHz]", font=QFont("Utopia", 12, QFont.Bold))
         beamFreqSetterLayout.addWidget(beamFreqSetterLabel)
+        beamFreqSetterLayout.addSpacing(15)
+
 
         self.beamFreqSetters = []
         for i in range(5):
-            beamFreqSetterLayout.addWidget(QLabel(f"Beam {i+1} frequency [MHz]"))
+            beamFreqSetterLayout.addWidget(QLabel(f"Beam {i+1} frequency", font=QFont("Cantarell", 10)))
+            beamFreqSetterLayout.addSpacing(1)
             beamFreqSetter = BeamFreqSetter(self, i)
             beamFreqSetterLayout.addLayout(beamFreqSetter.getLayout())
+            beamFreqSetterLayout.addSpacing(10)
             self.beamFreqSetters.append(beamFreqSetter.getLayout())
         
         dataSelectorLayout.addLayout(beamFreqSetterLayout)
         dataSelectorLayout.addStretch(1)
 
-
-        #Add button
         launchButton = QPushButton("Launch")
+        launchButton.setFont(QFont("Utopia", 12, QFont.Bold))
         dataSelectorLayout.addWidget(launchButton)
-        dataSelectorLayout.addStretch(1)
+        launchButton.setStyleSheet("background-color: green; color: white")
+        launchButton.setFixedHeight(50)
         launchButton.clicked.connect(lambda: self.write(self.sshClient, soc.launchAcqCmd()))
 
 
@@ -185,7 +223,7 @@ class MainWindow(QMainWindow):
             self.dataVisualizerLayout.addWidget(self.tb.top_scroll)
         except Exception as e:
             print(e)
-            self.dataVisualizerLayout.addWidget(QLabel("No se pudo iniciar GNU, conecte la placa y reinicie el programa"))
+            self.dataVisualizerLayout.addWidget(QLabel("No se pudo iniciar GNU, conecte la placa y reinicie el programa", font=QFont("Cantarell", 14), alignment=Qt.AlignCenter))
             
 
 app = QApplication(sys.argv)

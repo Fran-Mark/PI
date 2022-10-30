@@ -4,6 +4,7 @@ ELFS_LOCATION = '/mnt/currentVersions/'
 BASE_REG = 0x43C3_0000
 FIFO_INPUT_MUX_OFFSET = 4
 DATA_SOURCE_MUX_OFFSET = 8
+LOCAL_OSC_FREQ_SETTER_OFFSET = 0
 BEAM_FREQ_SETTER_OFFSET = 0xC
 
 def axiWriteCmd(reg, data):
@@ -79,4 +80,8 @@ def setBeamFreqCmd(beamNumber, freq : float):
     freqBB = freqUndersampled + 18.5
     freqConf = abs(freqBB * 32 / 260.0 * 2**32)
     return axiWriteCmd(hex(BASE_REG + BEAM_FREQ_SETTER_OFFSET + beamNumber * 4)[2:], hex(int(freqConf))[2:])
+
+def setLocalOscFreqCmd(freq : float):
+    freqConf = abs(freq * 4 * 2**32 / 260.0)
+    return axiWriteCmd(hex(BASE_REG + LOCAL_OSC_FREQ_SETTER_OFFSET)[2:], hex(int(freqConf))[2:])
 
