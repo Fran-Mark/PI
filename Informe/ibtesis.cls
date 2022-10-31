@@ -221,8 +221,8 @@
 % All other pages
 \fancyhead[LO]{}
 \fancyfoot[L,R,C]{}
-% \fancyhead[LE,RO]{\bfseries\thepage}
-% \fancyhead[RE]{\sffamily\bfseries\nouppercase{\leftmark}}
+\fancyhead[LE,RO]{\bfseries\thepage}
+\fancyhead[RE]{\sffamily\bfseries\nouppercase{\leftmark}}
 \fancyhead[LO]{\sffamily\nouppercase{\rightmark}}
 \renewcommand{\headrulewidth}{1pt}
 

@@ -1,29 +1,63 @@
 \documentclass[../../main.tex]{subfiles}
 \begin{document}
-
+\graphicspath{{./figures}}
 \chapter{Introducción}
 
 %% Creciente número de sats LEO en órbita (ejemplos)
 %% Antenas mecánicas -> solo 1 obj por vez
 
-En los últimos años, el número de satélites en órbita baja (LEO) ha crecido considerablemente debido a la creación de constelaciones de dichos satélites a manos de diversas empresas [REF] con el objetivo de brindar diversos servicios, entre los que se destaca el referente al acceso a internet. 
-Estos satélites tienen la ventaja de orbitar a una altura baja (alrededor de 500~km), de manera que la latencia de las comunicaciones, limitadas por la velocidad de la luz, también es baja. 
-Por otro lado, tienen un tiempo de pasada inferior a 10 minutos [REF], lo cual vuelve necesario disponer de algún mecanismo que permita seguir al satélite durante el limitado tiempo de comunicación.
+En los últimos años, el número de satélites en órbita baja (LEO) ha crecido considerablemente debido a la creación de constelaciones de dichos satélites a manos de diversas empresas \cite{LeoConstellation} con el objetivo de brindar diversos servicios, entre los que se destaca el referente al acceso a internet. 
 
-Tradicionalmente [REF] para establecer la comunicación con estos satélites desde una estación terrena (ET) se dispone de una antena de gran ganancia y tamaño que, mecanicamente, apuntan al satélite durante su pasada.
-Este enfoque tiene dos principales limitaciones: la complejidad mecánica asociada a mover físicamente a una gran antena y la restricción de apuntar únicamente a un satélite a la vez. Parte de la motivación de este proyecto es desarrollar una estación terrena capaz de eliminar esas dos limitaciones.
+Estos satélites tienen la ventaja de orbitar a una altura baja (alrededor de 500~km), de manera que la latencia de \textit{round-trip} de las comunicaciones, limitadas por la velocidad de la luz, es del orden de los 10 ms. 
+Por otro lado, tienen un tiempo de pasada inferior a 10 minutos, lo cual vuelve necesario disponer de algún mecanismo que permita seguir al satélite durante el limitado tiempo de comunicación.
 
+Tradicionalmente, para establecer la comunicación con estos satélites desde una estación terrena (ET) se dispone de una antena de gran ganancia y tamaño que, mecánicamente, apunta al satélite durante su pasada.
+Este enfoque tiene dos principales limitaciones: la complejidad mecánica asociada a mover físicamente a una gran antena y la restricción de apuntar únicamente a un satélite a la vez. Parte de la motivación de este proyecto es desarrollar una estación terrena capaz de eliminar ambas.
+
+\figura[0.5]{sat-constellation}{Ilustración de una constelación de satélites LEO.}
 
 \section{Conformación de haz}
 
-Para lograr apuntar al satélite sin realizar un seguimiento mecánico se propone el uso de conformación de haz o \textit{beamforming} para la cual se requiere disponer de un arreglo de antenas. Esta técnica consiste en sumar coherentemente las señales entrantes a cada elemento del arreglo mediante la aplicación de los desfases correspondientes calculados a partir de la dirección de arribo de la señal que quiere seguirse.
+Para lograr apuntar al satélite sin realizar un seguimiento mecánico se propone el uso de conformación de haz o \textit{beamforming} para la cual se requiere disponer de un arreglo de antenas en fase. Esta técnica consiste en sumar coherentemente las señales entrantes a cada elemento del arreglo mediante la aplicación de los desfases correspondientes calculados a partir de la dirección de arribo de la señal que quiere seguirse, como se muestra en la figura \ref{fig::phased-array}.
 
-IMAGEN Y EXPLICACIÓN DE LAS CUENTAS
+El cálculo de dichos desfases está íntimamente relacionado con la geometría del arreglo y la dirección de arribo de la señal. Para el arreglo lineal de la figura \ref{fig::phased-array} por ejemplo, la diferencia de fase $\Delta \phi_i$ entre cada elemento respecto al primero es:
+\begin{equation}
+    \Delta \phi_i = 2 \pi f \frac{i \ d \sin{\beta}}{c},
+\end{equation} 
+donde $f$ es la frecuencia de operación, $d$ es la separación entre elementos, $\beta$ es el ángulo de arribo de la señal respecto a la horizontal y $c$ es la velocidad de la luz. Luego, para una señal incidente $S(r)$, la señal recibida $S_{\textrm{rec}}(r)$ con un arreglo lineal de N antenas resulta:
+\begin{equation}
+    S_{\textrm{rec}}(r) = S(r) \sum_{i=1}^{N} \exp[{j (\Delta \phi_i + \theta_i)}].
+\end{equation}
+Luego, para maximizar la señal recibida $S_{\textrm{rec}}(r)$, deben elegirse los desfases $\theta_i$ tal que:
+\begin{equation}
+    \theta_i + \Delta \phi_i = 2 k \pi,
+\end{equation}
+con $k$ un número entero.
 
-La conformación de haz recién mencionada elimina la necesidad de realizar apuntamiento mecánico pero aún tiene la limitación de seguir únicamente a un satélite a la vez. Para deshacerse de esta segunda limitación se necesitaría aplicar un conjunto de retrasos distintos a las señales provenientes de cada elemento del arreglo, de manera de conformar más de un haz [FIGURA].
-Si bien esto es posible, rápidamente se vuelve impráctico ya que requiere equipamiento adicional, y, además, implica incurrir en nuevos costos cada vez que se quiera hacer el seguimiento en simúltaneo de un nuevo haz.
-Todas estas problemáticas se resuelven al pasar al dominio digital. 
+\figura[0.7]{phased-array}{Ilustración de conformación de haz empleando un arreglo lineal de cinco antenas en fase.} 
 
-La conformación digital de haz o digital beamforming consiste en muestrear las señales ``crudas'' para luego, digitalmente, aplicar los retrasos correspondientes y poder apuntar simultáneamente a varios satélites sin necesidad de mover físicamente el arreglo de antenas. Esta técnica se puso en práctica en este proyecto.
+\subsection{¿Por qué trabajar en el dominio digital?}
+
+La conformación de haz mostrada en la figura \ref{fig::phased-array} es analógica o en RF. Si bien se elimina la necesidad de realizar apuntamiento mecánico, aún tiene la limitación de seguir únicamente a un satélite a la vez. Para deshacerse de esta segunda limitación se necesitaría aplicar un conjunto de retrasos distintos a las señales provenientes de cada elemento del arreglo, de manera de conformar más de un haz.
+Si bien es posible realizar esto en RF \change{Esta bien decir RF?} por ejemplo, rápidamente se vuelve impráctico ya que requiere equipamiento adicional, y, además, implica incurrir en nuevos costos cada vez que se quiera hacer el seguimiento en simultáneo de un nuevo haz.
+Todas estas problemáticas pueden resolverse de manera más sencilla y menos costosa al pasar al dominio digital. 
+
+La conformación digital de haz o digital beamforming consiste en muestrear las señales ``crudas'' para luego, digitalmente, aplicar los retrasos correspondientes y poder apuntar simultáneamente a varios satélites sin necesidad de mover físicamente el arreglo de antenas como puede verse en la figura \ref{fig::digital-bf}. Esta fue la técnica empleada en este proyecto.
+
+\figura[0.7]{digital-bf}{Ilustración de conformación digital de $n$ haces en simultáneo empleando un arreglo lineal de cinco antenas en fase.}
+
+\section{Alcance y organización del proyecto}
+El presente proyecto integrador se enmarca dentro de un proyecto más amplio que consiste en el diseño y construcción de una estación terrena que implemente conformación digital de haz 
+para la recepción de señales de radiofrecuencia provenientes de satélites en órbita LEO que hacen uso de la banda de frecuencias asignada por la ITU para aplicaciones amateur, comprendida entre los 435 y 438 MHz \cite{itu-banda-amateur}.
+Este último fue comenzado y avanzado considerablemente en los proyectos integradores \cite{proyecto-jose}, en cuanto a la plataforma de adquisición de las señales, y \cite{proyecto-grigo}, respecto a la conformación de haz digital y la detección de la dirección de arribo de las señales. 
+
+Este proyecto es, en gran medida, una continuación e integración de ellos. En el mismo se busca continuar con el desarrollo del \textit{core} de adquisición de señales comenzado en \cite{proyecto-jose}, y resolver la integración de dicho \textit{core} con los algoritmos de beamforming y detección de arribo desarrollados en \cite{proyecto-grigo}.
+
+Por otro lado, también se plantea el desarrollo de un servidor capaz de transmitir en tiempo real las señales satelitales adquiridas a varios clientes simultáneamente.
+
+Por último, se propone el diseño e implementación de una interfaz de usuario que permita controlar y monitorear cada parte del sistema; esto incluye el sistema de adquisición, la etapa de procesamiento y conformación de haz y, por último, la etapa de \textit{streaming}.
+
+\section{Repositorio del proyecto}
+La realización del proyecto incorporó desarrollo digital y de software, incluyendo código de VHDL, SystemVerilog, Python y C++. Todo la base de código está alojada en el repositorio público de GitHub del proyecto \cite{github} que puede ser accedido por el lector en todo momento si desea obtener mayor detalle técnico sobre lo implementado.
 
 \end{document}
