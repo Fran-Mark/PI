@@ -4,20 +4,16 @@ import time
 
 import numpy as np
 
-# A tuple with server ip and port
-
 serverAddress = ("127.0.0.1", 7070)
-
-# Create a datagram socket
-
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 contador = np.int32(0)
 fs = 32000
 f = 1000
-packet_size = 1472
+packet_size = 1472 #bytes
 
-nValues = packet_size /8/ 2 #El /2 lo agrego para testeo del stream demux
+#Cada complex tiene 8 bytes y el /2 lo agrego para testeo del stream demux
+nValues = packet_size /8 /2 
 
 contNValues = packet_size / 4
 

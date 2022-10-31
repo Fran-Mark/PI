@@ -7,7 +7,7 @@
 # GNU Radio Python Flow Graph
 # Title: DoA de señales adquiridas con emulador de arreglo
 # Author: fran
-# GNU Radio version: 3.8.4.0
+# GNU Radio version: v3.8.5.0-6-g57bd109d
 
 from distutils.version import StrictVersion
 
@@ -27,7 +27,6 @@ from gnuradio.filter import firdes
 import sip
 from gnuradio import blocks
 import pmt
-from gnuradio import filter
 from gnuradio import gr
 import sys
 import signal
@@ -81,62 +80,112 @@ class doa_emulador_arreglo(gr.top_block, Qt.QWidget):
         ##################################################
         # Variables
         ##################################################
-        self.samp_rate = samp_rate = 32000
+        self.samp_rate = samp_rate = 32e3
         self.fs = fs = 65e6
         self.element_separation = element_separation = 0.5*299792458/fc
 
         ##################################################
         # Blocks
         ##################################################
-        self.qtgui_sink_x_1 = qtgui.sink_c(
-            1024, #fftsize
+        self.qtgui_time_sink_x_0 = qtgui.time_sink_c(
+            1024, #size
+            fs, #samp_rate
+            "", #name
+            1 #number of inputs
+        )
+        self.qtgui_time_sink_x_0.set_update_time(0.10)
+        self.qtgui_time_sink_x_0.set_y_axis(-1, 1)
+
+        self.qtgui_time_sink_x_0.set_y_label('Real', "")
+
+        self.qtgui_time_sink_x_0.enable_tags(True)
+        self.qtgui_time_sink_x_0.set_trigger_mode(qtgui.TRIG_MODE_FREE, qtgui.TRIG_SLOPE_POS, 0.0, 0, 0, "")
+        self.qtgui_time_sink_x_0.enable_autoscale(False)
+        self.qtgui_time_sink_x_0.enable_grid(False)
+        self.qtgui_time_sink_x_0.enable_axis_labels(True)
+        self.qtgui_time_sink_x_0.enable_control_panel(False)
+        self.qtgui_time_sink_x_0.enable_stem_plot(False)
+
+
+        labels = ['Signal 1', 'Signal 2', 'Signal 3', 'Signal 4', 'Signal 5',
+            'Signal 6', 'Signal 7', 'Signal 8', 'Signal 9', 'Signal 10']
+        widths = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        colors = ['blue', 'red', 'green', 'black', 'cyan',
+            'magenta', 'yellow', 'dark red', 'dark green', 'dark blue']
+        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0, 1.0]
+        styles = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        markers = [-1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1]
+
+
+        for i in range(2):
+            if len(labels[i]) == 0:
+                if (i % 2 == 0):
+                    self.qtgui_time_sink_x_0.set_line_label(i, "Re{{Data {0}}}".format(i/2))
+                else:
+                    self.qtgui_time_sink_x_0.set_line_label(i, "Im{{Data {0}}}".format(i/2))
+            else:
+                self.qtgui_time_sink_x_0.set_line_label(i, labels[i])
+            self.qtgui_time_sink_x_0.set_line_width(i, widths[i])
+            self.qtgui_time_sink_x_0.set_line_color(i, colors[i])
+            self.qtgui_time_sink_x_0.set_line_style(i, styles[i])
+            self.qtgui_time_sink_x_0.set_line_marker(i, markers[i])
+            self.qtgui_time_sink_x_0.set_line_alpha(i, alphas[i])
+
+        self._qtgui_time_sink_x_0_win = sip.wrapinstance(self.qtgui_time_sink_x_0.pyqwidget(), Qt.QWidget)
+        self.top_layout.addWidget(self._qtgui_time_sink_x_0_win)
+        self.qtgui_freq_sink_x_0 = qtgui.freq_sink_c(
+            1024, #size
             firdes.WIN_BLACKMAN_hARRIS, #wintype
             0, #fc
             fs, #bw
             "", #name
-            True, #plotfreq
-            True, #plotwaterfall
-            True, #plottime
-            True #plotconst
+            1
         )
-        self.qtgui_sink_x_1.set_update_time(1.0/10)
-        self._qtgui_sink_x_1_win = sip.wrapinstance(self.qtgui_sink_x_1.pyqwidget(), Qt.QWidget)
+        self.qtgui_freq_sink_x_0.set_update_time(0.10)
+        self.qtgui_freq_sink_x_0.set_y_axis(-140, 10)
+        self.qtgui_freq_sink_x_0.set_y_label('Relative Gain', 'dB')
+        self.qtgui_freq_sink_x_0.set_trigger_mode(qtgui.TRIG_MODE_FREE, 0.0, 0, "")
+        self.qtgui_freq_sink_x_0.enable_autoscale(False)
+        self.qtgui_freq_sink_x_0.enable_grid(False)
+        self.qtgui_freq_sink_x_0.set_fft_average(1.0)
+        self.qtgui_freq_sink_x_0.enable_axis_labels(True)
+        self.qtgui_freq_sink_x_0.enable_control_panel(False)
 
-        self.qtgui_sink_x_1.enable_rf_freq(False)
 
-        self.top_layout.addWidget(self._qtgui_sink_x_1_win)
-        self.hilbert_fc_0_0_1_0 = filter.hilbert_fc(16*4, firdes.WIN_HAMMING, 6.76)
-        self.hilbert_fc_0_0_1 = filter.hilbert_fc(16*4, firdes.WIN_HAMMING, 6.76)
-        self.hilbert_fc_0_0_0_0_0_0_1_0_0_0_0_0_0 = filter.hilbert_fc(16*4, firdes.WIN_HAMMING, 6.76)
-        self.hilbert_fc_0_0_0_0_0_0_1_0_0_0_0_0 = filter.hilbert_fc(16*4, firdes.WIN_HAMMING, 6.76)
-        self.hilbert_fc_0_0_0_0_0_0_1_0_0_0_0 = filter.hilbert_fc(16*4, firdes.WIN_HAMMING, 6.76)
-        self.hilbert_fc_0_0_0_0_0_0_1_0_0_0 = filter.hilbert_fc(16*4, firdes.WIN_HAMMING, 6.76)
-        self.hilbert_fc_0_0_0_0_0_0_1_0_0 = filter.hilbert_fc(16*4, firdes.WIN_HAMMING, 6.76)
-        self.hilbert_fc_0_0_0_0_0_0_1_0 = filter.hilbert_fc(16*4, firdes.WIN_HAMMING, 6.76)
-        self.hilbert_fc_0_0_0_0_0_0_1 = filter.hilbert_fc(16*4, firdes.WIN_HAMMING, 6.76)
-        self.hilbert_fc_0_0_0_0_0_0_0 = filter.hilbert_fc(16*4, firdes.WIN_HAMMING, 6.76)
-        self.hilbert_fc_0_0_0_0_0_0 = filter.hilbert_fc(16*4, firdes.WIN_HAMMING, 6.76)
-        self.hilbert_fc_0_0_0_0_0 = filter.hilbert_fc(16*4, firdes.WIN_HAMMING, 6.76)
-        self.hilbert_fc_0_0_0_0 = filter.hilbert_fc(16*4, firdes.WIN_HAMMING, 6.76)
-        self.hilbert_fc_0_0_0 = filter.hilbert_fc(16*4, firdes.WIN_HAMMING, 6.76)
-        self.hilbert_fc_0_0 = filter.hilbert_fc(16*4, firdes.WIN_HAMMING, 6.76)
-        self.hilbert_fc_0 = filter.hilbert_fc(16*4, firdes.WIN_HAMMING, 6.76)
-        self.blocks_vector_to_stream_0_0 = blocks.vector_to_stream(gr.sizeof_gr_complex*1, 16)
-        self.blocks_throttle_1 = blocks.throttle(gr.sizeof_short*1, samp_rate,True)
-        self.blocks_streams_to_vector_0_1 = blocks.streams_to_vector(gr.sizeof_gr_complex*1, 16)
+
+        labels = ['', '', '', '', '',
+            '', '', '', '', '']
+        widths = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        colors = ["blue", "red", "green", "black", "cyan",
+            "magenta", "yellow", "dark red", "dark green", "dark blue"]
+        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0, 1.0]
+
+        for i in range(1):
+            if len(labels[i]) == 0:
+                self.qtgui_freq_sink_x_0.set_line_label(i, "Data {0}".format(i))
+            else:
+                self.qtgui_freq_sink_x_0.set_line_label(i, labels[i])
+            self.qtgui_freq_sink_x_0.set_line_width(i, widths[i])
+            self.qtgui_freq_sink_x_0.set_line_color(i, colors[i])
+            self.qtgui_freq_sink_x_0.set_line_alpha(i, alphas[i])
+
+        self._qtgui_freq_sink_x_0_win = sip.wrapinstance(self.qtgui_freq_sink_x_0.pyqwidget(), Qt.QWidget)
+        self.top_layout.addWidget(self._qtgui_freq_sink_x_0_win)
+        self.blocks_throttle_0 = blocks.throttle(gr.sizeof_gr_complex*1, samp_rate,True)
         self.blocks_streams_to_vector_0 = blocks.streams_to_vector(gr.sizeof_gr_complex*1, 16)
-        self.blocks_short_to_float_0_0 = blocks.short_to_float(1, 1)
+        self.blocks_stream_to_vector_0 = blocks.stream_to_vector(gr.sizeof_gr_complex*1, 16)
         self.blocks_null_sink_0 = blocks.null_sink(gr.sizeof_gr_complex*16)
-        self.blocks_multiply_const_vxx_0_0 = blocks.multiply_const_ff(2/8192)
         self.blocks_message_debug_0 = blocks.message_debug()
-        self.blocks_file_source_0_0_1 = blocks.file_source(gr.sizeof_short*1, '/media/fran/46FAA90DFAA8FA77/Ventanas/IB/PI/GitHub/DOA/test/remake_desde_csv.npy', True, 64, 0)
-        self.blocks_file_source_0_0_1.set_begin_tag(pmt.PMT_NIL)
-        self.blocks_file_sink_0 = blocks.file_sink(gr.sizeof_gr_complex*16, '/media/fran/46FAA90DFAA8FA77/Ventanas/IB/PI/etc/output', False)
-        self.blocks_file_sink_0.set_unbuffered(False)
-        self.blocks_deinterleave_0_0 = blocks.deinterleave(gr.sizeof_float*1, 1)
+        self.blocks_file_source_0_0_0 = blocks.file_source(gr.sizeof_gr_complex*1, '/run/media/fran/46FAA90DFAA8FA77/Ventanas/IB/PI/GitHub/DOA/test/submuestreada_complex_trimmed.npy', True, 0, 0)
+        self.blocks_file_source_0_0_0.set_begin_tag(pmt.PMT_NIL)
         self.blocks_deinterleave_0 = blocks.deinterleave(gr.sizeof_gr_complex*1, 1)
-        self.blocks_add_const_vxx_0_0 = blocks.add_const_ff(-8191.5)
-        self.beamforming_randomsampler_1 = beamforming.randomsampler(16, 8)
+        self.beamforming_randomsampler_0 = beamforming.randomsampler(mx*my, 8)
         self.beamforming_doaesprit_py_cf_0 = beamforming.doaesprit_py_cf(mx, my, fc, element_separation, 1, 128)
 
 
@@ -144,66 +193,30 @@ class doa_emulador_arreglo(gr.top_block, Qt.QWidget):
         # Connections
         ##################################################
         self.msg_connect((self.beamforming_doaesprit_py_cf_0, 'doa_port'), (self.blocks_message_debug_0, 'print'))
-        self.connect((self.beamforming_randomsampler_1, 0), (self.beamforming_doaesprit_py_cf_0, 0))
-        self.connect((self.blocks_add_const_vxx_0_0, 0), (self.blocks_multiply_const_vxx_0_0, 0))
-        self.connect((self.blocks_deinterleave_0, 5), (self.blocks_streams_to_vector_0, 5))
-        self.connect((self.blocks_deinterleave_0, 4), (self.blocks_streams_to_vector_0, 4))
-        self.connect((self.blocks_deinterleave_0, 7), (self.blocks_streams_to_vector_0, 7))
-        self.connect((self.blocks_deinterleave_0, 0), (self.blocks_streams_to_vector_0, 0))
-        self.connect((self.blocks_deinterleave_0, 12), (self.blocks_streams_to_vector_0, 12))
-        self.connect((self.blocks_deinterleave_0, 1), (self.blocks_streams_to_vector_0, 1))
-        self.connect((self.blocks_deinterleave_0, 15), (self.blocks_streams_to_vector_0, 15))
-        self.connect((self.blocks_deinterleave_0, 8), (self.blocks_streams_to_vector_0, 8))
-        self.connect((self.blocks_deinterleave_0, 13), (self.blocks_streams_to_vector_0, 13))
-        self.connect((self.blocks_deinterleave_0, 2), (self.blocks_streams_to_vector_0, 2))
-        self.connect((self.blocks_deinterleave_0, 9), (self.blocks_streams_to_vector_0, 9))
-        self.connect((self.blocks_deinterleave_0, 10), (self.blocks_streams_to_vector_0, 10))
-        self.connect((self.blocks_deinterleave_0, 6), (self.blocks_streams_to_vector_0, 6))
+        self.connect((self.beamforming_randomsampler_0, 0), (self.beamforming_doaesprit_py_cf_0, 0))
         self.connect((self.blocks_deinterleave_0, 11), (self.blocks_streams_to_vector_0, 11))
+        self.connect((self.blocks_deinterleave_0, 4), (self.blocks_streams_to_vector_0, 4))
+        self.connect((self.blocks_deinterleave_0, 12), (self.blocks_streams_to_vector_0, 12))
+        self.connect((self.blocks_deinterleave_0, 9), (self.blocks_streams_to_vector_0, 9))
+        self.connect((self.blocks_deinterleave_0, 6), (self.blocks_streams_to_vector_0, 6))
+        self.connect((self.blocks_deinterleave_0, 1), (self.blocks_streams_to_vector_0, 1))
+        self.connect((self.blocks_deinterleave_0, 13), (self.blocks_streams_to_vector_0, 13))
         self.connect((self.blocks_deinterleave_0, 3), (self.blocks_streams_to_vector_0, 3))
+        self.connect((self.blocks_deinterleave_0, 2), (self.blocks_streams_to_vector_0, 2))
+        self.connect((self.blocks_deinterleave_0, 8), (self.blocks_streams_to_vector_0, 8))
+        self.connect((self.blocks_deinterleave_0, 0), (self.blocks_streams_to_vector_0, 0))
+        self.connect((self.blocks_deinterleave_0, 7), (self.blocks_streams_to_vector_0, 7))
+        self.connect((self.blocks_deinterleave_0, 5), (self.blocks_streams_to_vector_0, 5))
+        self.connect((self.blocks_deinterleave_0, 15), (self.blocks_streams_to_vector_0, 15))
+        self.connect((self.blocks_deinterleave_0, 10), (self.blocks_streams_to_vector_0, 10))
         self.connect((self.blocks_deinterleave_0, 14), (self.blocks_streams_to_vector_0, 14))
-        self.connect((self.blocks_deinterleave_0, 2), (self.qtgui_sink_x_1, 0))
-        self.connect((self.blocks_deinterleave_0_0, 0), (self.hilbert_fc_0, 0))
-        self.connect((self.blocks_deinterleave_0_0, 5), (self.hilbert_fc_0_0, 0))
-        self.connect((self.blocks_deinterleave_0_0, 4), (self.hilbert_fc_0_0_0, 0))
-        self.connect((self.blocks_deinterleave_0_0, 3), (self.hilbert_fc_0_0_0_0, 0))
-        self.connect((self.blocks_deinterleave_0_0, 2), (self.hilbert_fc_0_0_0_0_0, 0))
-        self.connect((self.blocks_deinterleave_0_0, 13), (self.hilbert_fc_0_0_0_0_0_0, 0))
-        self.connect((self.blocks_deinterleave_0_0, 1), (self.hilbert_fc_0_0_0_0_0_0_0, 0))
-        self.connect((self.blocks_deinterleave_0_0, 8), (self.hilbert_fc_0_0_0_0_0_0_1, 0))
-        self.connect((self.blocks_deinterleave_0_0, 9), (self.hilbert_fc_0_0_0_0_0_0_1_0, 0))
-        self.connect((self.blocks_deinterleave_0_0, 10), (self.hilbert_fc_0_0_0_0_0_0_1_0_0, 0))
-        self.connect((self.blocks_deinterleave_0_0, 11), (self.hilbert_fc_0_0_0_0_0_0_1_0_0_0, 0))
-        self.connect((self.blocks_deinterleave_0_0, 15), (self.hilbert_fc_0_0_0_0_0_0_1_0_0_0_0, 0))
-        self.connect((self.blocks_deinterleave_0_0, 12), (self.hilbert_fc_0_0_0_0_0_0_1_0_0_0_0_0, 0))
-        self.connect((self.blocks_deinterleave_0_0, 14), (self.hilbert_fc_0_0_0_0_0_0_1_0_0_0_0_0_0, 0))
-        self.connect((self.blocks_deinterleave_0_0, 6), (self.hilbert_fc_0_0_1, 0))
-        self.connect((self.blocks_deinterleave_0_0, 7), (self.hilbert_fc_0_0_1_0, 0))
-        self.connect((self.blocks_file_source_0_0_1, 0), (self.blocks_throttle_1, 0))
-        self.connect((self.blocks_multiply_const_vxx_0_0, 0), (self.blocks_deinterleave_0_0, 0))
-        self.connect((self.blocks_short_to_float_0_0, 0), (self.blocks_add_const_vxx_0_0, 0))
+        self.connect((self.blocks_deinterleave_0, 0), (self.qtgui_freq_sink_x_0, 0))
+        self.connect((self.blocks_deinterleave_0, 0), (self.qtgui_time_sink_x_0, 0))
+        self.connect((self.blocks_file_source_0_0_0, 0), (self.blocks_throttle_0, 0))
+        self.connect((self.blocks_stream_to_vector_0, 0), (self.beamforming_randomsampler_0, 0))
         self.connect((self.blocks_streams_to_vector_0, 0), (self.blocks_null_sink_0, 0))
-        self.connect((self.blocks_streams_to_vector_0_1, 0), (self.beamforming_randomsampler_1, 0))
-        self.connect((self.blocks_streams_to_vector_0_1, 0), (self.blocks_file_sink_0, 0))
-        self.connect((self.blocks_streams_to_vector_0_1, 0), (self.blocks_vector_to_stream_0_0, 0))
-        self.connect((self.blocks_throttle_1, 0), (self.blocks_short_to_float_0_0, 0))
-        self.connect((self.blocks_vector_to_stream_0_0, 0), (self.blocks_deinterleave_0, 0))
-        self.connect((self.hilbert_fc_0, 0), (self.blocks_streams_to_vector_0_1, 0))
-        self.connect((self.hilbert_fc_0_0, 0), (self.blocks_streams_to_vector_0_1, 5))
-        self.connect((self.hilbert_fc_0_0_0, 0), (self.blocks_streams_to_vector_0_1, 4))
-        self.connect((self.hilbert_fc_0_0_0_0, 0), (self.blocks_streams_to_vector_0_1, 3))
-        self.connect((self.hilbert_fc_0_0_0_0_0, 0), (self.blocks_streams_to_vector_0_1, 2))
-        self.connect((self.hilbert_fc_0_0_0_0_0_0, 0), (self.blocks_streams_to_vector_0_1, 13))
-        self.connect((self.hilbert_fc_0_0_0_0_0_0_0, 0), (self.blocks_streams_to_vector_0_1, 1))
-        self.connect((self.hilbert_fc_0_0_0_0_0_0_1, 0), (self.blocks_streams_to_vector_0_1, 8))
-        self.connect((self.hilbert_fc_0_0_0_0_0_0_1_0, 0), (self.blocks_streams_to_vector_0_1, 9))
-        self.connect((self.hilbert_fc_0_0_0_0_0_0_1_0_0, 0), (self.blocks_streams_to_vector_0_1, 10))
-        self.connect((self.hilbert_fc_0_0_0_0_0_0_1_0_0_0, 0), (self.blocks_streams_to_vector_0_1, 11))
-        self.connect((self.hilbert_fc_0_0_0_0_0_0_1_0_0_0_0, 0), (self.blocks_streams_to_vector_0_1, 15))
-        self.connect((self.hilbert_fc_0_0_0_0_0_0_1_0_0_0_0_0, 0), (self.blocks_streams_to_vector_0_1, 12))
-        self.connect((self.hilbert_fc_0_0_0_0_0_0_1_0_0_0_0_0_0, 0), (self.blocks_streams_to_vector_0_1, 14))
-        self.connect((self.hilbert_fc_0_0_1, 0), (self.blocks_streams_to_vector_0_1, 6))
-        self.connect((self.hilbert_fc_0_0_1_0, 0), (self.blocks_streams_to_vector_0_1, 7))
+        self.connect((self.blocks_throttle_0, 0), (self.blocks_deinterleave_0, 0))
+        self.connect((self.blocks_throttle_0, 0), (self.blocks_stream_to_vector_0, 0))
 
 
     def closeEvent(self, event):
@@ -235,14 +248,15 @@ class doa_emulador_arreglo(gr.top_block, Qt.QWidget):
 
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
-        self.blocks_throttle_1.set_sample_rate(self.samp_rate)
+        self.blocks_throttle_0.set_sample_rate(self.samp_rate)
 
     def get_fs(self):
         return self.fs
 
     def set_fs(self, fs):
         self.fs = fs
-        self.qtgui_sink_x_1.set_frequency_range(0, self.fs)
+        self.qtgui_freq_sink_x_0.set_frequency_range(0, self.fs)
+        self.qtgui_time_sink_x_0.set_samp_rate(self.fs)
 
     def get_element_separation(self):
         return self.element_separation

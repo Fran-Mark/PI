@@ -10,6 +10,7 @@ void helpers::throwErrorIf(bool cond, const char *msg){
 void helpers::waitUntil(std::chrono::time_point<std::chrono::system_clock> timePoint){
     std::chrono::duration<double> timeDiff = timePoint - std::chrono::system_clock::now();
     if(timeDiff.count() > 0){
+        std::cout << "Waiting for " << timeDiff.count() << " seconds" << std::endl;
         std::this_thread::sleep_for(timeDiff);
     }
 }
@@ -47,15 +48,6 @@ void helpers::writeNBytes(int fd, void* message, size_t nBytes){
     }
 }
 
-bool helpers::parseTLE(TLE tle){
-    //Siempre devuelve true hasta arreglar la lectura de los TLEs
-    bool value = true;
-    if (tle.getName() == "invalido"){
-        value = false;
-    }
-    
-    return value;
-}
 
 std::string helpers::generateTimestamp(){
     time_t t = time(0);

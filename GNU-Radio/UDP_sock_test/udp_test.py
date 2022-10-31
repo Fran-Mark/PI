@@ -7,9 +7,9 @@
 # GNU Radio Python Flow Graph
 # Title: Not titled yet
 # Author: fran
-# GNU Radio version: 3.10.1.0
+# GNU Radio version: v3.8.5.0-6-g57bd109d
 
-from packaging.version import Version as StrictVersion
+from distutils.version import StrictVersion
 
 if __name__ == '__main__':
     import ctypes
@@ -27,22 +27,19 @@ from gnuradio.filter import firdes
 import sip
 from gnuradio import blocks
 from gnuradio import gr
-from gnuradio.fft import window
 import sys
 import signal
 from argparse import ArgumentParser
 from gnuradio.eng_arg import eng_float, intx
 from gnuradio import eng_notation
-from gnuradio import network
-
-
+from stream_demux import stream_demux_swig
 
 from gnuradio import qtgui
 
 class udp_test(gr.top_block, Qt.QWidget):
 
     def __init__(self):
-        gr.top_block.__init__(self, "Not titled yet", catch_exceptions=True)
+        gr.top_block.__init__(self, "Not titled yet")
         Qt.QWidget.__init__(self)
         self.setWindowTitle("Not titled yet")
         qtgui.util.check_set_qss()
@@ -75,84 +72,78 @@ class udp_test(gr.top_block, Qt.QWidget):
         ##################################################
         # Variables
         ##################################################
-        self.samp_rate = samp_rate = 500000
+        self.samp_rate = samp_rate = 32000
 
         ##################################################
         # Blocks
         ##################################################
+        self.stream_demux_stream_demux_0 = stream_demux_swig.stream_demux(gr.sizeof_gr_complex*1, (92,92))
         self.qtgui_sink_x_1 = qtgui.sink_c(
             1024, #fftsize
-            window.WIN_BLACKMAN_hARRIS, #wintype
+            firdes.WIN_BLACKMAN_hARRIS, #wintype
             0, #fc
             samp_rate, #bw
             "Completo", #name
             True, #plotfreq
             True, #plotwaterfall
             True, #plottime
-            True, #plotconst
-            None # parent
+            True #plotconst
         )
         self.qtgui_sink_x_1.set_update_time(1.0/10)
-        self._qtgui_sink_x_1_win = sip.wrapinstance(self.qtgui_sink_x_1.qwidget(), Qt.QWidget)
+        self._qtgui_sink_x_1_win = sip.wrapinstance(self.qtgui_sink_x_1.pyqwidget(), Qt.QWidget)
 
         self.qtgui_sink_x_1.enable_rf_freq(False)
 
         self.top_layout.addWidget(self._qtgui_sink_x_1_win)
         self.qtgui_sink_x_0_0 = qtgui.sink_c(
             1024, #fftsize
-            window.WIN_BLACKMAN_hARRIS, #wintype
+            firdes.WIN_BLACKMAN_hARRIS, #wintype
             0, #fc
             samp_rate, #bw
             "3 MHz", #name
             True, #plotfreq
             True, #plotwaterfall
             True, #plottime
-            True, #plotconst
-            None # parent
+            True #plotconst
         )
         self.qtgui_sink_x_0_0.set_update_time(1.0/100)
-        self._qtgui_sink_x_0_0_win = sip.wrapinstance(self.qtgui_sink_x_0_0.qwidget(), Qt.QWidget)
+        self._qtgui_sink_x_0_0_win = sip.wrapinstance(self.qtgui_sink_x_0_0.pyqwidget(), Qt.QWidget)
 
         self.qtgui_sink_x_0_0.enable_rf_freq(False)
 
         self.top_layout.addWidget(self._qtgui_sink_x_0_0_win)
         self.qtgui_sink_x_0 = qtgui.sink_c(
             1024, #fftsize
-            window.WIN_BLACKMAN_hARRIS, #wintype
+            firdes.WIN_BLACKMAN_hARRIS, #wintype
             0, #fc
             samp_rate, #bw
             "1 MHz", #name
             True, #plotfreq
             True, #plotwaterfall
             True, #plottime
-            True, #plotconst
-            None # parent
+            True #plotconst
         )
         self.qtgui_sink_x_0.set_update_time(1.0/100)
-        self._qtgui_sink_x_0_win = sip.wrapinstance(self.qtgui_sink_x_0.qwidget(), Qt.QWidget)
+        self._qtgui_sink_x_0_win = sip.wrapinstance(self.qtgui_sink_x_0.pyqwidget(), Qt.QWidget)
 
         self.qtgui_sink_x_0.enable_rf_freq(False)
 
         self.top_layout.addWidget(self._qtgui_sink_x_0_win)
-        self.network_udp_source_1 = network.udp_source(gr.sizeof_gr_complex, 1, 7070, 0, 1472, True, False, False)
-        self.blocks_stream_demux_0 = blocks.stream_demux(gr.sizeof_gr_complex*1, (92, 92))
+        self.blocks_udp_source_0 = blocks.udp_source(gr.sizeof_gr_complex*1, '127.0.0.1', 7070, 1472, True)
 
 
         ##################################################
         # Connections
         ##################################################
-        self.connect((self.blocks_stream_demux_0, 0), (self.qtgui_sink_x_0, 0))
-        self.connect((self.blocks_stream_demux_0, 1), (self.qtgui_sink_x_0_0, 0))
-        self.connect((self.network_udp_source_1, 0), (self.blocks_stream_demux_0, 0))
-        self.connect((self.network_udp_source_1, 0), (self.qtgui_sink_x_1, 0))
+        self.connect((self.blocks_udp_source_0, 0), (self.qtgui_sink_x_1, 0))
+        self.connect((self.blocks_udp_source_0, 0), (self.stream_demux_stream_demux_0, 0))
+        self.connect((self.stream_demux_stream_demux_0, 0), (self.qtgui_sink_x_0, 0))
+        self.connect((self.stream_demux_stream_demux_0, 1), (self.qtgui_sink_x_0_0, 0))
 
 
     def closeEvent(self, event):
         self.settings = Qt.QSettings("GNU Radio", "udp_test")
         self.settings.setValue("geometry", self.saveGeometry())
-        self.stop()
-        self.wait()
-
         event.accept()
 
     def get_samp_rate(self):
@@ -163,6 +154,7 @@ class udp_test(gr.top_block, Qt.QWidget):
         self.qtgui_sink_x_0.set_frequency_range(0, self.samp_rate)
         self.qtgui_sink_x_0_0.set_frequency_range(0, self.samp_rate)
         self.qtgui_sink_x_1.set_frequency_range(0, self.samp_rate)
+
 
 
 
@@ -181,9 +173,6 @@ def main(top_block_cls=udp_test, options=None):
     tb.show()
 
     def sig_handler(sig=None, frame=None):
-        tb.stop()
-        tb.wait()
-
         Qt.QApplication.quit()
 
     signal.signal(signal.SIGINT, sig_handler)
@@ -193,6 +182,11 @@ def main(top_block_cls=udp_test, options=None):
     timer.start(500)
     timer.timeout.connect(lambda: None)
 
+    def quitting():
+        tb.stop()
+        tb.wait()
+
+    qapp.aboutToQuit.connect(quitting)
     qapp.exec_()
 
 if __name__ == '__main__':

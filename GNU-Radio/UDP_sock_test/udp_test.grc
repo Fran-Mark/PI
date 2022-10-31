@@ -1,7 +1,6 @@
 options:
   parameters:
     author: fran
-    catch_exceptions: 'True'
     category: '[GRC Hier Blocks]'
     cmake_opt: ''
     comment: ''
@@ -37,7 +36,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '500000'
+    value: '32000'
   states:
     bus_sink: false
     bus_source: false
@@ -45,48 +44,27 @@ blocks:
     coordinate: [184, 12]
     rotation: 0
     state: enabled
-- name: blocks_stream_demux_0
-  id: blocks_stream_demux
+- name: blocks_udp_source_0
+  id: blocks_udp_source
   parameters:
     affinity: ''
     alias: ''
     comment: ''
-    lengths: (92, 92)
+    eof: 'True'
+    ipaddr: 127.0.0.1
     maxoutbuf: '0'
     minoutbuf: '0'
-    num_outputs: '2'
-    type: complex
-    vlen: '1'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [344, 272.0]
-    rotation: 0
-    state: enabled
-- name: network_udp_source_1
-  id: network_udp_source
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    header: '0'
-    ipv6: 'False'
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    notify_missed: 'True'
-    payloadsize: '1472'
     port: '7070'
-    src_zeros: 'False'
+    psize: '1472'
     type: complex
     vlen: '1'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [88, 248.0]
+    coordinate: [48, 232.0]
     rotation: 0
-    state: enabled
+    state: true
 - name: qtgui_sink_x_0
   id: qtgui_sink_x
   parameters:
@@ -108,7 +86,7 @@ blocks:
     showports: 'False'
     showrf: 'False'
     type: complex
-    wintype: window.WIN_BLACKMAN_hARRIS
+    wintype: firdes.WIN_BLACKMAN_hARRIS
   states:
     bus_sink: false
     bus_source: false
@@ -137,7 +115,7 @@ blocks:
     showports: 'False'
     showrf: 'False'
     type: complex
-    wintype: window.WIN_BLACKMAN_hARRIS
+    wintype: firdes.WIN_BLACKMAN_hARRIS
   states:
     bus_sink: false
     bus_source: false
@@ -166,7 +144,7 @@ blocks:
     showports: 'False'
     showrf: 'False'
     type: complex
-    wintype: window.WIN_BLACKMAN_hARRIS
+    wintype: firdes.WIN_BLACKMAN_hARRIS
   states:
     bus_sink: false
     bus_source: false
@@ -174,12 +152,31 @@ blocks:
     coordinate: [328, 376.0]
     rotation: 0
     state: enabled
+- name: stream_demux_stream_demux_0
+  id: stream_demux_stream_demux
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    lengths: (92,92)
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_outputs: '2'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [344, 240.0]
+    rotation: 0
+    state: true
 
 connections:
-- [blocks_stream_demux_0, '0', qtgui_sink_x_0, '0']
-- [blocks_stream_demux_0, '1', qtgui_sink_x_0_0, '0']
-- [network_udp_source_1, '0', blocks_stream_demux_0, '0']
-- [network_udp_source_1, '0', qtgui_sink_x_1, '0']
+- [blocks_udp_source_0, '0', qtgui_sink_x_1, '0']
+- [blocks_udp_source_0, '0', stream_demux_stream_demux_0, '0']
+- [stream_demux_stream_demux_0, '0', qtgui_sink_x_0, '0']
+- [stream_demux_stream_demux_0, '1', qtgui_sink_x_0_0, '0']
 
 metadata:
   file_format: 1

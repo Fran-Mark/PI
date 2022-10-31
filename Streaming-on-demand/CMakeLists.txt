@@ -1,19 +1,37 @@
+cmake_minimum_required(VERSION 3.13)
 project(Marquinez-tp-redes)
-cmake_minimum_required(VERSION 3.8)
 
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -lrt")
+set(CMAKE_CXX_STANDARD 14)
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -lrt -fPIC")
 
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../bin)
 
-set(CLIENT_CPPS "client/src/client.cpp" "src/helpers.cpp" "src/tle.cpp" "client/src/main.cpp" "src/sample.cpp")
-add_executable(client ${CLIENT_CPPS})
+include(FetchContent)
+FetchContent_Declare(
+	pybind11
+	GIT_REPOSITORY https://github.com/pybind/pybind11.git
+	GIT_TAG        v2.6.2
+	GIT_SHALLOW    TRUE
+)
 
-set(SERVER_CPPS "server/src/server.cpp" "src/helpers.cpp" "src/tle.cpp" "server/src/main.cpp" "src/sample.cpp" "src/access_controller.cpp")
+FetchContent_MakeAvailable(pybind11)
 
-add_executable(server ${SERVER_CPPS})
+set(CLIENT_CPPS "client/src/client.cpp" "src/helpers.cpp" "src/tle.cpp" "client/src/main.cpp" "src/sample.cpp" "src/tle_parser.cpp")
+set(SERVER_CPPS "server/src/server.cpp" "src/helpers.cpp" "src/tle.cpp" "server/src/main.cpp" "src/sample.cpp" "src/access_controller.cpp" "src/tle_parser.cpp")
+
+pybind11_add_module(streaming_server ${SERVER_CPPS})
+target_compile_features(streaming_server PUBLIC cxx_std_14)
+set_target_properties(streaming_server PROPERTIES SUFFIX ".so")
+
+pybind11_add_module(streaming_client ${CLIENT_CPPS})
+target_compile_features(streaming_client PUBLIC cxx_std_14)
+set_target_properties(streaming_client PROPERTIES SUFFIX ".so")
 
 find_library(LIBRT rt) 
 if(LIBRT)
-target_link_libraries(server ${LIBRT})
+target_link_libraries(streaming_server PRIVATE ${LIBRT})
 endif()
-target_link_libraries(server Beamformer)
+target_link_libraries(streaming_server PRIVATE Beamformer)
 add_subdirectory(gnuradio)
