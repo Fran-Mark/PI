@@ -2,14 +2,106 @@
 \begin{document}
 \graphicspath{{./figures}}
 \chapter{Interfaz de usuario}
-%motivación
+Al observar el sistema completo como se ilustró en la figura \ref{fig::planteo-receptor} se ve que existen varios puntos donde el usuario puede intervenir. En la etapa de preprocesamiento dentro del sistema de adquisición por ejemplo, desarrollado en el capítulo \ref{cap::preproc}, el usuario tiene la capacidad seleccionar la fuente de datos que quiere recibir; en la etapa de procesamiento el usuario debe ser capaz de visualizar los datos, por nombrar unos ejemplos.
+
+Además, de los diversos puntos de interacción con el sistema existente, también ocurre que esta interacción no siempre es sencilla para aquellos no familiarizados con el sistema. Para escribir un registro en la FPGA por ejemplo debe tenerse acceso a un binario que lo haga, debe conocerse la dirección de memoria del registro y debe saberse el valor que debe escribirse para lograr el efecto deseado.
+
+La existencia de diversos puntos de interacción dispersos a lo largo del sistema y la dificultad que esta interacción puede representar para un usuario no familiarizado son los puntos que motivan la creación de una interfaz de usuario (UI).
+
+El código desarrollado en este capítulo puede encontrarse en \texttt{UI/}.
 
 \section{Requerimientos}
+Según lo recién explicado, se tienen dos grandes requerimientos, los cuales se satisfacen mediante el cumplimiento de otros requerimientos como se lista a continuación:
+\begin{enumerate}
+    \item Permitir el acceso a los diversos puntos del sistema desde un solo lugar, esto implica facilitar:
+    \begin{enumerate}
+        \item La escritura de registros dentro de la FPGA para las diversas configuraciones desarrolladas en \todo{Donde? Cap? Sec?}.
+        \item El acceso a los datos capturados y procesados en GNU Radio.
+        \item El monitoreo y control del servidor de \textit{streaming} a demanda desarrollado en el capitulo \todo{Cap?}
+    \end{enumerate}
+    \item Simplificar la interacción del usuario con el receptor, para esto la UI debe encargarse de:
+    \begin{enumerate}
+        \item La abstracción del proceso de escritura de registros eliminando la necesidad que el usuario conozca direcciones de memoria y valores específicos.
+        \item La visualización y manipulación sencilla de los datos capturados y procesados.
+    \end{enumerate}
+\end{enumerate}
 
-\section{Diseño conceptual}
+También resulta relevante que la UI sea fácil de usar y resulte de cierta forma intuitiva para un usuario que nunca interactuó con ella.
 
-\section{Implementación de GUI}
+\section{Diseño conceptual}\label{sec::disenio-conceptual}
+La interfaz de usuario se compone de tres partes claramente distinguidas: el control del SoC, la etapa de procesamiento o SDR, y el monitoreo del servidor de \textit{streaming} de capturas. A su vez, cada una de estas partes se compone de secciones más pequeñas, las cuales se listan a contnuación:
+
+\begin{itemize}
+    \item Control del SoC:
+    \begin{enumerate}
+        \item Inicialización: establecimiento de la conexión SSH con el PS, configuración de tensiones \unsure{Menciono tensiones antes?}, configuración por defecto de registros.
+        \item Estado de haces: mostrar y modificar la frecuencia de los haces mediante la lectura y escritura de registros.
+        \item Control de datos adquiridos: selección de fuente de datos que se quiere adquirir en base a todos los puntos de \textit{debug} del sistema \change{Redactar mejor}.
+    \end{enumerate}
+    \item SDR:
+    \begin{enumerate}
+        \item Información de señal: mostrar la frecuencia de la señal detectada, el ángulo de arribo \unsure{Mostramos diff con TLE?} y la potencia recibida por antena.
+        \item Visualización de los datos capturados, esto incluye gráficos en tiempo, frecuencia, gráficos de cascada, etc.
+        \todo{Calibración de orientación de arreglo?}
+    \end{enumerate}
+    \item Monitoreo del servidor:
+    \begin{enumerate}
+        \item Inicialización del servidor.
+        \item Estado del servidor: mostrar cantidad de clientes conectados, qué frecuencia se pide y en qué estado está la conexión (por ejemplo procesando, transmitiendo, esperando, etc).
+    \end{enumerate}
+\end{itemize}
+
+\section{Implementación de UI}
+La interfaz de usuario mencionada puede ser implementada el línea de comandos (CLI) o como una interfaz gráfica (GUI).  En un principio se implementó parcialmente en forma de CLI en Python usando la librería \texttt{Click} \cite{click} debido a la simplicidad ligada a su desarrollo. Sin embargo, rápidamente se concluyó que una GUI es una mejor solución en este caso debido a que, de acuerdo a los requerimientos, se necesita tener control en simultáneo del SoC, el SDR y el servidor, lo cual implica el manejo de múltiples procesos. Esto no resulta natural en una CLI, como si lo hace en una GUI.
+
+Por un lado, la principal ventaja de la GUI es la facilidad que representa su uso para el usuario en comparación a una CLI. Pero por otro lado, demanda más trabajo en el desarrollo que una CLI.
+
+\subsection{Selección de entorno}
+Al comenzar el desarrollo de una GUI debe seleccionarse el lenguaje y el \textit{framework} que se utilizará para hacerlo. En este caso se eligió desarrollar en el \textit{framework} de \texttt{Qt} \cite{Qt-framework}, más específicamente el el \textit{wrapper} para Python\footnote{El \textit{framework} está originalmente escrito en C++.} llamado \texttt{PyQt5} \cite{pyqt5}. Esta elección radica en el hecho de que GNU Radio utiliza \texttt{PyQt5} en la generación de su interfaz de usuario con los bloques del grupo \textit{QT GUI Blocks} \cite{gnuradio-qt}. De esta manera, el desarrollo de la GUI empleando \texttt{PyQt5} simplificará la integración de la parte de SDR (hecha en GNU Radio) en la misma.
+
+%Adaptaciones de lo existente: wapper de server, QProcessess
+%Backend: Qprocesses, write to stdin listen to stdout, stderr. 
+\subsection{Manejo de procesos en simultáneo}
+Según se expuso en la sección \ref{sec::disenio-conceptual}, la GUI se compone de tres partes bien distinguidas. A la hora de la implementación lo que se tiene son tres entidades distintas (el control del SoC, el SDR y el monitoreo del servidor) que deben ocurrir de manera simultánea. Una situación similar ya fue resuelta en el capítulo \todo{decir capitulo} donde se recurrió al uso de \textit{threads} y procesos en C++ para lograr la operación en paralelo del sistema de adquisición, procesamiento y \textit{streaming}. 
+
+Estas herramientas también están disponibles en Python con algunas diferencias. Sin embargo, al estar desarrollando una GUI con \texttt{PyQt5} puede hacerse uso de las herramientas que el mismo \textit{framework} brinda. Un ejemplo es el objeto \texttt{QProcess} \cite{qprocess}, el cual permite correr un nuevo proceso y establecer canales de comunicación con el mismo para poder escribir al \textit{stdin} (\textit{standard input}) y poder leer del \textit{stdout} (\textit{standard output}) y del \textit{stderr} (\textit{standard error}).
+
+\subsubsection{Interacción con el SoC}
+%SSH Client con paramiko, shell instance, channels
+La interacción con la CIAA-ACC desde una computadora externa se realiza mediante SSH como se explicó \todo{Donde? En el cap de preproc?}. Para incorporar esto dentro de la GUI es necesario resolver dos cuestiones:
+\begin{enumerate}
+    \item Cómo establecer una conexión SSH desde Python y,
+    \item Cómo mantener el estado de la sesión de SSH corriendo en paralelo con la GUI.
+\end{enumerate}
+
+Para resolver el primer punto se hace uso de la librería \texttt{Paramiko} de Python \cite{paramiko}, que es una implementación del protocolo SSHv2 brindando funcionalidades de cliente y de servidor.
+
+El segundo punto también se resuelve parcialmente mediante la librería \texttt{Paramiko} ya que la misma no solo permite establecer la conexión por SSH con la placa de desarrollo, sino que también brinda la posibilidad de invocar una consola para mantener una sesión corriendo, esto hace posible conservar el estado en la conexión. 
+
+Al invocar a la consola, se establece un canal de comunicación a través del cual puede escribirse al \textit{stdin} de la consola y leer del \textit{stdout} y edl \textit{stderr}. De esta forma, puede tenerse acceso total al PS del SoC.
+
+Por último, retomando el segundo punto, ya sabiendo cómo mantener una sesión, esto debe llevarse a cabo de manera paralela a la ejecución de la GUI. Para esto se instancia un \texttt{QProcess} el cual se ejecuta al inciar la GUI y se elimina al cerrarla.
+
+La implementación del cliente SSH se encuentra en \texttt{UI/sshClient.py} y los comandos de interacción con el SoC de definen en \texttt{UI/socCommands.py}. \todo{Decir de donde salen estos comandos}
+
+\subsubsection{SDR}
+%Uso de cdigo de GNU Radio en thread ppal, él se encarga del paralelismo (hace varios procesos). Incorporación de la GUI generada por GNU Radio
+Como se mencionó anteriormente, GNU Radio, el software de SDR empleado en el procesamiento, posee bloques de generación de GUI usando \texttt{PyQt5}. Esto es, en parte, lo que motivó el uso de este \textit{framework}. 
+
+Al generar un diagrama de bloques en GNU Radio, este lo traduce a código en C++ o Python dependiendo de la preferencia del usuario. Los bloques de \textit{Qt GUI}, sin embargo, solo se encuentran disponibles en Python. 
+
+El código generado por GNU Radio consiste de un objeto\footnote{Esto es, una \textit{clase} en Python.} que incluye todos los bloques instanciados y las respectivas conexiones entre ellos. Luego, se define una función \texttt{main}, la cual se encarga de la creación de la GUI y la ejecución del diagrama de bloques realizado por el usuario y contenido dentro de la clase principal generada. Adicionalmente, la función \texttt{main} también se encarga de la eliminación del objeto y la liberación de recursos cuando el usuario cierra la GUI.
+
+Resulta importante notar que el diagrama de bloques elaborado por GNU Radio corre ya en paralelo a la GUI automáticamente generada. Esto implica que es el mismo GNU Radio el que se encarga del paralelismo en la ejecución, de manera que la GUI en desarrollo no debe preocuparse por eso como sí debía hacerlo en el caso del SoC por ejemplo.
+
+Lo que debe hacerse entonces es eliminar la función \texttt{main} del código generado e implementar parte de su funcionamiento en la GUI que se está desarrollando, aprovechando la definición de los bloques y las conexiones hechas por GNU Radio en la clase principal generada. 
+Más específicamente, debe recuperarse el diseño de GUI generado automáticamente y embeberlo dentro de la GUI en desarrollo. Esto se logra mediante el uso del objeto de tipo \texttt{QLayout}, esto se desarrollará más adelante en este capítulo y se encuentra implementado en los archivos \texttt{UI/main.py} y \texttt{UI/gnu\_schematic.py}. \todo{Desarrollar este concepto más adelante en este capítulo.} 
+
+\subsubsection{Servidor de \textit{streaming}}
+%Wrapper
+El servidor de \textit{streaming} de capturas \textit{on demand} desarrollado en el capítulo \todo{poner capítulo} fue escrito en C++. Como consecuencia de esto, para poder comunicarse desde Python existen algunas alternativas. 
+
+
 \subsection{Disposición de controles}
-\subsection{Incorporación de la GUI generada por GNU Radio}
 
 \end{document}

@@ -53,3 +53,9 @@
 \backcite {complex-mult}{{25}{\caption@xref {??}{ on input line 83}}{table.caption.75}}
 \backcite {dds-compiler}{{25}{\caption@xref {??}{ on input line 83}}{table.caption.75}}
 \backcite {fir-compiler}{{25}{\caption@xref {??}{ on input line 83}}{table.caption.75}}
+\backcite {click}{{31}{7.3}{section.7.3}}
+\backcite {Qt-framework}{{31}{7.3.1}{subsection.7.3.1}}
+\backcite {pyqt5}{{31}{7.3.1}{subsection.7.3.1}}
+\backcite {gnuradio-qt}{{31}{7.3.1}{subsection.7.3.1}}
+\backcite {qprocess}{{32}{7.3.2}{section*.89}}
+\backcite {paramiko}{{32}{7.3.2}{Item.42}}
