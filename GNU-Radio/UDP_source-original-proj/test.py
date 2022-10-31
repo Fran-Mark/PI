@@ -26,6 +26,7 @@ from gnuradio import qtgui
 from gnuradio.filter import firdes
 import sip
 from gnuradio import blocks
+import pmt
 from gnuradio import gr
 import sys
 import signal
@@ -173,7 +174,6 @@ class test(gr.top_block, Qt.QWidget):
 
         self._qtgui_time_sink_x_0_win = sip.wrapinstance(self.qtgui_time_sink_x_0.pyqwidget(), Qt.QWidget)
         self.top_layout.addWidget(self._qtgui_time_sink_x_0_win)
-        self.blocks_udp_source_0_0_0 = blocks.udp_source(gr.sizeof_int*1, '192.168.0.21', 12345, 64088, True)
         self.blocks_null_sink_1 = blocks.null_sink(gr.sizeof_int*1)
         self.blocks_null_sink_0_0_3_3 = blocks.null_sink(gr.sizeof_int*1)
         self.blocks_null_sink_0_0_3_2_0 = blocks.null_sink(gr.sizeof_int*1)
@@ -193,17 +193,16 @@ class test(gr.top_block, Qt.QWidget):
         self.blocks_null_sink_0_0_3 = blocks.null_sink(gr.sizeof_int*1)
         self.blocks_int_to_float_0_0 = blocks.int_to_float(1, 1)
         self.blocks_int_to_float_0 = blocks.int_to_float(1, 1)
-        self.blocks_file_sink_0 = blocks.file_sink(gr.sizeof_int*1, '/run/media/fran/46FAA90DFAA8FA77/Ventanas/IB/PI/GitHub/GNU-Radio/UDP_sock_test/UDP_to_file_sink/file_py', False)
-        self.blocks_file_sink_0.set_unbuffered(True)
+        self.blocks_file_source_0 = blocks.file_source(gr.sizeof_int*1, '/run/media/fran/46FAA90DFAA8FA77/Ventanas/IB/PI/GitHub/GNU-Radio/UDP_sock_test/UDP_to_file_sink/file_py', True, 0, 0)
+        self.blocks_file_source_0.set_begin_tag(pmt.PMT_NIL)
 
 
         ##################################################
         # Connections
         ##################################################
+        self.connect((self.blocks_file_source_0, 0), (self.stream_demux_stream_demux_1, 0))
         self.connect((self.blocks_int_to_float_0, 0), (self.qtgui_time_sink_x_0, 0))
         self.connect((self.blocks_int_to_float_0_0, 0), (self.qtgui_time_sink_x_0_0, 0))
-        self.connect((self.blocks_udp_source_0_0_0, 0), (self.blocks_file_sink_0, 0))
-        self.connect((self.blocks_udp_source_0_0_0, 0), (self.stream_demux_stream_demux_1, 0))
         self.connect((self.stream_demux_stream_demux_1, 0), (self.blocks_int_to_float_0_0, 0))
         self.connect((self.stream_demux_stream_demux_1, 1), (self.blocks_null_sink_1, 0))
         self.connect((self.stream_demux_stream_demux_1, 0), (self.stream_demux_stream_demux_2, 0))

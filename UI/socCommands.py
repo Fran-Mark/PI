@@ -73,7 +73,7 @@ def startCmd():
     return ELFS_LOCATION + 'startup.elf\n'
 
 def launchAcqCmd():
-    return ELFS_LOCATION + 'sist_adq_1024.elf ' + ELFS_LOCATION + 'client_config\n'
+    return ELFS_LOCATION + 'sist_adq.elf ' + ELFS_LOCATION + 'client_config\n'
 
 def setBeamFreqCmd(beamNumber, freq : float):
     freqUndersampled = freq - 7*65
