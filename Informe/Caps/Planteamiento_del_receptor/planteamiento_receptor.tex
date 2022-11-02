@@ -9,12 +9,12 @@ El sistema de recepción consta de cinco partes principales como se muestra en l
 \begin{enumerate}
     \item El arreglo de antenas. Se consideró para este proyecto un arreglo de 16 antenas dispuestas geométricamente formando un cuadrado de 4 por 4.
     \item El \textit{front-end} de RF que incorpora etapas de filtrado grueso y amplificación.
-    \item El sistema de adquisición, el cual se compone por un ADC y una placa que incorpora un \textit{System on a Chip} (SoC).
+    \item El sistema de adquisición \unsure{JQ: estoy pensando que ya evolucionó a ser 'adquisición y preprocesamiento'}, el cual se compone por un ADC y una placa que incorpora un \textit{System on a Chip} (SoC).
     \item La etapa de procesamiento externo, donde se realizará la conformación de haz.
     \item El servidor de \textit{streaming} de capturas en tiempo real para el envío de las mismas a clientes.
 \end{enumerate} 
 
-Como se mencionó en la Introducción, en el presente proyecto integrador se trabaja sobre el desarrollo en algunas áreas del receptor, habiendo otras que quedan fuera del alcance del mismo. El objetivo de este capítulo es el de brindar una visión global del diseño del receptor, y establecer de manera clara las áreas de trabajo de este proyecto.
+Como se mencionó en la Introducción, en el presente proyecto integrador se trabaja sobre el desarrollo en algunas áreas del receptor, habiendo otras que quedan fuera del alcance del mismo. El objetivo de este capítulo es el de brindar una visión global del diseño del receptor, y establecer de manera clara las áreas de trabajo de este proyecto \unsure{JQ: no sé si me gusta el approach de ir diciendo 'esto no, esto no, esto sí'. Tal vez quedaría mejor describir todo el sistema, y recién al último poner solamente las partes en las que se trabajaron?}.
 
 \figura{planteo-receptor}{Diagrama de bloques conceptual de los subsistemas principales del receptor.}
 
@@ -39,7 +39,7 @@ La primera etapa de amplificación, correspondiente al LNA, tiene una ganancia d
 \figura[0.8]{front-end-rf-16}{Front end de RF.}
 
 \section{Sistema de adquisición} \label{sec::planteo-sist-adq}
-El sistema de adquisición debe ser capaz de:
+El sistema de adquisición \unsure{JQ: misma duda sobre agregar 'preprocesamiento'} debe ser capaz de:
 \begin{enumerate}
     \item Recibir las señales de las 16 antenas.
     \item Convertirlas al dominio digital a través de un muestreo.
@@ -99,12 +99,21 @@ En particular, este es un muestreo pasabanda en la séptima zona de Nyquist. Al 
 
 De la ecuación \ref{eq::freqs-submuestreadas} se concluye que tras el muestreo la copia de la banda de interés en la primera zona de Nyquist se ubicará desde los 17~MHz hasta los 20~MHz. 
 
-Resulta relevante notar que el espectro estará espejado respecto al original. No obstante, dado que las señales a recibir son reales en banda base,\unsure{Puedo asegurar que son reales en BB?? GMSK lo es. Reformular esta oración.} que el espectro esté espejado no tiene implicaciones en el sistema. \change{Esto está feo}
+Resulta relevante notar que el espectro estará espejado respecto al original. No obstante, dado que las señales a recibir son reales en banda base,\unsure{Puedo asegurar que son reales en BB?? GMSK lo es. Reformular esta oración.} que el espectro esté espejado no tiene implicaciones en el sistema. \change{Esto está feo} \change{JQ: acá pondría lo q mencionamos que el sistema recibe señales complejas, y nos olvidamos de si queda espejado o no}
 
 Una consecuencia a tener en cuenta en el submuestreo es la superposición espectral de ruido y de posibles señales interferentes sobre la copia de la banda de interés en la primera zona de Nyquist. Esto se desprende del hecho de que existen infinitas bandas de frecuencias $\Delta f_k$ de 3~MHz de ancho de banda cuya copia en la primera zona de Nyquist coincide con la de la banda de interés. 
-En la figura \ref{fig::submuestreo} se ilustra este fenómeno mediante el submuestreo de una señal ruidosa sintética en la banda de interés. Para aplacar este problema debe realizarse un filtrado pasabanda antes del submuestreo.
+En la figura \ref{fig::undersampling}\change{JQ: agregar una descripción de cada figura} se ilustra este fenómeno mediante el submuestreo de una señal ruidosa sintética en la banda de interés. Para aplacar este problema debe realizarse un filtrado pasabanda antes del submuestreo.
 
-\figura[0.8]{submuestreo}{Submuestreo a 65~Msps de una señal sintética ruidosa en la banda amateur de UHF.}
+\begin{figure}[H]
+    \centering
+    \subcaptionbox{Señal ruidosa en la banda de UHF.\label{fig::undersampling-before}}
+    {\includegraphics[width=0.49\linewidth]{noisy-signal.pdf}}
+    \hspace{\fill}%\\[1PC]
+    \subcaptionbox{Señal ruidosa submuestreada a 65~MSps.\label{fig::undersampling-after}}
+    {\includegraphics[width=0.49\linewidth]{undersampled-signal.pdf}}
+    \caption{Submuestreo a 65~Msps de una señal sintética ruidosa en la banda amateur de UHF.}
+    \label{fig::undersampling}
+\end{figure}
 
 
 \subsection{CIAA-ACC}
@@ -115,18 +124,18 @@ Los requerimientos 3, 4 y 5 listados al principio de esta sección se llevarán 
 En la figura \ref{fig::diagrama-ciaa} se observa un diagrama de bloques de la placa con sus principales componentes e interfaces. Entre ellos se tiene una interfaz Ethernet de 1~Gbps, la cual se empleará para comunicarse con una computadora externa y un conector FMC HPC (\textit{High Pin Count}) el cual se utilizará para recibir las muestras del ADC.
 
 \subsubsection{SoC Zynq-7030}
-El corazón \unsure{Muy informal?} de la CIAA-ACC es el SoC Zynq-7030 de Xilinx \cite{SoC}, el cual consiste de un sistema de procesamiento (PS) y lógica programable (PL), como puede verse en la figura \ref{fig::diagrama-ciaa}. La PL consiste en una FPGA de la familia Kintex-7 \cite{Kintex-7}, mientras que el PS cuenta con dos procesadores ARM Cortex-A9. La PL y el PS se comunican empleando el protocolo de bus AXI-4 \cite{AXI-4}.
+El corazón \unsure{Muy informal?} de la CIAA-ACC es el SoC Zynq-7030 de Xilinx \cite{SoC}, el cual consiste de un sistema de procesamiento (PS) y lógica programable (PL), como puede verse en la figura \ref{fig::diagrama-ciaa}. La PL consiste en una FPGA de la familia Kintex-7 \cite{Kintex-7}, mientras que el PS cuenta con dos procesadores ARM Cortex-A9.
 
 \unsure{Incluyo la foto del esquemático del Zynq?}
-
+\change{JQ: el diagrama en bloques de la CIAA debería quedar arriba, en la sección de la CIAA. Acá abajo sí pondría un diagrama en bloques del Zynq como SoC}
 \figura[0.8]{diagrama-ciaa}{Diagrama de bloques de la plataforma CIAA-ACC \cite{CIAA-ACC}.}
 
 \subsection{Diseño del sistema}
-Las muestras adquiridas por el ADC ingresan a la CIAA-ACC a través del conector FMC como se mencionó anteriormente. Desde allí pasan por el siguiente \textit{pipeline}, el cual además se ilustra en la figura \ref{fig::pipeline-ciaa}:
+\unsure{JQ: Las señales diferenciales que transportan las muestras...}Las muestras adquiridas por el ADC ingresan a la CIAA-ACC a través del conector FMC como se mencionó anteriormente. Desde allí pasan por el siguiente \textit{pipeline}, el cual además se ilustra en la figura \ref{fig::pipeline-ciaa}:
 
 \begin{enumerate}
     \item Retardos de entrada: corrigen diferencias en el ruteo de los 16 canales dentro de la FPGA.
-    \item Deserializador: el AD9249 entrega los datos en formato serie, esta etapa combina los 14 bits de cada muestra.
+    \item Deserializador: el AD9249 entrega los datos en formato serie, esta etapa identifica los límites de cada muestra de 14 bits y las extrae en paralelo.
     \item Preprocesamiento: aquí se incluyen etapas de decimación, filtrado y selección de banda y de canal. \change{Mencionar esto en algún lado de la introducción}
     \item FIFO: las muestras capturadas por la PL se almacenan aquí para ser leídas por la PS.
     \item Interfaz AXI: a través de esta interfaz se comunican la PL y la PS.
@@ -134,11 +143,11 @@ Las muestras adquiridas por el ADC ingresan a la CIAA-ACC a través del conector
     \item Envío a un servidor externo: los paquetes se envían hacia el exterior mediante un socket UDP.
 \end{enumerate}
 
-Este \textit{pipeline} ya fue implementado en \cite{proyecto-jose} con la excepción del punto 3, referido al preprocesamiento. Más adelante en este proyecto se abordará este punto, diseñándose e implementandose en el hardware.
+Este \textit{pipeline} ya fue implementado en \cite{proyecto-jose} con la excepción del punto 3, referido al preprocesamiento. Más adelante en este proyecto\change{JQ: agregar referencia al capítulo} se abordará este punto, diseñándose e implementandose en el hardware.
 
 \figura{pipeline-ciaa}{Cadena de bloques que atraviesan las muestras adquiridas dentro de la CIAA-ACC hasta ser enviadas.}
 
-\section{Procesamiento externo}
+\section{Procesamiento externo}\label{sec::procesamiento-externo}
 Los paquetes enviados por el sistema de adquisición se reciben a través de un socket UDP en un servidor externo, como por ejemplo una computadora, para realizar procesamiento digital sobre las muestras. Esto incluye a las etapas de estimación de dirección de arribo y conformación digital de haz.
 
 El procesamiento se realiza empleando GNU Radio, un proyecto libre y de código abierto para el desarrollo de SDR \cite{GNURadio}. La elección de este software fue hecha en \cite{proyecto-grigo}, donde se usó para implementar algoritmos de detección de DOA y de \textit{beamforming} digital.
@@ -154,7 +163,7 @@ Esta etapa consta de cuatro partes principales, estas son:
 Los puntos 1 y 2 se desarrollarán más adelante en este proyecto. Por otro lado, los puntos 3 y 4 fueron implementados y evaluados en \cite{proyecto-grigo}, pero de todas formas serán verificados y modificados más adelante en el presente proyecto.
 
 \section{Servidor de capturas en tiempo real}
-La parte final del planteo presentado al principio del capítulo incluye el desarrollo de un servidor de \textit{streaming} de capturas en tiempo real. Este servidor debe ser capaz de soportar múltiples conexiones simultáneas, como se muestra en la figura \ref{fig::streaming-server}, y además transmitir datos capturados y procesados en tiempo real. 
+La parte final del planteo presentado al principio del capítulo incluye el desarrollo de un servidor de \textit{streaming} de capturas en tiempo real. Este servidor debe ser capaz de soportar múltiples conexiones simultáneas, como se muestra en la figura \ref{fig::streaming-server}, y además transmitir datos capturados y procesados en tiempo real. \unsure{JQ: está medio pobre esto}
 
 \figura[0.7]{streaming-server}{Esquema conceptual de un servidor de \textit{streaming} que soporta múltiples conexiones simultáneas.}
 \end{document}

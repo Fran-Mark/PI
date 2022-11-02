@@ -2,7 +2,7 @@
 \begin{document}
 \graphicspath{{./figures}}
 \chapter{Interfaz de usuario}
-Al observar el sistema completo como se ilustró en la figura \ref{fig::planteo-receptor} se ve que existen varios puntos donde el usuario puede intervenir. En la etapa de preprocesamiento dentro del sistema de adquisición por ejemplo, desarrollado en el capítulo \ref{cap::preproc}, el usuario tiene la capacidad seleccionar la fuente de datos que quiere recibir; en la etapa de procesamiento el usuario debe ser capaz de visualizar los datos, por nombrar unos ejemplos.
+Al observar el sistema completo como se ilustró en la figura \ref{fig::planteo-receptor} se ve que existen \unsure{JQ: mejoraría el 'se ve que existen'} varios puntos donde el usuario puede intervenir. En la etapa de preprocesamiento dentro del sistema de adquisición por ejemplo, desarrollado en el capítulo \ref{cap::preproc}, el usuario tiene la capacidad seleccionar la fuente de datos que quiere recibir; en la etapa de procesamiento el usuario debe ser capaz de visualizar los datos, por nombrar unos ejemplos.
 
 Además, de los diversos puntos de interacción con el sistema existente, también ocurre que esta interacción no siempre es sencilla para aquellos no familiarizados con el sistema. Para escribir un registro en la FPGA por ejemplo debe tenerse acceso a un binario que lo haga, debe conocerse la dirección de memoria del registro y debe saberse el valor que debe escribirse para lograr el efecto deseado.
 
@@ -15,7 +15,7 @@ Según lo recién explicado, se tienen dos grandes requerimientos, los cuales se
 \begin{enumerate}
     \item Permitir el acceso a los diversos puntos del sistema desde un solo lugar, esto implica facilitar:
     \begin{enumerate}
-        \item La escritura de registros dentro de la FPGA para las diversas configuraciones desarrolladas en \todo{Donde? Cap? Sec?}.
+        \item La escritura de registros\todo{JQ: en algún lugar debería haber una referencia a una lista de registros y su funcionalidad. Puede ser un apéndice o un .h de SW} dentro de la FPGA para las diversas configuraciones desarrolladas en \todo{Donde? Cap? Sec?}.
         \item El acceso a los datos capturados y procesados en GNU Radio.
         \item El monitoreo y control del servidor de \textit{streaming} a demanda desarrollado en el capitulo \todo{Cap?}
     \end{enumerate}
@@ -68,7 +68,7 @@ Estas herramientas también están disponibles en Python con algunas diferencias
 
 \subsubsection{Interacción con el SoC}
 %SSH Client con paramiko, shell instance, channels
-La interacción con la CIAA-ACC desde una computadora externa se realiza mediante SSH como se explicó \todo{Donde? En el cap de preproc?}. Para incorporar esto dentro de la GUI es necesario resolver dos cuestiones:
+La interacción con la CIAA-ACC desde una computadora externa se realiza mediante SSH como se explicó \todo{Donde? En el cap de preproc? \\ JQ: me parece que podés referenciar mi PI ahí}. Para incorporar esto dentro de la GUI es necesario resolver dos cuestiones:
 \begin{enumerate}
     \item Cómo establecer una conexión SSH desde Python y,
     \item Cómo mantener el estado de la sesión de SSH corriendo en paralelo con la GUI.

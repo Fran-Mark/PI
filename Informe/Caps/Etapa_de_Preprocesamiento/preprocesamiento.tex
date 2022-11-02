@@ -2,8 +2,7 @@
 \begin{document}
 \graphicspath{{./figures}}
 \chapter{Preprocesamiento de los datos adquiridos}\label{cap::preproc}
-Las señales entrantes son muestreadas por el ADC a 65~MSps en un ancho de banda de 25~MHz como se desarrolló en el \cref{sec::planteo-front-end}. Sin embargo, los \textit{beams} de salida poseen un ancho de banda de apenas 25~kHz, de manera que puede reducirse considerablemente tanto el ancho de banda como la tasa de muestreo.
-\unsure{debería aclarar hasta donde -> teorema del muestreo}
+Las señales externas son muestreadas por el ADC a 65~MSps en un ancho de banda de 25~MHz como se desarrolló en el \cref{sec::planteo-front-end}. Sin embargo, los \textit{beams} de salida poseen un ancho de banda de apenas 25~kHz, de manera que puede reducirse considerablemente tanto el ancho de banda como la tasa de muestreo. Si se lograse centrar el ancho de banda de un  \textit{beam} en banda base por ejemplo, este solo ocuparía $12.5\un{kHz}$. Esto permitiría teóricamente reducir el ancho de banda de trabajo a $12.5\un{kHz}$ y trabajar con una tasa de muestreo ligeramente superior a 25~kSps cumpliendo con el teorema del muestreo. \cite{teorema-del-muestreo}.
 
 Como se dijo en el \cref{sec::planteo-sist-adq}, esta parte del \textit{core} de adquisición se desarrolla en el presente proyecto. Su diseño, implementación y validación se realizaron primero de manera aislada e independiente a lo desarrollado en \cite{proyecto-jose} y, posteriormente, se integró dentro de dicho sistema.
 
@@ -12,8 +11,8 @@ La etapa de preprocesamiento debe ser capaz de seleccionar uno o varios canales 
 
 Luego, partiendo de la banda de UHF de 3~MHz de ancho de banda centrada en $18.5\un{MHz}$ tras el submuestreo, debe obtenerse a la salida uno o varios haces de 25~kHz de ancho de banda.
 
-\section{Diseño conceptual}
-Al tratarse de una señal real centrada en $18.5\un{MHz}$, el módulo del espectro es simétrico respecto a la frecuencia $f = 0$, como se ilustra en la figura \ref{fig::espectro-inicial}. Dentro de cada triángulo en dicho gráfico se encuentran todos los haces de 25~kHz, replicados a ambos lados del espectro. Esto implica una redundancia de información que puede aprovecharse para optimizar la etapa de preprocesamiento.
+\section{Diseño conceptual}\label{sec::disenio-conceptual-preproc}
+Se parte de la señal real ya submuestreada cuyo espectro está cetrado en $\pm 18.5\un{MHz}$ (ver figura \ref{fig::undersampling}) y su módulo  es simétrico respecto a la frecuencia $f = 0$, como se ilustra en la figura \ref{fig::espectro-inicial}. Dentro de cada triángulo en dicho gráfico se encuentran todos los haces de 25~kHz, replicados a ambos lados del espectro. Esto implica una redundancia de información que puede aprovecharse para optimizar la etapa de preprocesamiento.
 
 Se propone entonces trabajar sobre solo una de estas réplicas mediante una mezcla compleja, esto es, una rotación del espectro \unsure{Agregar referencia?} que permita llevar una de las copias mostradas en \ref{fig::espectro-inicial} a banda base. En este caso es indistinto cuál de las copias se selecciona. 
 
@@ -24,25 +23,24 @@ Como puede verse en la figura \ref{fig::espectro-banda-corrida} el ancho de band
 
 Una vez aislada una copia de la banda de interés, resta seleccionar el \textit{beam} que quiere recibirse. Esto puede hacerse mediante un procedimiento similiar al recién aplicado. En este caso, la señal es compleja ya que no hay simetría en el módulo del espectro respecto a $f = 0$, es decir que no existe la redundancia de información que existía al hacer la primer mezcla. Esto implica que el sentido en el que se rota el espectro es relevante.
 
-En la figura \ref{fig::espectro-canal} se muestra el módulo del espectro tras realizar una segunda mezcla compleja partiendo de lo mostrado en la figura \ref{fig::espectro-banda-corrida} para trasladar a BB al haz de interés. 
-El rectángulo en línea de puntos que se muestra en dicha figura representa el filtrado que debe aplicarse tras la mezcla, el cual atenuará el resto de la banda junto con la parte de la potencia de ruido que cae por fuera de la banda de interés, obteniéndose así una segunda ganancia de preprocesamiento.
+En la figura \ref{fig::espectro-canal} se muestra el módulo del espectro tras realizar una segunda mezcla compleja partiendo de lo mostrado en la figura \ref{fig::espectro-banda-corrida} para trasladar a BB al haz de interés. El rectángulo en línea de puntos que se muestra en dicha figura representa el filtrado que debe aplicarse tras la mezcla, el cual atenuará el resto de la banda junto con la parte de la potencia de ruido que cae por fuera de la banda de interés, obteniéndose así una segunda ganancia de preprocesamiento.
 
 Nuevamente, si bien los haces tienen 25~kHz de ancho de banda, el filtrado debe contemplar un margen para tolerar el corrimiento Doppler (ver apéndice \ref{ap::doppler}).
 
-\figura[0.8]{espectro-inicial}{Ilustración del módulo del espectro a la entrada de la etapa del preprocesamiento. Se tiene la banda de interés sobre un piso de RAGB. Se ve que el espectro es simétrico respecto a la frecuencia $f = 0$ ya que se trata de una señal real.}
+\figura[0.8]{espectro-inicial}{Ilustración del módulo del espectro a la entrada de la etapa del preprocesamiento. Se tiene la banda de interés sobre un piso de RABG. Se ve que el espectro es simétrico respecto a la frecuencia $f = 0$ ya que se trata de una señal real.}
 
 \figura[0.8]{espectro-banda-corrida}{Módulo del espectro de la banda de interés trasladada a banda base y filtrada.}
 
 \figura[0.8]{espectro-canal}{Módulo del espectro de la banda de interés centrada en el haz de interés tras la segunda mezcla compleja. El rectángulo en línea punteada representa el filtrado que debe aplicarse psoteriormente para atenuar el resto de la banda y el ruido que cae por fuera del ancho de banda del haz de interés.}
 
 \section{Implementación en software}
-A modo de primera comprobación del diseño conceptual previo a su implementación en hardware se hizo una implementación en software de la etapa de preprocesamiento empleando Python. 
+A modo de primera comprobación del diseño conceptual previo a su implementación en hardware, se hizo una implementación en software \unsure{JQ: no sé si me gusta 'implementación en SW'. Tal vez lo cambiaría por 'Prueba de concepto en SW'} de la etapa de preprocesamiento empleando Python. 
 Esta se encuentra en \texttt{Simulaciones/preprocesamiento.ipynb}. 
 
 Partiendo de la señal submuestreada a 65~MSps mostrada en la figura \ref{fig::submuestreo} se aplicó un DDC \cite{DDC}, cuyo diagrama de bloques se muestra en la figura \ref{fig::DDC}. 
 Este incluye un NCO el cual genera una exponencial compleja para realizar la rotación de espectro en sentido horario a una frecuencia de $18.5\un{MHz}$, de manera de trasladar la banda de $[-20\un{MHz}, -17\un{MHz}]$ a $[-1.5\un{MHz}, 1.5\un{MHz}]$. 
 
-Ya en banda base, el DDC contiene una etapa de filtrado pasabajos, cuya frecuencia de corte se configuró como $f_c = 1.5\un{MHz}$ de manera de capturar toda la banda de interés dentro de la banda de paso del filtro. El filtrado aplicado fue de tipo Butterworth \cite{Butterworth}, sin embargo, el tipo de filtro elegido no tiene mayor relevancia en la presente implementación. Los coeficientes del mismo se obtuvieron mediante la función \texttt{butter} \cite{butter} de la librería de SciPy \cite{scipy} y el filtrado propiamente dicho se realizó usando la función \texttt{lfilter} \cite{lfilter} también de la librería de SciPy. 
+Ya en banda base, el DDC contiene una etapa de filtrado pasabajos, cuya frecuencia de corte se configuró como $f_c = 1.5\un{MHz}$ de manera de capturar toda la banda de interés dentro de la banda de paso del filtro. El filtrado aplicado fue de tipo Butterworth \cite{Butterworth}, sin embargo, el tipo de filtro elegido no tiene mayor relevancia en la presente implementación\unsure{JQ: por qué?}. Los coeficientes del mismo se obtuvieron mediante la función \texttt{butter} \cite{butter} de la librería de SciPy \cite{scipy} y el filtrado propiamente dicho se realizó usando la función \texttt{lfilter} \cite{lfilter} también de la librería de SciPy. 
 
 Por último, el DDC posee una etapa de decimación en la cual se reduce la tasa de muestreo. Para determinar el factor de decimación debe tenerse en cuenta que la tasa de Nyquist \cite{Nyquist-rate} es ahora de 3~MHz, lo cual implica que la tasa actual de muestreo de 65~MSps podría reducirse hasta en un factor $65/3 = 21.66$ aproximadamente. 
 No obstante, para esta implementación se eligió un factor de decimación de 10, de manera que la tasa de muestras a la salida del DDC resulta $6.5\un{MSps}$. La salida de este primer DDC se muestra en la figura \ref{fig::DDC-band}.
@@ -54,10 +52,16 @@ Para esta última se empleo un factor \todo{Agregar factor}. La salida de este s
 
 \figura[0.7]{DDC}{Diagrama de bloques de un \textit{Digital Down Converter} (DDC).}
 
-\change{Hacer figuras}
-% \figura[0.7]{DDC-band}{Salida del primer DDC encargado de trasladar la banda de interés a BB, filtrar y luego decimar con un factor 10.}
-
-% \figura[0.7]{DDC-beam}{Salida del segundo DDC encargado de seleccionar un \textit{beam}, trasladarlo a BB, filtrarlo y reducir la tasa de muestreo.}
+\begin{figure}[H]
+    \centering
+    \subcaptionbox{Salida del primer DDC encargado de trasladar la banda de interés a BB, filtrar y luego decimar con un factor 10..\label{fig::DDC-band}}
+    {\includegraphics[width=0.49\linewidth]{DDC-band.pdf}}
+    \hspace{\fill}%\\[1PC]
+    \subcaptionbox{Salida del segundo DDC encargado de seleccionar un \textit{beam}, trasladarlo a BB, filtrarlo y reducir la tasa de muestreo. Se dibuja además una línea vertical en la frecuencia donde termina el canal de interés, esto es, $f = 12.5\un{kHz}$\label{fig::DDC-beam}}
+    {\includegraphics[width=0.49\linewidth]{DDC-beam.pdf}}
+    \caption{Salida de las dos etapas de DDCs.}
+    \label{fig::DDC-output}
+\end{figure}
 
 \section{Implementación en hardware}
 %Uso clk de 260 MHz
@@ -68,7 +72,7 @@ La tasa de muestreo del AD9249 es de 65~MSps como se indica en la tabla \ref{tab
 \subsection{IPs empleadas}
 \textit{Vivado} cuenta con interfaces o bloques propietarios en su librería de propiedad intelectual o IP \cite{IP-Xilinx}. Estos funcionan como caja negra para el usuario, recibiendo entradas y produciendo salidas acordes a su funcionalidad.
 
-En el desarrollo de la etapa de preprocesamiento se utilizaron las IPs de \textit{Vivado} nombradas en la tabla \ref{tab::ip-vivado}.
+En el desarrollo de la etapa de preprocesamiento se utilizaron las IPs de \textit{Vivado} nombradas en la tabla \ref{tab::ip-vivado-preproc}.
 \begin{table}[H]
     \centering
     \resizebox{\textwidth}{!}{%
@@ -82,12 +86,12 @@ En el desarrollo de la etapa de preprocesamiento se utilizaron las IPs de \texti
     \multicolumn{1}{|l|}{FIR Compiler}       & \multicolumn{1}{l|}{Genera un filtro tipo FIR.}                                                                                                                                                                        & \cite{fir-compiler}     \\ \hline
     \end{tabular}%
     }
-    \caption{IPs nativas utilizadas.}
-    \label{tab::ip-vivado}
+    \caption{IPs nativas utilizadas en el desarrollo de la etapa de preprocesamiento.}
+    \label{tab::ip-vivado-preproc}
     \end{table}
 
 \subsection{Módulos desarrollados}
-Además de emplear IPs de \textit{Vivado}, se desarrollaron módulos en VHDL accesibles en el directorio \texttt{Fpga/prj/preprocessing\_stage/src}. Dichos módulos y su función se mencionan a continuación en la tabla \ref{tab::ip-fran}.
+Además de emplear IPs de \textit{Vivado}, se desarrollaron módulos en VHDL accesibles en el directorio \texttt{Fpga/prj/preprocessing\_stage/src}. Dichos módulos y su función se mencionan a continuación en la tabla \ref{tab::ip-fran}\todo{JQ: revisar si falta alguno (FIFO input data mux?)}.
 
 La integración de estos módulos con las IPs de Xilinx serán más claras en breve cuando se explique la composición del sistema implementado.
 
@@ -107,11 +111,12 @@ La integración de estos módulos con las IPs de Xilinx serán más claras en br
     \multicolumn{1}{|l|}{CDC Comparator}                                                    & Compara dos entradas y la asigna a la salida en caso de ser iguales.                                                                                                                                                                                                                                                     \\ \hline
     \end{tabular}%
     }
-    \caption{Módulos desarrollados en VHDL.}
+    \caption{Módulos desarrollados en VHDL para el desarrollo de la etapa de preprocesamiento.}
     \label{tab::ip-fran}
     \end{table}
 
 \subsection{Filtros y decimación}
+%Aritmética de punto fijo, ver bitácora
 \todo{Evaluar bien los filtros}
 
 
@@ -120,30 +125,58 @@ En todo desarrollo resulta importante incorporar herramientas para poder \textit
 \begin{itemize}
     \item Los datos del ADC. Este es el modo de operación normal, no de \textit{debug}.
     \item Una instancia del módulo \texttt{Basic Counter} (ver tabla \ref{tab::ip-fran}).
-    \item Una instancia del IP DDS Compiler (ver tabla \ref{tab::ip-vivado}) generando un coseno a una frecuencia conocida.
+    \item Una instancia del IP DDS Compiler (ver tabla \ref{tab::ip-vivado-preproc}) generando un coseno a una frecuencia conocida.
 \end{itemize}
 
 El multiplexor se controla mediante un registro en el módulo \texttt{AXI Slave Reg} conectado a su vez al IP AXI Interconnect.
 
-\subsubsection{Cruce de dominio de reloj (CDC)}
-Si bien la señal de control del multiplexor se encuentra dentro del dominio de reloj del AXI Interconnect (el cual generalmente viene dado por el PS), al tratarse de una señal lenta ya que cambia en tiempos muy largos, puede sincronizarse en el nuevo dominio de reloj (esto es, el de 260~MHz) como si se tratara de una señal asíncrona. Para esto se hace uso del módulo \texttt{CDC Two FF Sync}.
+\subsection{Cruces de dominio de reloj (CDCs)}
+Un dominio de reloj se compone de todos los elementos de un circuito lógico que operan bajo la misma señal de \textit{clock}.
+
+Al realizar desarrollo en hardware, una situación que se presenta con regularidad es la necesidad de sincronizar con un dado reloj una señal que proviene de otro dominio de reloj. Esta situación recibe el nombre de \textit{Clock Domain Crossing} (CDC) y debe ser manejada de manera de poder asegurar el cumplimiento de los tiempos de \textit{setup} y \textit{hold} de los \textit{flip-flops} controlados por el nuevo reloj.
+
+En el caso de la señal de control del \texttt{Data Source Mux}, la misma se encuentra dentro del dominio de reloj del AXI Interconnect (el cual generalmente viene dado por el PS). Al tratarse de una señal lenta ya que cambia en tiempos muy largos, puede sincronizarse en el nuevo dominio de reloj (esto es, el de 260~MHz) como si se tratara de una señal asíncrona. Para esto se hace uso del módulo \texttt{CDC Two FF Sync}.
 
 Sin embargo, dicho módulo por si solo se emplea para sincronizar un único bit \todo{referencia?}. En este caso, la señal de control del multiplexor tiene 2 bits (hay 3 entradas), en consecuencia, para asegurar la integridad de la señal en el CDC se emplean dos \texttt{CDC Two FF Sync} en serie y se comparan sus salidas con el módulo \texttt{CDC Comparator} como se muestra en la figura \ref{fig::CDC-preproc}. Si ambas salidas son iguales, entonces la señal se sincroniza exitósamente al dominio de reloj de 260~MHz.
 
 \figura{CDC-preproc}{Sincronizador de 2 bits para señales lentas empleado para realizar el CDC de la señal de control del multiplexor desde el dominio de reloj del AXI Interconnect al dominio de reloj de 260~MHz.}
 
 \subsection{Implementación en \textit{Vivado}}
+Interconectando los bloques de IP de las tablas \ref{tab::ip-vivado-preproc} y \ref{tab::ip-fran} puede implementarse el diseño conceptual descrito en la sección \ref{sec::disenio-conceptual-preproc}. Dicha interconexión se muestra en la figura \ref{fig::bd-preproc}, la cual corresponde al diagrama de bloques instanciado en \textit{Vivado}. 
+
+\todo{Ampliar, explicar jerarquías, qué hacemos con el complex gain?}
 
 \figura{bd-preproc}{BD preproc}
 
-
-
 \section{Verificación con UVM}
+Habiendo implementado el diseño en \textit{Vivado}, se procedió a verificar su correcto funcionamiento mediante simulaciones. \textit{Vivado} provee herramientas de simulación, sin embargo resultan demasiado lentas y demandantes en términos computacionales. Para lograr simulaciones más rápidas se hizo uso del simulador de la empresa Siemens \textit{Questa Advanced Simulator} \cite{questa}. \unsure{Mencionamos a Questa o mejor me ahorro esto??}
+
+Para el desarrollo de la simulación se utilizó \textit{Universal Verification Methodology} (UVM) \cite{uvm}. Este comenzó como un una librería de clases para el desarrollo de simulaciones en \textit{SystemVerilog} creado por la empresa Accellera para proveer un estándar en el ámbito de la verificación. Finalmente, UVM fue adoptado como estándar por la IEEE \cite{uvm-ieee}.
+
+El para las simulaciones se encuentra en el directorio \texttt{Fpga/prj/preprocessing\_stage/sim/}.
+
 \subsection{Estructura de la simulación}
-\subsection{Resultados}
+La simulación se desarrolló de acuerdo al estándar UVM, cuya estructura se muestra en la fiugra \ref{fig::uvm-structure}. Las funciones de cada uno de los componentes se detalla en la tabla \todo{ref}
+
+\todo{hacer tabla con componentes y descripción}
+
+La simulación se estructuró en cinco archivos principales, ubicados en \texttt{Fpga/prj/preprocessing\_stage/sim/tb/}, estos son:
+
+\todo{Tabla con archivos y descripción}
+
+Se emplearon además dos tipos de \texttt{UVM Agent}, uno para simular el comportamiento del ADC y otro para simular un agente que opera de acuerdo al protocolo \textit{AXI4-Lite}\cite{AXI-4}. \change{Expandir, escribir mejor}
+
+\figura[0.7]{uvm-structure}{Estructura del estándar UVM \cite{uvm}.}
+
+\subsection{Casos simulados y resultados}
+%Un solo tono a 19.51 MHz
+%Un solo tono con ruido
+%Tres tonos sin y con ruido
+
+
 
 \section{Integración con el sistema de adquisición}
-
+\todo{JQ: hay un montón de técnicas de CDC que se usaron (sincronizadores de nivel, de pulso, vector quasiestático, vector con pulso de valid delayeado...). Mencionaría todas las técnicas utilizadas, y un ejemplo de algún punto de dónde se hayan usado}
 \subsection{Recreación del proyecto preexistente}
 
 \subsection{Adaptaciones necesarias}
@@ -151,10 +184,21 @@ Sin embargo, dicho módulo por si solo se emplea para sincronizar un único bit 
 %División en varios bloques para minimizar replicas (16 canales)
 %Aumento dato fifo (32 bits en lugar de 16)
 %Uso de dos shorts como complex
+%JQ: cambio a RTL top, corte de adc_receiver para poder usar única etapa de procesamiento, mejoras de timing...
 \subsection{Otras modificaciones}
 %constraints - false paths
 %Uso de complemento a 2
 %Raw data path para calibracion
 %Cambio de índices
-\subsection{Herramientas de \textit{debug}}
+%Fifo input mux
+
+\subsection{Refactorización del código preexistente}
+%Simplificación del adc_receiver
+%Eliminación del bd_top para poder instanciar bds
+%Incorporación del data_handler
+%Ordenamiento natural de los canales
+\section{Ampliaciones}
+%Mas herramientas de debug, todas las salidas del mux
+\subsection{Incorporación de múltiples haces}
+\subsection{Optimizaciones}
 \end{document}
