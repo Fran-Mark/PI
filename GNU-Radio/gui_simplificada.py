@@ -73,7 +73,7 @@ class gui_simplificada(gr.top_block, Qt.QWidget):
         ##################################################
         # Variables
         ##################################################
-        self.samp_rate = samp_rate = 32000
+        self.samp_rate = samp_rate = 65e3
 
         ##################################################
         # Blocks

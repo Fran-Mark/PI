@@ -2,9 +2,9 @@ from enum import Enum
 
 ELFS_LOCATION = '/mnt/currentVersions/'
 BASE_REG = 0x43C3_0000
-FIFO_INPUT_MUX_OFFSET = 4
-DATA_SOURCE_MUX_OFFSET = 8
-LOCAL_OSC_FREQ_SETTER_OFFSET = 0
+FIFO_INPUT_MUX_OFFSET = 0x4
+DATA_SOURCE_MUX_OFFSET = 0x8
+LOCAL_OSC_FREQ_SETTER_OFFSET = 0x34
 BEAM_FREQ_SETTER_OFFSET = 0xC
 
 def axiWriteCmd(reg, data):
@@ -76,10 +76,21 @@ def launchAcqCmd():
     return ELFS_LOCATION + 'sist_adq.elf ' + ELFS_LOCATION + 'client_config\n'
 
 def setBeamFreqCmd(beamNumber, freq : float):
-    freqUndersampled = freq - 7*65
-    freqBB = freqUndersampled + 18.5
+    #freqs > a 436.5 son positivas => Necesitamos signo negativo (1)
+    #freqs < a 436.5 son negativas => Necesitamos signo positivo (0)
+    if freq > 436.5:
+        freqSign = 1
+    else:
+        freqSign = 0
+
+    # freqUndersampled = freq - 7*65
+    # freqBB = freqUndersampled + 18.5
+    freqBB = abs(436.5 - freq)
     freqConf = abs(freqBB * 32 / 260.0 * 2**32)
-    return axiWriteCmd(hex(BASE_REG + BEAM_FREQ_SETTER_OFFSET + beamNumber * 4)[2:], hex(int(freqConf))[2:])
+
+    freqAbsValCmd = axiWriteCmd(hex(BASE_REG + BEAM_FREQ_SETTER_OFFSET + beamNumber * 8)[2:], hex(int(freqConf))[2:])
+    freqSignCmd = axiWriteCmd(hex(BASE_REG + BEAM_FREQ_SETTER_OFFSET + 4 + beamNumber * 8)[2:], freqSign)
+    return freqAbsValCmd + " && " + freqSignCmd
 
 def setLocalOscFreqCmd(freq : float):
     freqConf = abs(freq * 4 * 2**32 / 260.0)
