@@ -49,24 +49,29 @@
 \backcite {vivado}{{26}{4.4}{section.4.4}}
 \backcite {vitis}{{26}{4.4}{section.4.4}}
 \backcite {cross-compilation}{{26}{4.4}{section.4.4}}
+\backcite {proyecto-jose}{{26}{4.4}{section.4.4}}
 \backcite {IP-Xilinx}{{26}{4.4.1}{subsection.4.4.1}}
-\backcite {axi-interconnect}{{26}{\caption@xref {??}{ on input line 88}}{table.caption.85}}
-\backcite {complex-mult}{{26}{\caption@xref {??}{ on input line 88}}{table.caption.85}}
-\backcite {dds-compiler}{{26}{\caption@xref {??}{ on input line 88}}{table.caption.85}}
-\backcite {fir-compiler}{{26}{\caption@xref {??}{ on input line 88}}{table.caption.85}}
-\backcite {questa}{{28}{4.5}{section.4.5}}
-\backcite {uvm}{{28}{4.5}{section*.93}}
-\backcite {uvm-ieee}{{28}{4.5}{section*.93}}
-\backcite {AXI-4}{{29}{4.5.1}{section*.96}}
-\backcite {uvm}{{29}{4.8}{figure.caption.98}}
-\backcite {proyecto-jose}{{30}{5}{chapter.5}}
-\backcite {proyecto-grigo}{{30}{5}{chapter.5}}
-\backcite {GNURadio}{{30}{5.1}{section.5.1}}
-\backcite {gr-modtool}{{30}{5.1}{section*.100}}
-\backcite {proyecto-jose}{{32}{5.2.2}{subsection.5.2.2}}
-\backcite {click}{{36}{7.3}{section.7.3}}
-\backcite {Qt-framework}{{36}{7.3.1}{subsection.7.3.1}}
-\backcite {pyqt5}{{36}{7.3.1}{subsection.7.3.1}}
-\backcite {gnuradio-qt}{{36}{7.3.1}{subsection.7.3.1}}
-\backcite {qprocess}{{37}{7.3.2}{section*.118}}
-\backcite {paramiko}{{37}{7.3.2}{Item.42}}
+\backcite {axi-interconnect}{{27}{\caption@xref {??}{ on input line 97}}{table.caption.86}}
+\backcite {complex-mult}{{27}{\caption@xref {??}{ on input line 97}}{table.caption.86}}
+\backcite {dds-compiler}{{27}{\caption@xref {??}{ on input line 97}}{table.caption.86}}
+\backcite {fir-compiler}{{27}{\caption@xref {??}{ on input line 97}}{table.caption.86}}
+\backcite {pto-fijo}{{28}{4.4.3}{section*.90}}
+\backcite {teorema-del-muestreo}{{29}{4.4.3}{section*.102}}
+\backcite {fir-compiler}{{29}{4.4.3}{section*.102}}
+\backcite {dds-compiler}{{32}{4.4.6}{section*.111}}
+\backcite {questa}{{34}{4.5}{section.4.5}}
+\backcite {uvm}{{34}{4.5}{section*.118}}
+\backcite {uvm-ieee}{{34}{4.5}{section*.118}}
+\backcite {AXI-4}{{35}{4.5.1}{section*.121}}
+\backcite {uvm}{{35}{4.14}{figure.caption.123}}
+\backcite {proyecto-jose}{{36}{5}{chapter.5}}
+\backcite {proyecto-grigo}{{36}{5}{chapter.5}}
+\backcite {GNURadio}{{36}{5.1}{section.5.1}}
+\backcite {gr-modtool}{{36}{5.1}{section*.125}}
+\backcite {proyecto-jose}{{38}{5.2.2}{subsection.5.2.2}}
+\backcite {click}{{42}{7.3}{section.7.3}}
+\backcite {Qt-framework}{{42}{7.3.1}{subsection.7.3.1}}
+\backcite {pyqt5}{{42}{7.3.1}{subsection.7.3.1}}
+\backcite {gnuradio-qt}{{42}{7.3.1}{subsection.7.3.1}}
+\backcite {qprocess}{{43}{7.3.2}{section*.143}}
+\backcite {paramiko}{{43}{7.3.2}{Item.44}}
