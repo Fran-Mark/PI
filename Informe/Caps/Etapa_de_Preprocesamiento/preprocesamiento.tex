@@ -79,7 +79,7 @@ Un esquema general con finalidad de servir como guía para la implementación se
 \figura[0.85]{disenio-para-hw}{Esquema guía para la implementación de la etapa de preprocesamiento en hardware. Se indican en negro las señales de datos y en naraja las de control.}
 
 \subsection{IPs empleadas}
-\textit{Vivado} cuenta con interfaces o bloques propietarios en su librería de propiedad intelectual o IP \cite{IP-Xilinx}. Estos funcionan como caja negra para el usuario, recibiendo entradas y produciendo salidas acordes a su funcionalidad.
+\textit{Vivado} cuenta con interfaces o bloques propietarios en su librería de propiedad intelectual o IP \cite{IP-Xilinx}. Estos \textit{IP Blocks}, a partir de ahora simplemente IPs, funcionan como caja negra para el usuario ya que su implementación está encriptada. Los IPs actuan recibiendo entradas y produciendo salidas acordes a su funcionalidad.
 
 En el desarrollo de la etapa de preprocesamiento se utilizaron las IPs de \textit{Vivado} nombradas en la tabla \ref{tab::ip-vivado-preproc}.
 \begin{table}[H]
@@ -269,9 +269,9 @@ Las etapas de filtrado se precedieron con una etapa de ganancia compleja como se
 Los filtros fueron implementados con el IP \texttt{FIR Compiler} en ambos casos. Su configuración se hizo a través de los archivos de coeficientes generados en MATLAB y las tasas de decimación se fijaron según lo desarrollado en la subsección \ref{subsec::filtros-decimacion}.
 \todo{Referir a tabla que tiene los parámetros mejor que a la sección!} Cabe destacar que la implementación del filtro y la decimación se dejó a cargo del IP con el objetivo de optimizar en el área ocupada.
 
-El \texttt{FIR Compiler} permite además definir una frecuencia de datos y otra de reloj, lo cual elimina la necesidad de generar algún controlador análogo al \texttt{DDS Compiler Controller}.
+El \texttt{FIR Compiler} permite además definir una frecuencia de datos y otra de reloj, lo cual elimina la necesidad de generar algún controlador análogo al \texttt{DDS Compiler Controller} (generado para controlar la tasa de datos del \texttt{DDS Compiler}).
 
-Si bien el IP incluye numerosas configuraciones como las ya mencionadas, no incluye una opción directa de trabajar con números complejos. Sin embargo, puede utilizarse la configuración del \textit{Number of paths}.Este parámetro hace referencia al número de canales de datos paralelos que se quiere emplear. De esta manera, configurando el ancho de la señal de entrada a 16 bits y el número de canales paralelos a 2, el IP esperará 32 bits a la entrada, los cuales filtrará por separado en dos canales de 16 bits y de forma simultánea.
+Si bien el IP incluye numerosas configuraciones como las ya mencionadas, no incluye una opción directa para trabajar con números complejos. Sin embargo, puede utilizarse la configuración del \textit{Number of paths}. Este parámetro hace referencia al número de canales de datos paralelos que se quiere emplear. De esta manera, configurando el ancho de la señal de entrada a 16 bits y el número de canales paralelos a 2, el IP esperará 32 bits a la entrada, los cuales filtrará por separado en dos canales de 16 bits y de forma simultánea.
 
 La señal de salida se trunca a 16 bits por canal, y se tiene entonces una señal de 32 bits donde los primeros 16 corresponden a la parte real y los últimos 16 a la imaginaria, siguiendo el esquema con el que se viene trabajando.
 
@@ -292,11 +292,16 @@ La simulación se desarrolló de acuerdo al estándar UVM, cuya estructura se mu
 
 \todo{hacer tabla con componentes y descripción}
 
-La simulación se estructuró en cinco archivos principales, ubicados en \texttt{Fpga/prj/preprocessing\_stage/sim/tb/}, estos son:
+La simulación se estructuró en cinco archivos principales. Estos se describen en la table \todo{ref table} y se ubican en \texttt{Fpga/prj/preprocessing\_stage/sim/tb/}.
+
+Se emplearon dos tipos de \texttt{UVM Agent}, uno para simular el comportamiento del ADC (agente ADC) y otro para simular un agente que opera de acuerdo al protocolo \textit{AXI4-Lite}\cite{AXI-4} (agente AXI). El comportamiento de estos agentes se programa a través de la definición de \textit{secuencias virtuales} (\textit{vseqs}) en el archivo \texttt{tb\_vseq\_pkg.sv}.
+
+Para el caso del agente ADC se tiene un generador de secuencia (\textit{sequencer}) que genera datos, llamados \textit{sequence items}, de tipo \texttt{logic} de 14 bits para simular las muestras a la salida del deserializador, que es el formato que debe recibir la etapa de preprocesamiento. 
+
+En el caso del agente AXI, se generaron dos secuencias, una de lectura y una de escritura. Esto permite simular de manera íntegra la lectura y escritura de registros de la FPGA y, en consecuencia, verificar el correcto funcionamiento de la señal de control.
 
 \todo{Tabla con archivos y descripción}
 
-Se emplearon además dos tipos de \texttt{UVM Agent}, uno para simular el comportamiento del ADC y otro para simular un agente que opera de acuerdo al protocolo \textit{AXI4-Lite}\cite{AXI-4}. \change{Expandir, escribir mejor}
 
 \figura[0.7]{uvm-structure}{Estructura del estándar UVM \cite{uvm}.}
 
@@ -304,19 +309,61 @@ Se emplearon además dos tipos de \texttt{UVM Agent}, uno para simular el compor
 %Un solo tono a 19.51 MHz
 %Un solo tono con ruido
 %Tres tonos sin y con ruido
+Con la estructura base de la simulación ya definida, se procedió a la elaboración de \textit{testbenches} (TBs) para probar el funcionamiento de la etapa de preprocesamiento. Se realizaron las siguientes simulaciones:
+\todo{tabla? o items? con el nombre de la simu y su objetivo}
 
+\subsubsection{Tono único sin ruido}
 
+Como primera simulación se emitió un único tono sin ruido a través del agente ADC. Esto se hizo con el fin de verificar si el \textit{pipeline} estaba funcionando en términos generales.
+
+La frecuencia elegida para el tono a transmitir fue de $19.51\un{MHz}$, esto representa la frecuencia de una señal submuestreada. Al tratarse de un tono real, el módulo de su espectro es simétrico respecto a $f = 0$ y su correspondiente frecuencia en la banda de UHF es $- 19.51\un{MHz} + 7 \cdot 65 = 435.49\un{MHz}$. Se eligió esta frecuencia teniendo en cuenta las frecuencias de las exponenciales complejas generadas en los osciladores de banda y de canal, estas son $18.5\un{MHz}$ y $1\un{MHz}$ respectivamente. Luego, a la salida de la etapa de preprocesamiento, el tono de $19.51\un{MHz}$ se habrá trasladado a 
+\[ - 19.51\un{MHz} + 18.5\un{MHz} + 1\un{MHz} = -10\un{kHz}.\]
+
+Para generar el tono se hizo uso de la función \texttt{\$cos} de SystemVerilog, la cual genera una señal cosenoidal a una dada frecuencia cuya amplitud se encuentra en el intervalo [-1, 1]. Es importante notar que, para aprovechar el rango dinámico del agente ADC, debe escalarse la amplitud para ocupar los 14 bits disponibles.
+
+En las figuras \todo{figs} se muestran los resultados de esta simulación
+
+\todo{Mostrar algún resultado}
+
+\subsubsection{Tres tonos sin ruido}
+En la simulación anterior se validó el correcto funcionamiento de los \textit{mixers}, pero no se evaluaron los filtros. De la simulación anterior solo se puede decir que el tono enviado atraviesa los filtros sin atenuaciones \change{Cómo sé eso? Poner imagen a escala}, no obstante, esto no implica que la banda de paso del mismo sea la que se planteó originalmente en la subsección \ref{subsec::filtros-decimacion}.
+
+Para evaluar la implementación de los filtros, se procedió a generar tres tonos puros, también sin ruido, los cuales serán sumados y enviados por el agente ADC. Las frecuencias elegidas para estos tonos fueron
+\todo{decir freqs, una para testear cada filtro y la original}
+\todo{Correr la simu de vuelta y generar los datos}
+
+\subsubsection{Tres tonos con ruido}
+Resulta relevante analizar el comportamiento del sistema al agregar RABG. Para esto, partiendo de los tres tonos generados con el agente ADC en la simulación anterior, se procedió a sumar un término de ruido Gaussiano a la señal. 
+
+Para generar el ruido blanco se usó la función \texttt{\$urandom\_range} de SystemVerilog, la cual genera enteros sin signo en un rango específico, en este caso, el rango se desprende de los 14 bits de resolución del agente ADC.
+
+Los resultados .. \todo{Resultados!}
 
 \section{Integración con el sistema de adquisición}
-\todo{JQ: hay un montón de técnicas de CDC que se usaron (sincronizadores de nivel, de pulso, vector quasiestático, vector con pulso de valid delayeado...). Mencionaría todas las técnicas utilizadas, y un ejemplo de algún punto de dónde se hayan usado}
+Habiendo desarrollado y validado la etapa de preprocesamiento de manera aislada (\textit{standalone}), se procede a realizar la integración con el \textit{core} de adquisición desarrollado en \cite{proyecto-jose}.
+
+Todo el código relacionado con la integración de los proyectos se encuentra en el submódulo \texttt{PIQuinteros/} del respositorio, en las ramas \texttt{dev-fran} y \texttt{dev-fran-opt} ya que se extendió directamente el proyecto existente, que se ubica dentro de ese repositorio. Más especificamente, se encuentra en el directorio \texttt{PIQuinteros/Fpga/}
+
 \subsection{Recreación del proyecto preexistente}
+Para lograr la integración de la etapa de preprocesamiento con el proyecto llevado a cabo en \cite{proyecto-jose}, resulta necesario entender los aspectos más importantes del mismo. Para esto se recreó el proyecto original con los archivos ubicados en la rama \texttt{main} del submódulo.
+
+Se empleó \textit{Vivado} para generar el \textit{bitstream}, esto es, el archivo de configuración de la FPGA correspondiente al proyecto y \textit{Vitis Unified Software Platform} para generar los archivos binarios a correr en el PS y en una computadora externa.
+
+Un diagrama de lo implementado dentro de la CIAA-ACC en \cite{proyecto-jose} se muestra en la figura \ref{fig::pipeline-ciaa}, a excepción de la etapa de preprocesamiento, la cual no se implementó en dicho proyecto.
+
+Se logró exitósamente replicar los resultados mostrados en \cite{proyecto-jose}, transmitiendo y recibiendo capturas utilizando el software allí desarrollado.
 
 \subsection{Adaptaciones necesarias}
+La integración del presente proyecto con el \textit{core} de adquisición ya existente no resulta directa ya que existen diferencias que deben ser salvadas para poder lograr la incorporación de la etapa de preprocesamiento. Estas diferencias se mencionan en la tabla \todo{ref tabla}
+
+\todo{tabla}
 %Clock a 260, CDCs
 %División en varios bloques para minimizar replicas (16 canales)
 %Aumento dato fifo (32 bits en lugar de 16)
 %Uso de dos shorts como complex
 %JQ: cambio a RTL top, corte de adc_receiver para poder usar única etapa de procesamiento, mejoras de timing...
+
+\todo{JQ: hay un montón de técnicas de CDC que se usaron (sincronizadores de nivel, de pulso, vector quasiestático, vector con pulso de valid delayeado...). Mencionaría todas las técnicas utilizadas, y un ejemplo de algún punto de dónde se hayan usado}
 \subsection{Otras modificaciones}
 %constraints - false paths
 %Uso de complemento a 2
