@@ -13,24 +13,50 @@ def textClickHandler(window : QMainWindow, qline : QLineEdit, proc : QProcess):
     qline.clear()
 
 class BeamFreqSetter:
-    def __init__(self, window : QMainWindow, beamNumber):
+    def __init__(self, window : QMainWindow, beamNumber, buttonGroup : QButtonGroup):
+        self.window = window
         self.beamNumber = beamNumber
         self.beamFreqSetter = QHBoxLayout()
+        self.buttonGroup = buttonGroup
+        self.button = QPushButton(f'Beam {beamNumber + 1}')
+        self.button.setCheckable(True)
+        self.button.clicked.connect(lambda: self.buttonClickHandler())
+        buttonGroup.addButton(self.button)
+
+        self.beamFreqSetter.addWidget(self.button,3)
         self.beamFreqSetterLineEdit = QLineEdit(alignment=Qt.AlignCenter)
         self.beamFreqSetterLineEdit.setPlaceholderText("Freq")
         self.beamFreqSetterLineEdit.returnPressed.connect(lambda: window.write(window.sshClient, soc.setBeamFreqCmd(self.beamNumber, float(self.beamFreqSetterLineEdit.text()))))
-        self.beamFreqSetter.addWidget(self.beamFreqSetterLineEdit,1)
+        self.beamFreqSetter.addWidget(self.beamFreqSetterLineEdit,3)
         self.beamFreqSetterSlider = QSlider(Qt.Horizontal)
         self.beamFreqSetterSlider.setMinimum(435000)
         self.beamFreqSetterSlider.setMaximum(438000)
         self.beamFreqSetterSlider.valueChanged.connect(lambda: self.beamFreqSetterLineEdit.setText(str(self.beamFreqSetterSlider.value()/1000)))
         self.beamFreqSetterSlider.sliderReleased.connect(lambda: window.write(window.sshClient, soc.setBeamFreqCmd(self.beamNumber, float(self.beamFreqSetterLineEdit.text()))))
-        self.beamFreqSetter.addWidget(self.beamFreqSetterSlider,2)
+        self.beamFreqSetter.addWidget(self.beamFreqSetterSlider,4)
 
     def getLayout(self):
         return self.beamFreqSetter
 
-            
+    def buttonClickHandler(self):
+        if self.button.isChecked():
+            self.window.write(self.window.sshClient, soc.selectBeamCmd(self.beamNumber))
+            self.button.setStyleSheet('QPushButton:checked {background-color: green}')
+        else:
+            self.button.setStyleSheet('QPushButton {background-color: white}')
+
+    def readRegisters(self):
+        #self.loadedFreq = float(self.window.read(self.window.sshClient, soc.getBeamFreqCmd(self.beamNumber)))
+        self.beamFreqSetterLineEdit.setText(str(self.loadedFreq))
+        self.beamFreqSetterSlider.setValue(int(self.loadedFreq*1000))
+
+        #isClicked = self.window
+
+        #load local oscillator frequency
+        #load beam frequency
+        #load button status
+
+
 class MainWindow(QMainWindow):
 
     def __init__(self):
@@ -50,8 +76,8 @@ class MainWindow(QMainWindow):
         self.sshClientText.setPlaceholderText("Write command to CIAA")
         self.sshClientText.returnPressed.connect(lambda: textClickHandler(self, self.sshClientText, self.sshClient))
 
-        self.initLayout()      
-    
+        self.initLayout()
+
     def initLayout(self):
         dataControlTab = QWidget()
         self.consolesTab = QWidget()
@@ -116,14 +142,16 @@ class MainWindow(QMainWindow):
 
 
         self.beamFreqSetters = []
+        self.buttonGroup = QButtonGroup()
+
         for i in range(5):
-            beamFreqSetterLayout.addWidget(QLabel(f"Beam {i+1} frequency", font=QFont("Cantarell", 10)))
+            #beamFreqSetterLayout.addWidget(QLabel(f"Beam {i+1} frequency", font=QFont("Cantarell", 10)))
             beamFreqSetterLayout.addSpacing(1)
-            beamFreqSetter = BeamFreqSetter(self, i)
+            beamFreqSetter = BeamFreqSetter(self, i, buttonGroup=self.buttonGroup)
             beamFreqSetterLayout.addLayout(beamFreqSetter.getLayout())
             beamFreqSetterLayout.addSpacing(10)
             self.beamFreqSetters.append(beamFreqSetter.getLayout())
-        
+
         dataSelectorLayout.addLayout(beamFreqSetterLayout)
         dataSelectorLayout.addStretch(1)
 
@@ -137,7 +165,7 @@ class MainWindow(QMainWindow):
 
 
         #GNU
-        self.dataVisualizerLayout = QVBoxLayout()      
+        self.dataVisualizerLayout = QVBoxLayout()
         self.gnuradio = self.runGnu()
         dataControlTabLayout.addLayout(dataSelectorLayout,1)
         dataControlTabLayout.addLayout(self.dataVisualizerLayout,100)
@@ -202,7 +230,7 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, event):
         quit_msg = "Seguro que querés salir?"
-        reply = QMessageBox.question(self, 'Cerrar', 
+        reply = QMessageBox.question(self, 'Cerrar',
                         quit_msg, QMessageBox.Yes, QMessageBox.No)
         if reply == QMessageBox.Yes:
             self.write(self.server, "stop\n")
@@ -211,7 +239,7 @@ class MainWindow(QMainWindow):
             event.accept()
         else:
             event.ignore()
-            
+
     def runGnu(self, top_block_cls=gnu.bf_fixed_doa):
         try:
             self.tb = top_block_cls()
@@ -224,7 +252,7 @@ class MainWindow(QMainWindow):
         except Exception as e:
             print(e)
             self.dataVisualizerLayout.addWidget(QLabel("No se pudo iniciar GNU, conecte la placa y reinicie el programa", font=QFont("Cantarell", 14), alignment=Qt.AlignCenter))
-            
+
 
 app = QApplication(sys.argv)
 

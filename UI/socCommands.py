@@ -6,9 +6,12 @@ FIFO_INPUT_MUX_OFFSET = 0x4
 DATA_SOURCE_MUX_OFFSET = 0x8
 LOCAL_OSC_FREQ_SETTER_OFFSET = 0x34
 BEAM_FREQ_SETTER_OFFSET = 0xC
+BEAM_SELECTOR_OFFSET = 0x38
 
-def axiWriteCmd(reg, data):
-    cmd = ELFS_LOCATION + 'axi_rw_test.elf w {} {}\n'.format(reg, data)
+def axiWriteCmd(reg, data, includesReturn=True):
+    cmd = ELFS_LOCATION + 'axi_rw_test.elf w {} {}'.format(reg, data)
+    if includesReturn:
+        cmd = cmd + '\n'
     return cmd
 
 class DataSource(Enum):
@@ -88,11 +91,14 @@ def setBeamFreqCmd(beamNumber, freq : float):
     freqBB = abs(436.5 - freq)
     freqConf = abs(freqBB * 32 / 260.0 * 2**32)
 
-    freqAbsValCmd = axiWriteCmd(hex(BASE_REG + BEAM_FREQ_SETTER_OFFSET + beamNumber * 8)[2:], hex(int(freqConf))[2:])
-    freqSignCmd = axiWriteCmd(hex(BASE_REG + BEAM_FREQ_SETTER_OFFSET + 4 + beamNumber * 8)[2:], freqSign)
+    freqAbsValCmd = axiWriteCmd(hex(BASE_REG + BEAM_FREQ_SETTER_OFFSET + beamNumber * 8)[2:], hex(int(freqConf))[2:], includesReturn=False)
+    freqSignCmd = axiWriteCmd(hex(BASE_REG + BEAM_FREQ_SETTER_OFFSET + 4 + beamNumber * 8)[2:], int(freqSign))
     return freqAbsValCmd + " && " + freqSignCmd
 
 def setLocalOscFreqCmd(freq : float):
     freqConf = abs(freq * 4 * 2**32 / 260.0)
     return axiWriteCmd(hex(BASE_REG + LOCAL_OSC_FREQ_SETTER_OFFSET)[2:], hex(int(freqConf))[2:])
+
+def selectBeamCmd(beamNumber):
+    return axiWriteCmd(hex(BASE_REG + BEAM_SELECTOR_OFFSET)[2:], hex(int(beamNumber))[2:])
 
