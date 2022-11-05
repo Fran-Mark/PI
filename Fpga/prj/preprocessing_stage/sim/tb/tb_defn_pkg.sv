@@ -16,8 +16,8 @@ package tb_defn_pkg;
   localparam logic[WSTRB_WIDTH-1:0] WSTRB_AGREGADO = 4'b1111;
 
   localparam real FREQ_TONO_MHZ = 19.51;
-  localparam real FREQ_TONO_MHZ_2 = 16.5;
-  localparam real FREQ_TONO_MHZ_3 = 14;
+  localparam real FREQ_TONO_MHZ_2 = 19.42;
+  localparam real FREQ_TONO_MHZ_3 = 16.7;
   localparam real FREQ_LOW_MHZ = 2;
   localparam real PI_CONST = 3.14159265;
   localparam int LARGO_TONO = 50000;

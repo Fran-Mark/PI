@@ -1,6 +1,6 @@
 import paramiko
 import re
-
+import socCommands as soc
 class ShellHandler:
     def __init__(self):
         self.isConnected = False
@@ -91,6 +91,9 @@ if __name__ == '__main__':
         print('Unable to connect to CIAA')
         exit(1)
     print('Connected to CIAA')
+    # output = shell.execute(soc.sendReadCmd())
+    # configData = soc.decodeReading(output[1])
+    # print(configData)
     while True:
         cmd = input()
         shell.execute(cmd)

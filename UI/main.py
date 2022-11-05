@@ -3,11 +3,11 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import QProcess, Qt
 import sys
 
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QTextCursor
 
 import socCommands as soc
 import gnu_schematic as gnu
-
+from time import sleep
 def textClickHandler(window : QMainWindow, qline : QLineEdit, proc : QProcess):
     window.write(proc, f'{qline.text()}\n')
     qline.clear()
@@ -21,6 +21,7 @@ class BeamFreqSetter:
         self.button = QPushButton(f'Beam {beamNumber + 1}')
         self.button.setCheckable(True)
         self.button.clicked.connect(lambda: self.buttonClickHandler())
+
         buttonGroup.addButton(self.button)
 
         self.beamFreqSetter.addWidget(self.button,3)
@@ -33,7 +34,19 @@ class BeamFreqSetter:
         self.beamFreqSetterSlider.setMaximum(438000)
         self.beamFreqSetterSlider.valueChanged.connect(lambda: self.beamFreqSetterLineEdit.setText(str(self.beamFreqSetterSlider.value()/1000)))
         self.beamFreqSetterSlider.sliderReleased.connect(lambda: window.write(window.sshClient, soc.setBeamFreqCmd(self.beamNumber, float(self.beamFreqSetterLineEdit.text()))))
+
         self.beamFreqSetter.addWidget(self.beamFreqSetterSlider,4)
+
+        self.initValues()
+
+    def initValues(self):
+        self.button.setChecked(self.window.configData['activeBeam'] == self.beamNumber)
+        self.buttonClickHandler()
+
+        self.beamFreqSetterLineEdit.setText(str(self.window.configData[f'beam{self.beamNumber + 1}Freq']))
+
+        self.beamFreqSetterSlider.setValue(int(self.window.configData[f'beam{self.beamNumber + 1}Freq']*1000))
+
 
     def getLayout(self):
         return self.beamFreqSetter
@@ -42,23 +55,16 @@ class BeamFreqSetter:
         if self.button.isChecked():
             self.window.write(self.window.sshClient, soc.selectBeamCmd(self.beamNumber))
             self.button.setStyleSheet('QPushButton:checked {background-color: green}')
-        else:
-            self.button.setStyleSheet('QPushButton {background-color: white}')
-
-    def readRegisters(self):
-        #self.loadedFreq = float(self.window.read(self.window.sshClient, soc.getBeamFreqCmd(self.beamNumber)))
-        self.beamFreqSetterLineEdit.setText(str(self.loadedFreq))
-        self.beamFreqSetterSlider.setValue(int(self.loadedFreq*1000))
-
-        #isClicked = self.window
-
-        #load local oscillator frequency
-        #load beam frequency
-        #load button status
 
 
+def copyText(window : QMainWindow):
+    # qtext.selectAll()
+    # qtext.copy()
+    # qtext.setTextCursor(QTextCursor())
+    # configData = soc.decodeReading(window.sshClientMessenger.toPlainText())
+    # print(configData)
+    pass
 class MainWindow(QMainWindow):
-
     def __init__(self):
         super().__init__()
         self.setWindowTitle("🍫🍓FranUI🍓🍫")
@@ -66,8 +72,11 @@ class MainWindow(QMainWindow):
         #Set up processes
         self.server, self.serverMessenger = self.setUpProcess("server")
         self.sshClient, self.sshClientMessenger = self.setUpProcess("sshClient")
-        self.write(self.sshClient, soc.startCmd())
-
+        # self.write(self.sshClient, soc.sendReadCmd())
+        # configData = soc.decodeReading(self.sshClientMessenger.toPlainText())
+        # print(configData)
+        #self.write(self.sshClient, soc.startCmd())
+        self.configData = soc.readConfigData()
         self.serverText = QLineEdit()
         self.serverText.setPlaceholderText("Write command to server")
         self.serverText.returnPressed.connect(lambda: textClickHandler(self, self.serverText, self.server))
@@ -76,6 +85,10 @@ class MainWindow(QMainWindow):
         self.sshClientText.setPlaceholderText("Write command to CIAA")
         self.sshClientText.returnPressed.connect(lambda: textClickHandler(self, self.sshClientText, self.sshClient))
 
+        self.testButton = QPushButton("Test")
+        self.testButton.clicked.connect(lambda: copyText(self))
+
+        self.configData = soc.readConfigData()
         self.initLayout()
 
     def initLayout(self):
@@ -95,6 +108,9 @@ class MainWindow(QMainWindow):
         self.dataSourceSelector = QComboBox(font=QFont("Cantarell", 10))
         self.dataSourceSelector.addItems([item.toString() for item in soc.DataSource])
         self.dataSourceSelector.currentIndexChanged.connect(lambda: self.write(self.sshClient, soc.setDataSourceCmd(soc.DataSource(self.dataSourceSelector.currentIndex()))))
+        #set default value
+        self.dataSourceSelector.setCurrentIndex(self.configData['dataSource'])
+
         dataSelectorVLayout.addWidget(dataSourceLabel)
         dataSelectorVLayout.addWidget(self.dataSourceSelector)
         dataSelectorLayout.addLayout(dataSelectorVLayout)
@@ -107,6 +123,8 @@ class MainWindow(QMainWindow):
         self.FIFOInputSelector = QComboBox(font=QFont("Cantarell", 10))
         self.FIFOInputSelector.addItems([item.toString() for item in soc.FIFOInput])
         self.FIFOInputSelector.currentIndexChanged.connect(lambda: self.write(self.sshClient, soc.setFIFOInputCmd(soc.FIFOInput(self.FIFOInputSelector.currentIndex()))))
+        #set default value
+        self.FIFOInputSelector.setCurrentIndex(self.configData['fifoInput'])
         FIFOInputVLayout.addWidget(FIFOInputLabel)
         FIFOInputVLayout.addWidget(self.FIFOInputSelector)
         dataSelectorLayout.addLayout(FIFOInputVLayout)
@@ -122,12 +140,16 @@ class MainWindow(QMainWindow):
         localOscFreqSetterLineEdit = QLineEdit(alignment=Qt.AlignCenter)
         localOscFreqSetterLineEdit.setPlaceholderText("Freq")
         localOscFreqSetterLineEdit.returnPressed.connect(lambda: self.write(self.sshClient, soc.setLocalOscFreqCmd(float(localOscFreqSetterLineEdit.text()))))
+        #set default value
+        localOscFreqSetterLineEdit.setText(str(self.configData['localOscFreq']))
         localOscFreqSetterHLayout.addWidget(localOscFreqSetterLineEdit,1)
         localOscFreqSetterSlider = QSlider(Qt.Horizontal)
         localOscFreqSetterSlider.setMinimum(0)
         localOscFreqSetterSlider.setMaximum(32500)
         localOscFreqSetterSlider.valueChanged.connect(lambda: localOscFreqSetterLineEdit.setText(str(localOscFreqSetterSlider.value()/1000)))
         localOscFreqSetterSlider.sliderReleased.connect(lambda: self.write(self.sshClient, soc.setLocalOscFreqCmd(float(localOscFreqSetterLineEdit.text()))))
+        #set default value
+        localOscFreqSetterSlider.setValue(int(self.configData['localOscFreq']*1000))
         localOscFreqSetterHLayout.addWidget(localOscFreqSetterSlider,2)
         localOscFreqSetter.addLayout(localOscFreqSetterHLayout)
         dataSelectorLayout.addLayout(localOscFreqSetter)
@@ -161,6 +183,8 @@ class MainWindow(QMainWindow):
         launchButton.setStyleSheet("background-color: green; color: white")
         launchButton.setFixedHeight(50)
         launchButton.clicked.connect(lambda: self.write(self.sshClient, soc.launchAcqCmd()))
+
+        dataSelectorLayout.addWidget(self.testButton)
 
 
 
@@ -201,7 +225,7 @@ class MainWindow(QMainWindow):
         self.handleCommunications(proc, messenger)
         return proc, messenger
 
-    def handleCommunications(self, process : QProcess, messenger):
+    def handleCommunications(self, process : QProcess, messenger : QPlainTextEdit):
         process.readyReadStandardOutput.connect(lambda: self.handleStdout(process, messenger))
         process.readyReadStandardError.connect(lambda: self.handleStderr(process, messenger))
 
@@ -218,12 +242,12 @@ class MainWindow(QMainWindow):
         proc.start("python3", [f'{name}.py'])
         return proc
 
-    def handleStderr(self, process, messenger):
+    def handleStderr(self, process : QProcess, messenger : QPlainTextEdit):
         data = process.readAllStandardError()
         stderr = bytes(data).decode("utf8")
         messenger.appendPlainText(stderr)
 
-    def handleStdout(self, process : QProcess, messenger):
+    def handleStdout(self, process : QProcess, messenger : QPlainTextEdit):
         data = process.readAllStandardOutput()
         stdout = bytes(data).decode("utf8")
         messenger.appendPlainText(stdout)
@@ -257,6 +281,7 @@ class MainWindow(QMainWindow):
 app = QApplication(sys.argv)
 
 w = MainWindow()
+
 w.show()
 
 def quitting():
