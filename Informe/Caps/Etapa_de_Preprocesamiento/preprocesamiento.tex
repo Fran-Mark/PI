@@ -14,7 +14,7 @@ Luego, partiendo de la banda de UHF de 3~MHz de ancho de banda centrada en $18.5
 \section{Diseño conceptual}\label{sec::disenio-conceptual-preproc}
 Se parte de la señal real ya submuestreada cuyo espectro está cetrado en $\pm 18.5\un{MHz}$ (ver figura \ref{fig::undersampling}) y su módulo  es simétrico respecto a la frecuencia $f = 0$, como se ilustra en la figura \ref{fig::espectro-inicial}. Dentro de cada triángulo en dicho gráfico se encuentran todos los haces de 25~kHz, replicados a ambos lados del espectro. Esto implica una redundancia de información que puede aprovecharse para optimizar la etapa de preprocesamiento.
 
-Se propone entonces trabajar sobre solo una de estas réplicas mediante una mezcla compleja, esto es, una rotación del espectro \unsure{Agregar referencia?} que permita llevar una de las copias mostradas en \ref{fig::espectro-inicial} a banda base. En este caso es indistinto cuál de las copias se selecciona. 
+Se propone entonces trabajar sobre solo una de estas réplicas mediante una mezcla compleja, esto es, una rotación del espectro que permita llevar una de las copias mostradas en \ref{fig::espectro-inicial} a banda base. En este caso es indistinto cuál de las copias se selecciona. 
 
 Asumiendo RABG, se tiene en el espectro una densidad de potencia de ruido independiente de la frecuencia. \unsure{En realidad en el modelo la DEP es estrictamente constante, pero eso no es lo que muestro en las figuras}
 Tras el corrimiento de una de las réplicas a BB se procede a realizar también un filtrado como se muestra en la figura \ref{fig::espectro-banda-corrida} reduciendo el ancho de banda de trabajo de manera de filtrar gran parte del ruido entrante. Esta es una primera etapa de ganancia de preprocesamiento, la cual se analizó en el \cref{sec::ganancias-por-preproc}. 
@@ -33,20 +33,20 @@ Nuevamente, si bien los haces tienen 25~kHz de ancho de banda, el filtrado debe 
 
 \figura[0.8]{espectro-canal}{Módulo del espectro de la banda de interés centrada en el haz de interés tras la segunda mezcla compleja. El rectángulo en línea punteada representa el filtrado que debe aplicarse psoteriormente para atenuar el resto de la banda y el ruido que cae por fuera del ancho de banda del haz de interés.}
 
-\section{Implementación en software}
-A modo de primera comprobación del diseño conceptual previo a su implementación en hardware, se hizo una implementación en software \unsure{JQ: no sé si me gusta 'implementación en SW'. Tal vez lo cambiaría por 'Prueba de concepto en SW'} de la etapa de preprocesamiento empleando Python. 
+\section{Prueba de concepto en software}
+A modo de primera comprobación del diseño conceptual previo a su implementación en hardware, se hizo una prueba de concepto en software de la etapa de preprocesamiento empleando Python. 
 Esta se encuentra en \texttt{Simulaciones/preprocesamiento.ipynb}. 
 
 Partiendo de la señal submuestreada a 65~MSps mostrada en la figura \ref{fig::undersampling} se aplicó un DDC \cite{DDC}, cuyo diagrama de bloques se muestra en la figura \ref{fig::DDC}. 
 Este incluye un NCO el cual genera una exponencial compleja para realizar la rotación de espectro en sentido horario a una frecuencia de $18.5\un{MHz}$, de manera de trasladar la banda de $[-20\un{MHz}, -17\un{MHz}]$ a $[-1.5\un{MHz}, 1.5\un{MHz}]$. 
 
-Ya en banda base, el DDC contiene una etapa de filtrado pasabajos, cuya frecuencia de corte se configuró como $f_c = 1.5\un{MHz}$ de manera de capturar toda la banda de interés dentro de la banda de paso del filtro. El filtrado aplicado fue de tipo Butterworth \cite{Butterworth}, sin embargo, el tipo de filtro elegido no tiene mayor relevancia en la presente implementación\unsure{JQ: por qué?}. Los coeficientes del mismo se obtuvieron mediante la función \texttt{butter} \cite{butter} de la librería de SciPy \cite{scipy} y el filtrado propiamente dicho se realizó usando la función \texttt{lfilter} \cite{lfilter} también de la librería de SciPy. 
+Ya en banda base, el DDC contiene una etapa de filtrado pasabajos, cuya frecuencia de corte se configuró como $f_c = 1.5\un{MHz}$ de manera de capturar toda la banda de interés dentro de la banda de paso del filtro. El filtrado aplicado fue de tipo Butterworth \cite{Butterworth} y sus coeficientes del mismo se obtuvieron mediante la función \texttt{butter} \cite{butter} de la librería de SciPy \cite{scipy} y el filtrado propiamente dicho se realizó usando la función \texttt{lfilter} \cite{lfilter} también de la librería de SciPy. 
 
 Por último, el DDC posee una etapa de decimación en la cual se reduce la tasa de muestreo. Para determinar el factor de decimación debe tenerse en cuenta que la tasa de Nyquist \cite{Nyquist-rate} es ahora de 3~MHz, lo cual implica que la tasa actual de muestreo de 65~MSps podría reducirse hasta en un factor $65/3 = 21.66$ aproximadamente. 
-No obstante, para esta implementación se eligió un factor de decimación de 10, de manera que la tasa de muestras a la salida del DDC resulta $6.5\un{MSps}$. La salida de este primer DDC se muestra en la figura \ref{fig::DDC-band}.
+No obstante, para esta prueba de concepto se eligió un factor de decimación de 10, de manera que la tasa de muestras a la salida del DDC resulta $6.5\un{MSps}$. La salida de este primer DDC se muestra en la figura \ref{fig::DDC-band}.
 
 Teniendo toda la banda de UHF ya en BB, se procede a seleccionar un haz o \textit{beam} como se muestra en la figura \ref{fig::espectro-canal}. 
-Para esto se instancia un nuevo DDC, el cual realiza la mezcla compleja para trasladar el haz a banda base, ejecuta un filtrado del haz con una frecuencia de corte de $f_c = 12.5\un{kHz}$\footnote{Al tratarse de una implementación de prueba, no se tuvo en cuenta el corrimiento Doppler. 
+Para esto se instancia un nuevo DDC, el cual realiza la mezcla compleja para trasladar el haz a banda base, ejecuta un filtrado del haz con una frecuencia de corte de $f_c = 12.5\un{kHz}$\footnote{Al tratarse de una prueba de concepto, no se tuvo en cuenta el corrimiento Doppler. 
 De tenerse en cuenta, debería aumentarse la frecuencia de corte del filtro aproximadamente 10~kHz por encima de la actual.} y finalmente una decimación. 
 Para esta última se empleo un factor \todo{Agregar factor}. La salida de este segundo DDC se muestra en la figura \ref{fig::DDC-beam}, donde se observa que pudo aislarse un haz de 25~kHz de ancho de banda de manera exitosa.
 
@@ -54,10 +54,10 @@ Para esta última se empleo un factor \todo{Agregar factor}. La salida de este s
 
 \begin{figure}[H]
     \centering
-    \subcaptionbox{Salida del primer DDC encargado de trasladar la banda de interés a BB, filtrar y luego decimar con un factor 10..\label{fig::DDC-band}}
+    \subcaptionbox{Salida del primer DDC encargado de trasladar la banda de interés a BB, filtrar y luego decimar con un factor 10.\label{fig::DDC-band}}
     {\includegraphics[width=0.49\linewidth]{DDC-band.pdf}}
     \hspace{\fill}%\\[1PC]
-    \subcaptionbox{Salida del segundo DDC encargado de seleccionar un \textit{beam}, trasladarlo a BB, filtrarlo y reducir la tasa de muestreo. Se dibuja además una línea vertical en la frecuencia donde termina el canal de interés, esto es, $f = 12.5\un{kHz}$\label{fig::DDC-beam}}
+    \subcaptionbox{Salida del segundo DDC encargado de seleccionar un \textit{beam}, trasladarlo a BB, filtrarlo y reducir la tasa de muestreo. Se dibuja además una línea vertical en la frecuencia donde termina el canal de interés, esto es, $f = 12.5\un{kHz}$.\label{fig::DDC-beam}}
     {\includegraphics[width=0.49\linewidth]{DDC-beam.pdf}}
     \caption{Salida de las dos etapas de DDCs.}
     \label{fig::DDC-output}
@@ -89,10 +89,10 @@ En el desarrollo de la etapa de preprocesamiento se utilizaron las IPs de \texti
     \hline
     \multicolumn{3}{|c|}{\textbf{IPs nativas utilizadas}}                                                                                                                                                                                                                                                        \\ \hline
     \multicolumn{1}{|l|}{\textbf{Nombre}}    & \multicolumn{1}{l|}{\textbf{Función}}                                                                                                                                                                                  & \textbf{Documentación}                   \\ \hline
-    \multicolumn{1}{|l|}{AXI Interconnect}   & \multicolumn{1}{l|}{\begin{tabular}[c]{@{}l@{}}Conecta uno o más dispositivos maestros AXI mapeados\\ en memoria a uno o más dispositivos esclavos mapeados\\ en memoria.\end{tabular}}                                & \cite{axi-interconnect} \\ \hline
-    \multicolumn{1}{|l|}{Complex Multiplier} & \multicolumn{1}{l|}{\begin{tabular}[c]{@{}l@{}}Implementa multiplicadores complejos optimizados, de\\ alto rendimiento y compatibles con AXI4-Stream basados\\ en opciones especificadas por el usuario.\end{tabular}} & \cite{complex-mult}     \\ \hline
-    \multicolumn{1}{|l|}{DDS Compiler}       & \multicolumn{1}{l|}{Genera señales sinusoidales.}                                                                                                                                                                      & \cite{dds-compiler}     \\ \hline
-    \multicolumn{1}{|l|}{FIR Compiler}       & \multicolumn{1}{l|}{Genera un filtro tipo FIR.}                                                                                                                                                                        & \cite{fir-compiler}     \\ \hline
+    \multicolumn{1}{|l|}{\texttt{AXI Interconnect}}   & \multicolumn{1}{l|}{\begin{tabular}[c]{@{}l@{}}Conecta uno o más dispositivos maestros AXI mapeados\\ en memoria a uno o más dispositivos esclavos mapeados\\ en memoria.\end{tabular}}                                & \cite{axi-interconnect} \\ \hline
+    \multicolumn{1}{|l|}{\texttt{Complex Multiplier}} & \multicolumn{1}{l|}{\begin{tabular}[c]{@{}l@{}}Implementa multiplicadores complejos optimizados, de\\ alto rendimiento y compatibles con AXI4-Stream basados\\ en opciones especificadas por el usuario.\end{tabular}} & \cite{complex-mult}     \\ \hline
+    \multicolumn{1}{|l|}{\texttt{DDS Compiler}}       & \multicolumn{1}{l|}{Genera señales sinusoidales.}                                                                                                                                                                      & \cite{dds-compiler}     \\ \hline
+    \multicolumn{1}{|l|}{\texttt{FIR Compiler}}       & \multicolumn{1}{l|}{Genera un filtro tipo FIR.}                                                                                                                                                                        & \cite{fir-compiler}     \\ \hline
     \end{tabular}%
     }
     \caption{IPs nativas utilizadas en el desarrollo de la etapa de preprocesamiento.}
@@ -100,25 +100,25 @@ En el desarrollo de la etapa de preprocesamiento se utilizaron las IPs de \texti
     \end{table}
 
 \subsection{Módulos desarrollados}
-Además de emplear IPs de \textit{Vivado}, se desarrollaron módulos en VHDL accesibles en el directorio \texttt{Fpga/prj/preprocessing\_stage/src}. Dichos módulos y su función se mencionan a continuación en la tabla \ref{tab::ip-fran}\todo{JQ: revisar si falta alguno (FIFO input data mux?)}.
+Además de emplear IPs de \textit{Vivado}, se desarrollaron módulos en VHDL accesibles en el directorio \texttt{Fpga/prj/preprocessing\_stage/src}. Dichos módulos y su función se mencionan a continuación en la tabla \ref{tab::ip-fran}.
 
 La integración de estos módulos con las IPs de Xilinx serán más claras en breve cuando se explique la composición del sistema implementado.
 
-\todo{Incluir Complelx\_gain}
 \begin{table}[H]
     \resizebox{\textwidth}{!}{%
     \begin{tabular}{|ll|}
     \hline
     \multicolumn{2}{|c|}{\textbf{Módulos desarrollados}}                                                                                                                                                                                                                                                                                                                                                               \\ \hline
     \multicolumn{1}{|l|}{\textbf{Nombre}}                                                   & \textbf{Función}                                                                                                                                                                                                                                                                                                         \\ \hline
-    \multicolumn{1}{|l|}{\begin{tabular}[c]{@{}l@{}}DDS Compiler\\ Controller\end{tabular}} & \begin{tabular}[c]{@{}l@{}}Opera con la interfaz AXI4-Stream. Su entrada es la salida de\\ un DDS Compiler. Mediante el pulso de tready del protocolo\\ AXI4-Stream controla la tasa a la cual el DDS Compiler \\ genera nuevos datos, convirtiendola en cualquier submúltiplo de\\ la frecuencia de reloj.\end{tabular} \\ \hline
-    \multicolumn{1}{|l|}{\begin{tabular}[c]{@{}l@{}}Valid Data\\ Holder\end{tabular}}       & \begin{tabular}[c]{@{}l@{}}Opera con la interfaz AXI4-Stream. Sostiene el último dato\\ válido en la salida hasta que llega uno nuevo.\end{tabular}                                                                                                                                                                      \\ \hline
-    \multicolumn{1}{|l|}{Basic Counter}                                                     & \begin{tabular}[c]{@{}l@{}}Contador de ancho ajustable que se incrementa cada N \\ ciclos de reloj, con N configurable.\end{tabular}                                                                                                                                                                                     \\ \hline
-    \multicolumn{1}{|l|}{Zero Padder}                                                       & \begin{tabular}[c]{@{}l@{}}Convierte una señal de N bits en una de M bits con M\textgreater{}N\\ agregando ceros ya sea a derecha o a izquierda.\end{tabular}                                                                                                                                                            \\ \hline
-    \multicolumn{1}{|l|}{Data Source Mux}                                                   & \begin{tabular}[c]{@{}l@{}}Multiplexor con 3 entradas tipo AXI4-Stream y una señal\\ de control.\end{tabular}                                                                                                                                                                                                            \\ \hline
-    \multicolumn{1}{|l|}{AXI Slave Reg}                                                     & Bloque de registros que implementan el protocolo AXI4-Lite.                                                                                                                                                                                                                                                              \\ \hline
-    \multicolumn{1}{|l|}{CDC Two FF Sync}                                                   & \begin{tabular}[c]{@{}l@{}}Dos FF en serie. Sirven para sincronizar un bit de una señal\\ asíncrona.\end{tabular}                                                                                                                                                                                                        \\ \hline
-    \multicolumn{1}{|l|}{CDC Comparator}                                                    & Compara dos entradas y la asigna a la salida en caso de ser iguales.                                                                                                                                                                                                                                                     \\ \hline
+    \multicolumn{1}{|l|}{\texttt{AXI Slave Reg}}                                                     & Bloque de registros que implementan el protocolo AXI4-Lite.                                                                                                                                                                                                                                                              \\ \hline
+    \multicolumn{1}{|l|}{\texttt{Basic Counter}}                                                     & \begin{tabular}[c]{@{}l@{}}Contador de ancho ajustable que se incrementa cada N \\ ciclos de reloj, con N configurable.\end{tabular}                                                                                                                                                                                     \\ \hline
+    \multicolumn{1}{|l|}{\texttt{CDC Comparator}}                                                    & Compara dos entradas y la asigna a la salida en caso de ser iguales.                                                                                                                                                                                                                                                     \\ \hline
+    \multicolumn{1}{|l|}{\texttt{CDC Two FF Sync}}                                                   & \begin{tabular}[c]{@{}l@{}}Dos FF en serie. Sirven para sincronizar un bit de una señal\\ asíncrona.\end{tabular}                                                                                                                                                                                                        \\ \hline
+    \multicolumn{1}{|l|}{\texttt{Complex Gain}}                                                      & Ganancia de 6 dB para una señal de entrada compleja.                                                                                                                                                                                                                                                                     \\ \hline
+    \multicolumn{1}{|l|}{\texttt{Data Source Mux}}                                                   & \begin{tabular}[c]{@{}l@{}}Multiplexor con 3 entradas tipo AXI4-Stream y una señal\\ de control.\end{tabular}                                                                                                                                                                                                            \\ \hline
+    \multicolumn{1}{|l|}{\begin{tabular}[c]{@{}l@{}}\texttt{DDS Compiler}\\ \texttt{Controller}\end{tabular}} & \begin{tabular}[c]{@{}l@{}}Opera con la interfaz AXI4-Stream. Su entrada es la salida de\\ un \texttt{DDS Compiler}. Mediante el pulso de tready del protocolo\\ AXI4-Stream controla la tasa a la cual el \texttt{DDS Compiler} \\ genera nuevos datos, convirtiendola en cualquier submúltiplo de\\ la frecuencia de reloj.\end{tabular} \\ \hline
+    \multicolumn{1}{|l|}{\begin{tabular}[c]{@{}l@{}}\texttt{Valid Data}\\ \texttt{Holder}\end{tabular}}       & \begin{tabular}[c]{@{}l@{}}Opera con la interfaz AXI4-Stream. Sostiene el último dato\\ válido en la salida hasta que llega uno nuevo.\end{tabular}                                                                                                                                                                      \\ \hline
+    \multicolumn{1}{|l|}{\texttt{Zero Padder}}                                                       & \begin{tabular}[c]{@{}l@{}}Convierte una señal de N bits en una de M bits con M\textgreater{}N\\ agregando ceros ya sea a derecha o a izquierda.\end{tabular}                                                                                                                                                            \\ \hline
     \end{tabular}%
     }
     \caption{Módulos desarrollados en VHDL para el desarrollo de la etapa de preprocesamiento.}
@@ -131,18 +131,19 @@ Según el esquema guía de la figura \ref{fig::disenio-para-hw} y lo desarrollad
 Al diseñar la etapa de filtrado deben tenerse en cuenta las consideraciones habituales \unsure{No mg mucho esa palabra} como la evaluación del tipo de filtro, la frecuencia de corte, el orden del filtro, entre otros. Pero además, al tratarse de un filtro a ser implementado en hardware, debe tenerse en cuenta que el mismo hará uso de aritmética de punto fijo \cite{pto-fijo}. Esto implica que el número de dígitos decimales con los que se trabaja se mantiene constante.
 
 \subsubsection{Diseño de los filtros}
-Para el diseño de los filtros se utilizó el programa MATLAB \todo{ref?}, el cual incorpora herramientas tales como \texttt{Filter Builder} \todo{ref} y \texttt{Filter Designer} \todo{ref}. Estas herramientas permiten realizar el diseño de filtros de todo tipo a partir de los parámetros de interés de cada aplicación en particular. 
+Para el diseño de los filtros se utilizó el programa MATLAB de la empresa MathWorks, el cual incorpora herramientas tales como \texttt{Filter Builder} \cite{filter-builder} y \texttt{Filter Designer} \cite{filter-designer}. Estas herramientas permiten realizar el diseño de filtros de todo tipo a partir de los parámetros de interés de cada aplicación en particular. 
 
 \texttt{Filter Builder} y \texttt{Filter Designer} también son capaces de trabajar con aritmética de punto fijo y generar el código en VHDL para utilizar directamente en \textit{Vivado}. A priori esta puede ser una opción viable, sin embargo, dado que los filtros se implementarán con el \textit{IP Block} \texttt{FIR Compiler} nativo de Xilinx, no se necesita el código en VHDL. En cambio, el \texttt{FIR Compiler} requiere que se lo configure con los valores de los coeficientes. Para esto se usa un archivo con extensión \textit{coe} que es un archivo de texto indicando los valores de todos los coeficientes, la base numérica en la que están expresados (llamado \textit{radix}) y el ancho en bits de los mismos. Un recorte de un archivo de coeficientes se muestra en la figura \ref{fig::coef-file}. Este recorte corresponde al archivo empleado en la configuración del primer filtro pasabajos.
 
 Resulta relevante destacar que finalmente, a pesar de las capacidades de operación con aritmética de punto fijo que tienen las herramientas de MATLAB, el diseño de los filtros se hizo con aritmética de punto flotante. La razón detrás de esto es que \textit{Vivado}, a través del \texttt{FIR Compiler}, cuenta con su propio método de implementación en punto fijo a partir de punto flotante. Es decir, el \texttt{FIR Compiler} puede configurarse con aritmética de punto flotante y él mismo se encarga de convertirlo a aritmética de punto fijo.
 
+
+
+El primer filtrado se designará a partir de ahora como \textit{filtrado de banda}. Este nombre proviene del hecho de que este es el filtrado a ser aplicado tras la traslación de la banda de interés a BB. Este filtrado debe contener a la banda de interés en su banda de paso. Al estar en BB, la máxima frecuencia de la banda de interés de 3~MHz de ancho de banda es $f_\textrm{max} = 1.5\un{MHz}$. Luego, usando la herramienta \texttt{Filter Designer} se generaron los coeficientes para un filtro FIR pasabajos de tipo equirripple \unsure{Justifico por qué este tipo de filtro? (No hay por qué)}. La respuesta del fitro junto con las configuraciones se muestran en la figura \ref{fig::band-filter.png}. Además, sus especificaciones se listan en la tabla \ref{tab::filtros-preproc}.
+
+Para el caso del segundo filtrado, a partir de ahora \textit{filtrado de haz} o \textit{filtrado de beam}, se opera de forma análoga al anterior. En este caso se tiene el requerimiento de que cada beam tiene alrededor de 25~kHz de ancho de banda en total. Al estar en BB, la frecuencia más alta es de la mitad del ancho de banda ($12.5\un{kHz}$), sin embargo, debe incorporarse un margen para contemplar el corrimiento Doppler (ver apéndice \ref{ap::doppler}). Como una primera iteración se diseñó un filtro de 50~kHz de ancho de banda, cuyas especificaciones se encuentran en la tabla \ref{tab::filtros-preproc} y su respuesta en frecuencia se ilustra en la figura \ref{fig::beam-filter-old}.
+
 \figura[0.7]{coef-file}{Ejemplo de archivo de configuración generado con MATLAB para el \texttt{FIR Compiler}.}
-
-El primer filtrado se designará a partir de ahora como \textit{filtrado de banda}. Este nombre proviene del hecho de que este es el filtrado a ser aplicado tras la traslación de la banda de interés a BB. Este filtrado debe contener a la banda de interés en su banda de paso. Al estar en BB, la máxima frecuencia de la banda de interés de 3~MHz de ancho de banda es $f_\textrm{max} = 1.5\un{MHz}$. Luego, usando la herramienta \texttt{Filter Designer} se generaron los coeficientes para un filtro FIR pasabajos de tipo equirripple \todo{ref!}. La respuesta del fitro junto con las configuraciones se muestran en la figura \todo{Poner captura de Filter Designer}. Adeamás, sus especificaciones se listan en la tabla \todo{Hacer tabla}
-
-Para el caso del segundo filtrado, a partir de ahora \textit{filtrado de haz}, se opera de forma análoga al anterior. En este caso se tiene el requerimiento de que cada beam tiene alrededor de 25~kHz de ancho de banda \change{En BB es la mitad. De todas formas hay que tener en cuenta Doppler asi que vuelve approx a 25.}. Como una primera iteración se diseñó un filtro de 50~kHz de ancho de banda, cuyas especificaciones se encuentran en la table \todo{hacer tabla, misma que antes?} y su respuesta en frecuencia se ilustra en la figura \todo{Poner captura del filter designer}.
-
 
 \subsubsection{Tasas de decimación}
 Tras el primer filtrado se tiene toda la información de la banda de UHF de interés ahora en el rango de frecuencias $-1.5\un{MHz}<f<1.5\un{MHz}$. De esta manera, se requiere una tasa de muestreo mínima superior a los 3~MHz (\cite{teorema-del-muestreo}). Partiendo de la tasa actual de muestreo de 65~MSps, puede incorporarse un factor de decimación máximo:
@@ -152,8 +153,37 @@ Para esta implementación \textit{standalone} se eligió un factor de decimació
 Tras el filtrado de canal se tiene que a la salida el ancho de banda es de 50~kHz. Luego, se requiere una frecuencia de muestreo de al menos 100~kHz. Esto permite tener el siguiente factor máximo de decimación:
 \[\textrm{Factor de decimación máximo} = \left\lfloor\frac{8.125\un{MSps}}{100\un{kSps}}\right\rfloor = 81.\] En este caso se eligió una tasa de decimación de 50.
 
-\todo{Figuras y tablas}
+\begin{table}[H]
+    \centering
+    \resizebox{0.7\textwidth}{!}{%
+    \begin{tabular}{|l|c|c|}
+    \hline
+    \multicolumn{1}{|c|}{}                  & Filtro de banda & Filtro de haz \\ \hline
+    Frecuencia de paso {[}kHz{]}            & 1500            & 2000          \\ \hline
+    Frecuencia de rechazo {[}kHz{]}         & 50              & 100           \\ \hline
+    Atenuación en banda de paso {[}dB{]}    & 0               & 0             \\ \hline
+    Atenuación en banda de rechazo {[}dB{]} & 40              & 40            \\ \hline
+    Tipo de filtro                          & Equirriple      & Equirriple    \\ \hline
+    Orden del filtro                        & 185             & 231           \\ \hline
+    Frecuencia de muestreo {[}Msps{]}       & 65              & 8,125         \\ \hline
+    Factor de decimación                    & 8               & 50            \\ \hline
+    \end{tabular}%
+    }
+    \caption{Configuraciones principales de los filtros de banda y de haz.}
+    \label{tab::filtros-preproc}
+\end{table}
 
+\begin{figure}[H]
+    \centering
+    \subcaptionbox{Diseño del filtro de banda.\label{fig::band-filter.png}}
+    {\includegraphics[width=0.7\linewidth]{band-filter.png}}
+    \\[1PC]
+    \subcaptionbox{Diseño del filtro de haz\label{fig::beam-filter-old.png}}
+    {\includegraphics[width=0.7\linewidth]{beam-filter-old.png}}
+    \caption{Diseño de filtros empleando la herramienta \texttt{Filter Designer}.}
+    \label{fig::filter-designs-old}
+\end{figure}
+\todo{Estas atenuaciones están un poco mal. Debería ser 0 dB en la banda de paso, no 1.}
 \subsection{Herramientas de \textit{debug}}\label{subsec::debug-preproc-inicial}
 En todo desarrollo resulta importante incorporar herramientas para poder \textit{debuggear} el sistema cuando algo no esté funcionando. Con este propósito se empleó el módulo \texttt{Data Source Mux} mencionado en la tabla \ref{tab::ip-fran} al cual se conectaron tres entradas:
 \begin{itemize}
@@ -162,18 +192,18 @@ En todo desarrollo resulta importante incorporar herramientas para poder \textit
     \item Una instancia del IP \texttt{DDS Compiler} oscilando a una frecuencia conocida y controlado mediante una instancia de \texttt{DDS Compiler Controller} (ver tablas \ref{tab::ip-vivado-preproc} y \ref{tab::ip-fran}).
 \end{itemize}
 
-El multiplexor se controla mediante un registro en el módulo \texttt{AXI Slave Reg} conectado a su vez al IP AXI Interconnect.
+El multiplexor se controla mediante un registro en el módulo \texttt{AXI Slave Reg} conectado a su vez al IP \texttt{AXI Interconnect}.
 
-\subsection{Cruces de dominio de reloj (CDCs)}
+\subsection{Cruces de dominio de reloj (CDCs)}\label{subsec::cdcs-standalone}
 Un dominio de reloj se compone de todos los elementos de un circuito lógico que operan bajo la misma señal de \textit{clock}.
 
 Al realizar desarrollo en hardware, una situación que se presenta con regularidad es la necesidad de sincronizar con un dado reloj una señal que proviene de otro dominio de reloj. Esta situación recibe el nombre de \textit{Clock Domain Crossing} (CDC) y debe ser manejada de manera de poder asegurar el cumplimiento de los tiempos de \textit{setup} y \textit{hold} de los \textit{flip-flops} controlados por el nuevo reloj.
 
-En el caso de la señal de control del \texttt{Data Source Mux}, la misma se encuentra dentro del dominio de reloj del AXI Interconnect (el cual generalmente viene dado por el PS). Al tratarse de una señal lenta ya que cambia en tiempos muy largos, puede sincronizarse en el nuevo dominio de reloj (esto es, el de 260~MHz) como si se tratara de una señal asíncrona. Para esto se hace uso del módulo \texttt{CDC Two FF Sync}.
+En el caso de la señal de control del \texttt{Data Source Mux}, la misma se encuentra dentro del dominio de reloj del \texttt{AXI Interconnect} (el cual generalmente viene dado por el PS). Al tratarse de una señal lenta ya que cambia en tiempos muy largos, puede sincronizarse en el nuevo dominio de reloj (esto es, el de 260~MHz) como si se tratara de una señal asíncrona. Para esto se hace uso del módulo \texttt{CDC Two FF Sync}.
 
 Sin embargo, dicho módulo por si solo se emplea para sincronizar un único bit \todo{referencia?}. En este caso, la señal de control del multiplexor tiene 2 bits (hay 3 entradas), en consecuencia, para asegurar la integridad de la señal en el CDC se emplean dos \texttt{CDC Two FF Sync} en serie y se comparan sus salidas con el módulo \texttt{CDC Comparator} como se muestra en la figura \ref{fig::CDC-preproc}. Si ambas salidas son iguales, entonces la señal se sincroniza exitósamente al dominio de reloj de 260~MHz.
 
-\figura{CDC-preproc}{Sincronizador de 2 bits para señales lentas empleado para realizar el CDC de la señal de control del multiplexor desde el dominio de reloj del AXI Interconnect al dominio de reloj de 260~MHz.}
+\figura{CDC-preproc}{Sincronizador de 2 bits para señales lentas empleado para realizar el CDC de la señal de control del multiplexor desde el dominio de reloj del \texttt{AXI Interconnect} al dominio de reloj de 260~MHz.}
 
 \subsection{Implementación en \textit{Vivado}}
 Haciendo uso e interconectando los bloques de IP de las tablas \ref{tab::ip-vivado-preproc} y \ref{tab::ip-fran} puede implementarse el diseño conceptual descrito en la sección \ref{sec::disenio-conceptual-preproc} tomando comó guía el esquema de la figura \ref{fig::disenio-para-hw}. 
@@ -186,8 +216,6 @@ A continuación se aborda la implementación en \textit{Vivado} de este esquema.
 La jerarquía AXI (o AXI hier) mostrada como un bloque del flujo de preprocesamiento en la figura \ref{fig::disenio-para-hw} se muestra con mayor detalle en la figura \ref{fig::axi-hier}. La misma se compone de dos \textit{IP blocks}, una instancia del \texttt{AXI Interconnect} conectado a través de una interfaz AXI4-Lite a un \texttt{AXI Slave Reg}. 
 
 El objetivo de esta jerarquía es permitir la comunicación con la FPGA desde el exterior mediante la escritura de registros. En este caso, la señal de control para el \texttt{Data Source Mux} como se aclaró en la subsección \ref{subsec::debug-preproc-inicial}.
-
-\todo{Incorporar mapeo de registros}
 
 \figura[0.85]{axi-hier}{Jerarquía AXI compuesta por un \texttt{AXI Interconnect} y un \texttt{AXI Slave Reg} interconectados a través de una interfaz AXI4-Lite.}
 
@@ -210,7 +238,7 @@ Se instancian en total tres osciladores: uno para funcionar como fuente de datos
 El oscilador de \textit{debug} se conforma de dos \textit{IP Blocks} como se muestra en la figura \ref{fig::local-osc}, estos son:
 \begin{itemize}
     \item \texttt{DDS Compiler}: es el encargado de generar la sinusoide a la frecuencia de interés.
-    \item \texttt{DDS Compiler Controller}: controla la tasa a la que el DDS Compiler entrega los datos pidiendo los datos a la tasa deseada mediante el uso del pulso de \textit{tready} del protocolo AXI4-Stream.
+    \item \texttt{DDS Compiler Controller}: controla la tasa a la que el \texttt{DDS Compiler} entrega los datos pidiendo los datos a la tasa deseada mediante el uso del pulso de \textit{tready} del protocolo AXI4-Stream.
 \end{itemize}
 
 La incorporación del \texttt{DDS Compiler Controller} es necesaria ya que no se encontró otra manera de controlar la tasa de generación de datos del \texttt{DDS Compiler} que no sea a través de la señal \textit{tready} de entrada. Para el caso de los osciladores de banda y de \textit{beam}, el pulso de \textit{tready} está conectado al pulso de \textit{tvalid} de los datos de entrada a los mezcladores.
@@ -238,7 +266,7 @@ De esta manera, reemplazando $f_\textrm{conf}$ por \[f_\textrm{out} = \frac{f_\t
     \label{eq::calculo-incremento-fase-v2}
 \end{equation}
 
-Las frecuencias seleccionadas para los osciladores se muestran en la tabla \todo{citar y hacer tabla: Osc - Freq - Modo}. A continuación se justifican estan elecciones:
+Las frecuencias seleccionadas para los osciladores se muestran en la tabla \ref{tab::osciladores-conf-preproc}. A continuación se justifican estan elecciones:
 \begin{itemize}
     \item La frecuencia del oscilador de banda se eligió de manera que la banda submuestreada amateur de UHF quede centrada en BB tras la mezcla.
     \item La frecuencia del oscilador de \textit{beam} se seleccionó de manera arbitraria a modo de demostración con la restricción de que $-1.5\un{MHz}<f<1.5\un{MHz}$, de manera de asegurarse que la salida de la mezcla esté dentro de la banda de interés.
@@ -246,6 +274,21 @@ Las frecuencias seleccionadas para los osciladores se muestran en la tabla \todo
 \end{itemize}
 
 \figura[0.8]{local-osc}{Ejemplo de uno de los osciladores instanciados en el diseño, en este caso se trata del oscilador de \textit{debug}, el cual incorpora el \texttt{DDS Compiler Oscillator Controller}.}
+
+\begin{table}[H]
+    \centering
+    \resizebox{0.85\textwidth}{!}{%
+    \begin{tabular}{|l|c|c|c|}
+    \hline
+                                & Oscilador local de \textit{debug} & Oscilador de banda & Oscilador de haz \\ \hline
+    $f_\textrm{out}$ {[}MHz{]}  & 19,51                                              & 18,5               & 1                \\ \hline
+    $f_\textrm{conf}$ {[}MHz{]} & 78,04                                              & 74                 & 32               \\ \hline
+    Ancho de salida {[}bits{]}  & 16                                                 & 32                 & 32               \\ \hline
+    Modo de operación           & Coseno puro                                        & Coseno - Seno      & Coseno - Seno    \\ \hline
+    \end{tabular}%
+    }
+    \caption{Parametros configurados en los osciladores para la etapa de preprocesamiento.}\label{tab::osciladores-conf-preproc} 
+    \end{table}
 
 \subsection{Mezcladores}
 Los mezcladores mostrados en la figura \ref{fig::disenio-para-hw} se implementaron usando el IP \texttt{Complex Multiplier}, presentado en la tabla \ref{tab::ip-vivado-preproc}. Este multiplicador implementa el protocolo AXI4-Stream y solo realiza la multiplicación cuando ambas señales de entrada tienen su \textit{tvalid} activo.
@@ -266,8 +309,7 @@ Por último, al usar el \texttt{Complex Multiplier} surgieron dos problemas punt
 \subsection{Filtros}
 Las etapas de filtrado se precedieron con una etapa de ganancia compleja como se muestra en la figura \ref{fig::ch-filter-hier}. Esta etapa de ganancia de 6~dB se incorporó para mitigar el efecto de atenuación introducido por los multiplicadores.
 
-Los filtros fueron implementados con el IP \texttt{FIR Compiler} en ambos casos. Su configuración se hizo a través de los archivos de coeficientes generados en MATLAB y las tasas de decimación se fijaron según lo desarrollado en la subsección \ref{subsec::filtros-decimacion}.
-\todo{Referir a tabla que tiene los parámetros mejor que a la sección!} Cabe destacar que la implementación del filtro y la decimación se dejó a cargo del IP con el objetivo de optimizar en el área ocupada.
+Los filtros fueron implementados con el IP \texttt{FIR Compiler} en ambos casos. Su configuración se hizo a través de los archivos de coeficientes generados en MATLAB y las tasas de decimación indicadas en la tabla \ref{tab::filtros-preproc}. Cabe destacar que la implementación del filtro y la decimación se dejó a cargo del IP con el objetivo de optimizar en el área ocupada.
 
 El \texttt{FIR Compiler} permite además definir una frecuencia de datos y otra de reloj, lo cual elimina la necesidad de generar algún controlador análogo al \texttt{DDS Compiler Controller} (generado para controlar la tasa de datos del \texttt{DDS Compiler}).
 
@@ -288,7 +330,7 @@ Para el desarrollo de la simulación se utilizó \textit{Universal Verification 
 El para las simulaciones se encuentra en el directorio \texttt{Fpga/prj/preprocessing\_stage/sim/}.
 
 \subsection{Estructura de la simulación}
-La simulación se desarrolló de acuerdo al estándar UVM, cuya estructura se muestra en la fiugra \ref{fig::uvm-structure}. Las funciones de cada uno de los componentes se detalla en la tabla \todo{ref}
+La simulación se desarrolló de acuerdo al estándar UVM, cuya estructura se muestra en la fiugra \ref{fig::uvm-structure}. Las funciones de cada uno de los componentes se detalla en la tabla \ref{tab::uvm-components}.
 
 \todo{hacer tabla con componentes y descripción}
 
@@ -300,23 +342,39 @@ Para el caso del agente ADC se tiene un generador de secuencia (\textit{sequence
 
 En el caso del agente AXI, se generaron dos secuencias, una de lectura y una de escritura. Esto permite simular de manera íntegra la lectura y escritura de registros de la FPGA y, en consecuencia, verificar el correcto funcionamiento de la señal de control.
 
-\todo{Tabla con archivos y descripción}
-
-
 \figura[0.7]{uvm-structure}{Estructura del estándar UVM \cite{uvm}.}
 
+
+\begin{table}[H]
+    \centering
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{|l|l|}
+    \hline
+    \textbf{UVM}         & \textbf{Función}                                                                                                                                                                                                                                    \\ \hline
+    \textit{Testbench}   & Instancia el módulo DUT y la clase \textit{UVM Test} y configura las conexiones entre ellos.                                                                                                                                       \\ \hline
+    DUT                  & \textit{Device} o \textit{Design Under Test}.                                                                                                                                                                     \\ \hline
+    \textit{Test}        & \begin{tabular}[c]{@{}l@{}}Instancia un \textit{UVM Environment}, lo configura y aplica estímulos invocando \textit{UVM Sequences}\\ al DUT a través del \textit{UVM Environment}.\end{tabular} \\ \hline
+    \textit{Environment} & Agrupa componentes de verificación interrelacionados. Es un ocomponente jerárquico.                                                                                                                                                                 \\ \hline
+    \textit{Agent}       & Agrupa componentes relacionados con una interfaz específica del DUT.                                                                                                                                                                                \\ \hline
+    \textit{Sequencer}   & \begin{tabular}[c]{@{}l@{}}Normalmente forma parte de un \textit{UVM Agent} y controla el flujo de transacciones de secuencias de\\ estímulos hacia el DUT.\end{tabular}                                                           \\ \hline
+    \end{tabular}%
+    }
+    \caption{Breve explicación del funcionamiento de algunos componentes relevantes de UVM. Una explicación más detallada se encuentra en \cite{uvm}}\label{tab::uvm-components}
+    \end{table}
+
 \subsection{Casos simulados y resultados}
-%Un solo tono a 19.51 MHz
-%Un solo tono con ruido
-%Tres tonos sin y con ruido
-Con la estructura base de la simulación ya definida, se procedió a la elaboración de \textit{testbenches} (TBs) para probar el funcionamiento de la etapa de preprocesamiento. Se realizaron las siguientes simulaciones:
-\todo{tabla? o items? con el nombre de la simu y su objetivo}
+Con la estructura base de la simulación ya definida, se procedió a la elaboración de \textit{testbenches} (TBs) para probar el funcionamiento de la etapa de preprocesamiento. Se desarrollan a continuación tres de las simulaciones realizadas, estas son:
+\begin{itemize}
+    \item Tono único sin ruido.
+    \item Tono único con ruido.
+    \item Tres tonos con ruido.
+\end{itemize}
 
 \subsubsection{Tono único sin ruido}
 
-Como primera simulación se emitió un único tono sin ruido a través del agente ADC. Esto se hizo con el fin de verificar si el \textit{pipeline} estaba funcionando en términos generales.
+Como primera simulación se emitió un único tono real sin ruido a través del agente ADC. Esto se hizo con el fin de verificar si el \textit{pipeline} estaba funcionando en términos generales.
 
-La frecuencia elegida para el tono a transmitir fue de $19.51\un{MHz}$, esto representa la frecuencia de una señal submuestreada. Al tratarse de un tono real, el módulo de su espectro es simétrico respecto a $f = 0$ y su correspondiente frecuencia en la banda de UHF es $- 19.51\un{MHz} + 7 \cdot 65 = 435.49\un{MHz}$. Se eligió esta frecuencia teniendo en cuenta las frecuencias de las exponenciales complejas generadas en los osciladores de banda y de canal, estas son $18.5\un{MHz}$ y $1\un{MHz}$ respectivamente. Luego, a la salida de la etapa de preprocesamiento, el tono de $19.51\un{MHz}$ se habrá trasladado a 
+La frecuencia elegida para el tono a transmitir fue de $19.51\un{MHz}$, esto representa la frecuencia de una señal submuestreada. Al tratarse de un tono real, el módulo de su espectro es simétrico respecto a $f = 0$ y su correspondiente frecuencia en la banda de UHF es $- 19.51\un{MHz} + 7 \cdot 65 = 435.49\un{MHz}$. Se eligió esta frecuencia teniendo en cuenta las frecuencias de las exponenciales complejas generadas en los osciladores de banda y de canal, estas son $18.5\un{MHz}$ y $1\un{MHz}$ respectivamente (ver tabla \ref{tab::osciladores-conf-preproc}). Luego, a la salida de la etapa de preprocesamiento, el tono de $19.51\un{MHz}$ se habrá trasladado a 
 \[ - 19.51\un{MHz} + 18.5\un{MHz} + 1\un{MHz} = -10\un{kHz}.\]
 
 Para generar el tono se hizo uso de la función \texttt{\$cos} de SystemVerilog, la cual genera una señal cosenoidal a una dada frecuencia cuya amplitud se encuentra en el intervalo [-1, 1]. Es importante notar que, para aprovechar el rango dinámico del agente ADC, debe escalarse la amplitud para ocupar los 14 bits disponibles.
@@ -325,19 +383,51 @@ En las figuras \todo{figs} se muestran los resultados de esta simulación
 
 \todo{Mostrar algún resultado}
 
-\subsubsection{Tres tonos sin ruido}
-En la simulación anterior se validó el correcto funcionamiento de los \textit{mixers}, pero no se evaluaron los filtros. De la simulación anterior solo se puede decir que el tono enviado atraviesa los filtros sin atenuaciones \change{Cómo sé eso? Poner imagen a escala}, no obstante, esto no implica que la banda de paso del mismo sea la que se planteó originalmente en la subsección \ref{subsec::filtros-decimacion}.
-
-Para evaluar la implementación de los filtros, se procedió a generar tres tonos puros, también sin ruido, los cuales serán sumados y enviados por el agente ADC. Las frecuencias elegidas para estos tonos fueron
-\todo{decir freqs, una para testear cada filtro y la original}
-\todo{Correr la simu de vuelta y generar los datos}
-
-\subsubsection{Tres tonos con ruido}
-Resulta relevante analizar el comportamiento del sistema al agregar RABG. Para esto, partiendo de los tres tonos generados con el agente ADC en la simulación anterior, se procedió a sumar un término de ruido Gaussiano a la señal. 
+\subsubsection{Tono único con ruido}
+Resulta relevante analizar el comportamiento del sistema al agregar RABG. Para esto se procedió a sumar un término de ruido Gaussiano a la señal con una potencia 1~dB por denajo de la de señal.
 
 Para generar el ruido blanco se usó la función \texttt{\$urandom\_range} de SystemVerilog, la cual genera enteros sin signo en un rango específico, en este caso, el rango se desprende de los 14 bits de resolución del agente ADC.
 
-Los resultados .. \todo{Resultados!}
+\todo{Poner resultados}
+
+\subsubsection{Tres tonos con ruido}
+En las simulaciones anteriores se validó el correcto funcionamiento de los \textit{mixers}, y, mediante la aplicación de RAGB como en la simulación anterior, también pudo observarse el desempeño de los filtros ante ruido blanco. No obstante, en estas simulaciones no resulta secillo comprobar que el comportamiento de estos es acorde a los parámetros definidos en la table \ref{tab::filtros-preproc}.
+
+Para evaluar más detalladamente la implementación de los filtros entonces, se procedió a generar tres tonos puros sumados a una componente de ruido gaussiano para ser enviados por el agente ADC. Las frecuencias elegidas para estos tonos se muestran a continuación en la tabla \ref{tab::tresTonosMuchoRuido-tabla}. Estas se eligieron con el siguiente criterio:
+\begin{itemize}
+    \item La frecuencia de $19.51\un{MHz}$ atravesará los dos filtros y trasladandose a $-10\un{kHz}$ como se explicó anteriormente.
+    \item La frecuencia de $19.42\un{MHz}$ se trasladará a $-19.42\un{MHz} + 18.5\un{MHz} = 920\un{kHz}$ tras la primera mezcla, quedando dentro del ancho de banda. Para la segunda mezcla, en cambio, se trasladará a $-920\un{kHz} + 1000\un{kHz} = 80\un{kHz}$ cayendo fuera de la banda de paso del filtro de haz.
+    \item La frecuencia $16.7\un{MHz}$ queda fuera de la banda de paso del filtro de banda tras la primera mezcla ya que finaliza en $-16.7\un{MHz} + 18.5\un{MHz} = 1.8\un{MHz}$. 
+\end{itemize}
+
+\begin{table}[H]
+    \centering
+    \resizebox{0.85\textwidth}{!}{%
+    \begin{tabular}{|l|c|c|c|}
+    \hline
+                          & \textbf{Frecuencia {[}MHz{]}} & \textbf{Función}                    & \textbf{Ganancia {[}dB{]}} \\ \hline
+    \textbf{Primer tono}  & 19,51                         & Atravesar todos los filtros         & 0                          \\ \hline
+    \textbf{Segundo tono} & 19,42                         & Ser filtrado por el filtro de haz   & 0                          \\ \hline
+    \textbf{Tercer tono}  & 16,7                          & Ser filtrado por el filtro de banda & 0                          \\ \hline
+    \textbf{Ruido}        & -                             & Simular situación más realista      & -1                         \\ \hline
+    \end{tabular}%
+    }
+    \caption{Parámetros utilizados para la simulación de tres tonos con ruido.}\label{tab::tresTonosMuchoRuido-tabla}
+    \end{table}
+
+\begin{figure}[H]
+    \centering
+    \subcaptionbox{DEP de la señal de entrada al sistema.\label{fig::tresTonosMuchoRuido-dataInFreq}}
+    {\includegraphics[width=0.49\linewidth]{tresTonosMuchoRuido-dataInFreq.pdf}}
+    \hspace{\fill}%\\[1PC]
+    \subcaptionbox{DEP de la salida del filtrado de banda.\label{fig::tresTonosMuchoRuido-bandFilterFreq}}
+    {\includegraphics[width=0.49\linewidth]{tresTonosMuchoRuido-bandFilterFreq.pdf}}
+    \\[1PC]
+    \subcaptionbox{DEP de la salida del filtrado de haz.\label{fig::tresTonosMuchoRuido-channelFreq}}
+    {\includegraphics[width=0.49\linewidth]{tresTonosMuchoRuido-channelFreq.pdf}}
+    \caption{Resultados de la simualación enviando tres tonos con ruido por el agente ADC.}
+    \label{fig::tresTonosMuchoRuido}
+\end{figure}
 
 \section{Integración con el sistema de adquisición}
 Habiendo desarrollado y validado la etapa de preprocesamiento de manera aislada (\textit{standalone}), se procede a realizar la integración con el \textit{core} de adquisición desarrollado en \cite{proyecto-jose}.
@@ -353,24 +443,122 @@ Un diagrama de lo implementado dentro de la CIAA-ACC en \cite{proyecto-jose} se 
 
 Se logró exitósamente replicar los resultados mostrados en \cite{proyecto-jose}, transmitiendo y recibiendo capturas utilizando el software allí desarrollado.
 
-\subsection{Adaptaciones necesarias}
-La integración del presente proyecto con el \textit{core} de adquisición ya existente no resulta directa ya que existen diferencias que deben ser salvadas para poder lograr la incorporación de la etapa de preprocesamiento. Estas diferencias se mencionan en la tabla \todo{ref tabla}
+\subsection{Módulos y IPs empleados en la integración}
+%FIFO Generator
+%Clocking Wizard
 
-\todo{tabla}
+%pulse_sync
+%sampler_with_ce
+
+\subsection{Diferencias de interfaz}
+La integración del presente proyecto con el \textit{core} de adquisición ya existente no resulta directa ya que existen diferencias que deben ser salvadas para poder lograr la incorporación de la etapa de preprocesamiento. Estas diferencias se mencionan en la tabla \ref{tab::diferencias-integracion}
+
 %Clock a 260, CDCs
 %División en varios bloques para minimizar replicas (16 canales)
 %Aumento dato fifo (32 bits en lugar de 16)
 %Uso de dos shorts como complex
+%Uso de complemento a 2
 %JQ: cambio a RTL top, corte de adc_receiver para poder usar única etapa de procesamiento, mejoras de timing...
 
-\todo{JQ: hay un montón de técnicas de CDC que se usaron (sincronizadores de nivel, de pulso, vector quasiestático, vector con pulso de valid delayeado...). Mencionaría todas las técnicas utilizadas, y un ejemplo de algún punto de dónde se hayan usado}
-\subsection{Otras modificaciones}
+\begin{table}[H]
+    \centering
+    \resizebox{0.8\textwidth}{!}{%
+    \begin{tabular}{|l|c|c|}
+    \hline
+                                                                                   & \textbf{Proyecto preexistente} & \textbf{Etapa de preprocesamiento a integrar} \\ \hline
+    \textbf{Frecuencia de reloj}                                                   & 65 MHz                         & 260 MHz                                       \\ \hline
+    \textbf{Formato de datos}                                                      & Enteros de 16 bits             & Complejos de 32 bits en total                 \\ \hline
+    \textbf{\begin{tabular}[c]{@{}l@{}}Ancho de datos\\ en las FIFOs\end{tabular}} & Dos datos de 16 bits           & Un dato de 32 bits                            \\ \hline
+    \textbf{Cantidad de canales}                                                   & 16                             & 1                                             \\ \hline
+    \end{tabular}%
+    }
+    \caption{Diferencias a salvar para lograr la integración de la etapa de preprocesamiento.}\label{tab::diferencias-integracion}
+    \end{table}
+
+La adaptación del formato de datos y el ancho de las FIFOs resulta directa ya que el \textit{core} de adquisición fue diseñado de manera de trabajar con dos datos de 16 bits ya que el ancho de los registros del bus AXI fue fijado a 32 bits. La transición de 16 a 32 bits se lleva a cabo en las colas FIFO, las almacenan los datos capturados para luego ser leídos por el PS mediante el bus AXI.
+
+La instanciación de las colas FIFO se hace a través del IP \texttt{FIFO Generator} de Xilinx \cite{fifo-generator}. Este IP provee la configuración de los parámetros \textit{Input Data Width} y \textit{Output Data Width}, los cuales en el \textit{core} de adquisición fueron configurados como 16 y 32 bits respectivamente.
+
+De esta manera, la única adaptación necesaria consiste es aumentar el parámetro \textit{Input Data Width} del IP \texttt{FIFO Generator} a 32 bits para poder escribir a las FIFOs datos complejos.
+
+La diferencia mostrada en la tabla \ref{tab::diferencias-integracion} que queda por resolver es la de la frecuencia de reloj para el preprocesamiento de los datos. Dado que toda la etapa de preprocesamiento \textit{standalone} se desarrolló con el reloj de 260~MHz, lo más conveniente es adaptar el \textit{core} de adquisición para poder operar a esta frecuencia.
+
+Como se mencionó en la ecuación \ref{eq::DCO}, el ADC opera con una frecuencia de reloj de datos de 455~MHz. Esta es la frecuencia a partir de la cual se genera la nueva señal de reloj a 65~MHz en el proyecto preexistente mediante la instanciación del IP \texttt{Clocking Wizard}. Para cambiar la frecuencia de trabajo entonces se removió dicha instancia y se generó una nueva, la cual, a partir del reloj de 455~MHz genera una nueva señal de \textit{clock} de 260~MHz.
+
+Finalmente, en cuanto a la discrepancia en número de canales, se optó en primera instancia por replicar la lógica de la etapa de preprocesamiento 16 veces. Esto se optimizará más adelante tras avanzar en la integración de los proyectos.
+
+\subsection{Cruces de dominio de reloj (CDCs)}\label{subsec::cdcs-integracion}
+Existen en el diseño tres dominios de reloj distintos:
+\begin{itemize}
+    \item El del ADC, el cual tiene una frecuencia de 455~MHz.
+    \item El del preprocesamiento a 260~MHz.
+    \item El de las interfaces AXI, a 100~MHz.
+\end{itemize}
+Como consecuencia de esto, se vuelve necesario determinar mecanismos para la sincronización de señales que atraviesen de un dominio a otro. Se evalúan a continuación todos estos casos y se desarrolla el método de CDC adecuado.
 %constraints - false paths
-%Uso de complemento a 2
 %Raw data path para calibracion
 %Cambio de índices
 %Fifo input mux
+\subsubsection{Sincronización de datos del deserializador}
+Ya con el nuevo reloj de 260~MHz generado, se vuelve necesario sincronizar los datos de salida del deserializador, el cual entrega datos de 14~bits a 65~MSps como, esto es, a la máxima frecuencia de muestreo del ADC (ver tabla~\ref{tab::ADC}) y opera en el dominio de reloj del ADC (455~MHz). Esto se realizó en dos partes de la siguiente manera:
+\begin{enumerate}
+    \item Se sincronizó el pulso de \textit{valid} proveniente del deserializador, el cual se encuentra en el dominio de reloj de 455~MHz. 
+    \item Se muestreó la salida del deserializador con el pulso de \textit{valid} ya sincronizado al dominio de reloj de 260~MHz.
+\end{enumerate}
 
+Para el primer punto se instanció el módulo \texttt{Pulse Sync} \todo{Incluir en tabla}, el cual sincroniza un pulso de un dominio de reloj a otro. Su funcionamiento se ilustra en la figura \todo{Poner figura}.
+
+Con el pulso de \textit{valid} ya sincronizado, se procedió a muestrear la señal de datos proveniente del deserializador mediante la instanciación del módulo \texttt{Sampler with CE}, el cual muestrea una señal al recibir un pulso de \textit{clock enable}, el cual en este caso corresponde al pulso de \textit{valid} recién sincronizado.
+
+\todo{poner foto de pulse sync}
+
+\subsubsection{Sincronización de señales de control}
+%Sync de vector quariestático para señales de control
+Para lograr el CDC en las señales de control como por ejemplo la que selecciona la salida del \texttt{Data Source Mux}, cuyo dominio de reloj es el del \texttt{AXI Interconnect} se instanció el módulo \texttt{Quasistatic Sync}, el cual implementa un sincronizador para señales cuasiestáticas como el mostrado en la figura \ref{fig::CDC-preproc}. La explicación para la sincronización de este tipo de señales es la ya dada en la subsección \ref{subsec::cdcs-standalone}.
+
+\subsubsection{Sincronización de señales por nivel}
+%Sync de nivel para la señal de debug y de la fifo
+
+\subsubsection{Sincronización para interfaces AXI4-Stream cuasiestáticas}
+%Sync de AXI (data vector + valid) para el local osc freq y las señales de frec en gral
+En el caso de la sincronización de interfaces AXI4-Stream compuestas por una señal de datos y una de \textit{valid} puede aplicarse la misma técnica de sincronización del pulso de \textit{valid} y muestreo con \textit{clock enable} que se desarrolló en anteriormente para el caso de la salida del deserializador.
+
+Sin embargo, cuando estas señales son lentas o cuasiestáticas, es decir que tienen variaciones extremadamente lentas respecto a la frecuencia del reloj, puede emplearse una técnica de sincronismo más sencilla.
+
+\todo{Wait, creo que es la misma}
+
+Todas estas técnicas de CDC fueron aplicadas en el proceso de integración de la etapa de preprocesamiento. Se hará referencia a ellas a medida que surjan en el desarollo.
+
+\subsection{Ampliación de las herramientas de \textit{debug}}
+En la subsección \ref{subsec::debug-preproc-inicial} se mencionó la inclusión del módulo \texttt{Data Source Mux} como herramienta de \textit{debug} para seleccionar la entrada de datos ya sea desde el ADC, desde un oscilador de frecuencia conocida o un contaor.
+
+Durante la integración del \textit{core} de adquisición con la etapa de preprocesamiento no solo se mantuvo este módulo, sino que se incluyó además un nuevo módulo, llamado \texttt{FIFO Input Mux} para facilitar el acceso al usuario a distintos puntos del sistema.
+
+El \texttt{FIFO Input Mux} es, como su nombre lo indica, un multiplexor que permite seleccionar la señal de entrada a las colas FIFO, y así otorga al usuario la posibilidad de observar las señales en diversos puntos del sistema. Las salidas posibles son:
+\begin{itemize}
+    \item Desactivado: no se envía nada a las FIFOs.
+    \item Preprocesamiento: se asigna la salida de la etapa de preprocesamiento a la entrada de las FIFOs.
+    \item Datos crudos: selecciona datos crudos del ADC, estos son los datos que salen directamente del deserializador.
+    \item Mezclador de banda: la salida del módulo bajo esta configuración son los datos de salida de la primera mezcla de preprocesamiento.
+    \item Filtrado de banda: los datos de salida se corresponden con la salida del filtro de banda.
+    \item Mezclador de haz: la entrada a las FIFOs es la salida del mezclador de haz.
+\end{itemize}
+El multiplexor se controla mediante una señal asociada a un registro, con lo cual debe ser sincronizada de manera acorde como una señal de control según se explicó en \ref{subsec::cdcs-integracion}.
+
+\subsection{Adaptación de los \textit{constraints} del proyecto}
+Las \textit{constraints} o restricciones de diseño definen los requisitos que debe cumplir el flujo de compilación en \textit{Vivado} para que el diseño sea funcional en la placa \cite{xdc-constraints}. En \textit{Vivado}, estos se especifican mediante un archivo de texto con extensión \texttt{.xdc} (\textit{Xilinx Design Constraints}), en el cual todos los \textit{constraints} se especifican mediante comandos de TCL (lenguaje de \textit{scripting}).
+
+El proyecto preexistente ya implementa un archivo XDC en el cual se especifican las asociaciones de puertos con pines de la FPGA (llamado \textit{pinout}) y se fijan estándares eléctricos entre otras cosas. Estos archivos se encuentan en \texttt{PIQuinteros/Fpga/src/constraints/}.
+
+En dicho directorio se incorporó un nuevo archivo llamado \texttt{ciaa\_acc\_SistAdq\_timing.xdc}. En este archivo se especificaron \textit{constraints} relacionados al \textit{timing} del sistema. En particular, se empleó el comando \texttt{set\_false\_path} para que \textit{Vivado} ignore ciertos \textit{caminos} a la hora de realizar el análisis de \textit{timing} \cite{false-paths}.
+
+Los caminos a ser ignorados por la herramienta están son aquellos que incurren en un CDC, ya que estos casos fueron debidamente abordados empleando lógica adicional de sincronización para evitar problemas de metaestabilidad. 
+
+En general, las señales involucradas en los CDCs son lentas o cuasiestáticas como se desarrolló en la subsección \ref{subsec::cdcs-integracion}, a excepción de la señal de datos que sale del deserializador. 
+
+En este caso particular se tienen datos generados a 65~MSps empleando un reloj de 455~MHz, los cuales deben muestrearse a medida que salen con el reloj de 260~MHz. De manera,que se dispone de 4 ciclos del reloj de 260~MHz para muestrear la señal que sale del deserializador. Sin embargo, también debe considerarse que el módulo \texttt{Pulse Sync} hace uso de 2 ciclos de reloj para sincronizar la señal de \textit{valid}, la cual luego se utilizará como \textit{clock enable} para el módulo \texttt{Sampler with CE} (ver subsección \ref{subsec::cdcs-integracion}). Como consecuencia, la señal de datos proveniente del deserializador debe estar estable para ser muestreada luego de 2 ciclos de reloj de 260~MHz.
+
+Este requerimiento puede expresarse en el archivo XDC a través de la función \texttt{set\_max\_delay}, la cual permite fijar un retraso máximo para un dado \textit{datapath} \cite{set-max-delay}. En este caso, dicho retraso máximo es de $1000 \cdot 2/260\un{ns}$.
 \subsection{Refactorización del código preexistente}
 %Simplificación del adc_receiver
 %Eliminación del bd_top para poder instanciar bds
@@ -380,4 +568,8 @@ La integración del presente proyecto con el \textit{core} de adquisición ya ex
 %Mas herramientas de debug, todas las salidas del mux
 \subsection{Incorporación de múltiples haces}
 \subsection{Optimizaciones}
+
+\section{\textit{Mapeo} de registros}
+
+Las pruebas de integración se realizarán junto con la incorporación del GNU Radio en el próximo capítulo.
 \end{document}
