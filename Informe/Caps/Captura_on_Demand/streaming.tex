@@ -45,7 +45,7 @@ Otro punto relevante es que el servidor emplea los TLE de un satélite para dete
 
 La implementación de la arquitectura mostrada en la figura~\ref{fig::flujo-captura} se realizó en C++ y se encuentra en el directorio \texttt{Streaming-on-demand/}. Dicha implementación se detalla a continuación.
 
-\section{Implementación del servidor}
+\section{Implementación del servidor}\label{sec::implementacion-servidor}
 
 \subsection{Gestión de sesiones activas}
 Uno de los requerimientos del servidor, especificado en la tabla~\ref{tab::reqs-cliente-servidor}, es el de prooveer servicios de manera simultánea a múltiples clientes. Para esto se hizo uso de diversas librerías y técnicas dispnibles, a mencionar a continuación:
@@ -74,7 +74,7 @@ La inicialización del cliente dispara además otro \texttt{thread} de ejecució
     \item Lectura de TLE enviados por el \textit{socket} del lado del cliente.
     \item Lectura de la frecuencia de operación de la misión que se desea escuchar. Esta información también es enviada por el cliente a través del \textit{socket}.
     \item Determinación de la próxima pasada del satélite. En caso que los TLE no sean válidos, el servidor pide que se ingresen nuevamente.
-    \item Notificar al cliente a través del \textit{socket} cuando la pasada esté por comenzar.
+    \item Notificar al cliente a través del \textit{socket} cuando la pasada esté por comenzar. En este momento el servidor abre un nuevo \textit{socket} para enviar los datos, llamado \textit{socket de datos}.
     \item Comenzar con la captura, el procesamiento y el envío de datos.
 \end{enumerate}
 
@@ -118,29 +118,134 @@ La librería cuenta con objetos de tipo \texttt{Location} que representan un pun
 
 Se implementaron además tres funciones para las siguientes tareas:
 \begin{itemize}
-    \item Calcular la próxima pasada del satélite por la estación terrena
-    \item Obtener las coordenadas del satélite respecto a la estación terrena.
+    \item Calcular la próxima pasada del satélite por la estación terrena. La librería permite además la configuración de un ángulo de elevación mínimo a patir del cual considerar que comienza la pasada. En este caso, la pasada comienza cuando el satélite se encuentra a $10\degree$ sobre el horizonte.
+    \item Obtener las coordenadas del satélite respecto a la estación terrena en un dado momento.
     \item Calcular el factor de corrimiento Doppler respecto a la ubicación de la estación terrena.
 \end{itemize}
 
 \subsection{Etapa de captura, procesamiento y envío a clientes}
+Al comenzar la pasada del satélite, el servidor finaliza la espera y comienza con la etapa de captura, procesamiento y envío a clientes.
 
+Se optó por agrupar las etapas de procesamiento y \textit{streaming} mostrados en la figura \ref{fig::flujo-captura} ya que el procesamiento se hará de a pocas muestras, y enviar las muestras procesadas requiere unas pocas instrucciones por lo que no se consideró necesario implementar una nueva etapa de procesamiento paralelo.
 
+No obstante, las etapas de captura y procesamiento con envío a clientes sí ocurren de manera simultánea, según el flujo mostrado en la figura \ref{fig::flujo-captura}. Para manejar esta situación se implementó un enfoque de múltiples procesos comunicados a través de una memoria compartida. 
+
+Antes de comenzar la captura, se determina el nombre del archivo que contendrá la captura para poder identificarlo posteriormente. Además, dicho nombre se envía al cliente por el \textit{socket}. La estructura del nombre es la siguiente:
+\[\texttt{filename} = \texttt{<Nombre de misión>\_<timestamp>\\}\]
+donde el nombre de la misión se extrae de los TLE y la estampa temporal se genera en al momento de creación usando la librería \texttt{std::chrono}.
+
+Empleando la función \texttt{fork} se replica el proceso actual. El nuevo proceso, llamado \textit{proceso hijo}, se emplea para comenzar la captura de los datos, mientras que el proceso original, llamado \textit{proceso padre}, cumplirá con la tarea de procesar y enviar los datos a través del \textit{socket de datos}.
+
+Se desarrolla a continuación el funcionamiento de estas dos etapas, dejando la explicación del manejo de recursos compartidos para la siguiente subsección.
+
+\subsubsection{Captura con GNU Radio}
+El proceso hijo, encargado de la captura de datos, realiza su tarea a través del uso de GNU Radio. Como se explicó en el capítulo \ref{cap::gnu-radio}, el \textit{framework} tiene la capacidad de generar código en C++. De esta manera, puede realizarse la captura de los datos en C++ utilizando bloques de GNU Radio.
+
+Se generó un diagrama de bloques con la estructura mostrada en la figura \ref{fig::bd-captura-gnuradio}. El mismo consiste de un bloque \texttt{UDP Source}, ya utilizado en la comunicación entre la placa y GNU Radio en la subsección \ref{subsec::comuicacion-con-gnuradio}, conectado a un bloque \texttt{File Sink}, el cual escribe todos los datos entrantes a un archivo en un directorio elegido por el usuario.
+
+Vale la pena mencionar que el código de C++ generado automáticamente por el \textit{framework} en su versión 3.8 (la utilizada en este proyecto), en muchos casos tiene errores y no compila. Este fue el caso al implementar el simple diagrama de bloques de la figura \ref{fig::bd-fig::bd-captura-gnuradio}. No obstante, los errores suelen ser fácilmente solucionables inspeccionando el código generado.
+
+\figura[0.55]{bd-captura-gnuradio}{Diagrama de bloques empleado para capturar y guardar los datos a disco.}\unsure{Revisar si la propiedad Unbuffered es necesario settearla, entiendo que solo tiene importancia en Python}
+
+Al finalizar la pasada se finaliza la ejecución de este proceso, dejando únicamente al proceso padre. \todo{Implementar esto en el código!}
+
+\subsubsection{Procesamiento y envío a clientes}
+Esta parte de la ejecución tiene lugar en el proceso padre. Como primer paso, se abre un nuevo \textit{socket}, el llamado \textit{socket de datos} en un puerto asignado automáticamente por el OS. Este número de puerto se comunica al cliente a través del \textit{socket} establecido originalmente entre cliente y servidor.
+
+La técnica de abrir un nuevo \textit{socket} exclusivo para la transmisión de los datos se inspira en la implementación del protocolo FTP (\textit{File Transfer Protocol}) \todo{referencia}. Las ventajas principales que trae esta práctica radican en la disponibilidad permanente de un canal de comunicación y en la señalización del final de la transmisión.
+
+Con un solo \textit{socket} para la comunicación, el cliente y el servidor no podrían intercambiar mensajes de control por ejemplo durante la transmisión de datos ya que el único canal de comunicación estaría siendo utilizado para enviar los datos. Esto hace que, si no se incorpora lógica de control adicional, el cliente y el servidor queden de cierta manera incomunicados por la duración de la transmisión.
+
+Por otro lado, si se emplease un único \textit{socket} en la comunicación, debería incorporarse algún mecanismo de señalización para indicar el comienzo y el final de la transmisión de datos. Habitualmente esto se hace enviando un único bit al final de cada paquete el cual está en alto cuando quedan datos por enviar y en bajo cuando se quiere finalizar la transmisión. \todo{referencia}
+
+Esto se vuelve innecesario si se abre un \textit{socket de datos}, ya que al finalizar la transmisión de estos, el \textit{socket} puede simplemente cerrarse, indicando así el final de la transmisión y, a su vez, manteniendo un canal de comunicación abierto y siempre disponible entre cliente y servidor.
+
+Luego de abrir el \textit{socket de datos}, el proceso padre procede a abrir en modo lectura el archivo que está siendo escrito por el proceso hijo, el cual contiene los datos crudos capturados y \textit{mapea} su contenido en memoria mediante el uso de la función \texttt{mmap} \todo{referencia} a un puntero a la clase \texttt{SampleLine}. 
+
+La clase \texttt{SampleLine} se compone de un arreglo de 16 números complejos, representando una muestra por cada uno de los canales del ADC. Además incorpora métodos para serializar los datos y enviarlos de manera correcta a través del \textit{socket de datos}.
+
+El mecanismo de control de acceso empleado para garantizar la integridad de los datos se explicará en la próxima subsección. 
+
+Tras adquirir los datos crudos, los mismos se procesan mediante otra función implementada con GNU Radio 
+\todo{Poner bd y explicar}
+Finalmente, son enviados a través del \textit{socket de datos} al cliente.
+
+Como se mencionó anteriormente, al finalizar el envío de datos, el \textit{socket de datos} es cerrado por parte del servidor, dando por finalizada la transmisión.
+%Hablar del cierre del socket de datos y que eso representa una ventaja
 %hablar del proceso de validacion   
 %Hablar del proceso de determinacion de pasada
 %Hablar de filenames
 %hablar de shm
 
 \subsection{Control de acceso a recursos compartidos}
+Al explicarse el sistema de captura, procesamiento y envío de datos se dijo que el proceso de captura escribe los datos a un archivo y que, de manera simultánea, el proceso encargado de procesamiento y envío de datos los lee a medida que se escriben. Un sistema de este tipo debe tener algún tipo de control de acceso para evitar problemas como por ejemplo que el proceso padre (el de procesamiento) lea más rápido de lo que el proceso hijo (el encargado de capturar los datos) pueda escribir.
 
-\section{Implementación del cliente}
+Se mencionó también que el mecanismo implementado para comunicar estos procesos fue la creación de memoria compartida. Es a través de ella que se gestiona el control de acceso. El enfoque implementado consiste en la creación de una instancia de la clase \texttt{AccessController}, declarada en \texttt{Streaming-on-demand/src/access\_controller.h} en la memoria compartida, de manera que dicha instancia pueda ser accedida por ambos procesos.
 
-\section{Comunicación cliente-servidor}
-Para la comunicación entre cliente y el servidor se estableció un \textit{socket} de Linux
+Esta clase incorpora métodos para garantizar la lectura del archivo por parte del proceso padre solo cuando haya datos para leer. Algunos mecanismos para asegurar esto se enumeran a continuación:
+\begin{enumerate}
+    \item En primera instancia, el \texttt{AccessController} registra cuando el proceso hijo comienza la escritura, y evita que el proceso padre inicie la lectura si la escritura aún no ha comenzado.
+    \item Comenzada la lectura, el \texttt{AccessController} lleva registro de la cantidad de bytes disponibles para ser leídos y bloquea la lectura hasta que el número de bytes listos para ser leídos sea mayor o igual al \textit{page size} del OS \todo{referencia}. El tamaño de página o \textit{page size} representa la mínima cantidad de bytes que pueden ser mapeados en memoria empleando la función \texttt{mmap}. En este caso, el \textit{page size} es de 4096 bytes. De esta manera, en cada lectura se leen 4096 bytes.
+    \item Al finalizar la escritura, el proceso hijo notifica al \texttt{AccessController}. Este último habilita entonces el \textit{mapeo} de los bytes restantes incluso cuando el número de ellos es menor al \textit{page size}. El resto del tamaño de página debe incluirse en \texttt{mmap}, pero será intencionalmente ignorado en el envío. \ref{Explicar bien el tema del mmap}
+\end{enumerate}
+
+El \texttt{AccessController} determina los bytes disponibles para leer a través de la resta entre los bytes totales del archivo y los bytes leídos hasta ahora, de los cuales se lleva registro. Para determinar los bytes disponibles, el \texttt{AccessController} hace uso de la función \texttt{fstat} \todo{ref} (\textit{file statistics}) que pide al OS información sobre un dado archivo. Este cálculo se actualiza siempre que el proceso padre intenta realizar una lectura, y es el resultado de dicho cálculo el que determina si se puede o no realizarla.
+
+\section{Implementación del cliente}\label{sec::implementacion-cliente}
+El software desarrollado para el cliente resulta sencillo debido a que el mismo tiene los requerimientos básicos mencionados en la tabla \ref{tab::reqs-cliente-servidor}. El código del cliente se encuentra en el directorio \texttt{Streaming-on-demand/client/src/}.
+
+El flujo del programa es el siguiente:
+\begin{enumerate}
+    \item Al inicializarse, el cliente intenta conectarse con el servidor a través del \textit{socket} TCP.
+    \item Tras la conexión, se le pide al usuario que ingrese los TLE; primero el nombre de la misión, luego la primera línea y por último la segunda.
+    \item Los TLE son enviados a través del \textit{socket} al servidor y el cliente aguarda un veredicto sobre la validez de los mismos.
+    \item Si los TLE ingresados resultan válidos, el cliente envía la frecuencia de operación y espera conectado a que se inicie la captura cuando llegue la próxima pasada. En caso de ser inválidos, se retoma el paso anterior y deben reingresarse las líneas de los TLE.
+    \item Al comenzar la pasada del satélite, el servidor empezará la captura pero antes le avisará al cliente mediante una \textit{flag} de inicialización de captura, enviada por el \textit{socket}. El cliente recibe esta \textit{flag} y confirma el inicio de la captura.
+    \item El cliente recibe el número de puerto en el cual se abrirá el \textit{socket de datos} y procede a conectarse al mismo.
+    \item El nombre del archivo de captura también es recibido por el cliente en el \textit{socket} principal, con lo cual se procede a la creación del archivo de capturas y a la posterior lectura del \textit{socket de datos}.
+    \item Cuando la captura termina, la lectura del \textit{socket de datos} devuelve un 0, ya que ningún byte podrá ser leído, señalando así que el \textit{socket de datos} fue cerrado por el servidor y la captura ha finalizado.
+\end{enumerate}
+
+Resulta relevante remarcar que la captura del socket de datos se hace de a saltos de longitud igual a una \texttt{SampleLine}, esto equivale a 128 bytes\footnote{16 muestras $\times$ 8 bytes por muestra}.
 
 \section{Compilación}
 %mencionar Cmkae, gnu radio es un shared object, y el server tambien
-\subsection{Integración con GNU Radio}
+Como se mencionó oportunamente, se generó un \textit{wrapper} con \textit{pybind11} de todo el sistema desarrollado en C++. Esto debe tenerse en cuenta a la hora de la compilación del código.
+
+Para describir las instrucciones de compilación se usa \textit{CMake} que es un software multiplataforma libre y de código abierto empleado en la automatización de flujos de compilación, empaquetado e instalación, empleando métodos agnósticos al compilador \cite{CMake}. En la figura \ref{fig::compilation-flow} se ilustra el flujo de compilación de un programa en C o C++ (para mayor información ver \cite{computer-systems}).
+
+La ventaja particular de utilizar \textit{CMake} en este proyecto, además de las inherentes a \textit{CMake}, es que GNU Radio, utilizado en la implementación del servidor, hace uso de este sistema de compilación. De esta manera, todo el código, incluyendo el de GNU Radio puede compilarse con un único archivo de configuración.
+
+Al seleccionar C++ como lenguaje objetivo, GNU Radio automáticamente genera los archivos de código correspondientes junto con un \texttt{CMakeLists.txt}. Este último archivo tiene todas las instrucciones de \textit{CMake} que serán transformadas en instrucciones específicas a una plataforma, como por ejemplo instrucciones de \textit{Make} para sistemas operativos tipo Unix como Linux \cite{Make}. En la figura \ref{fig::flujo-cmake} se ilustra este proceso.
+En el archivo \texttt{CMakeLists.txt} debe hacerse un cambio de configuración para indicarle a \textit{CMake} que se desea compilar el código desarrollado en GNU Radio en forma de librería ejecutable o \textit{shared object} y no en forma de ejecutable \textit{standalone}. Para esto debe cambiarse la sentencia \texttt{add\_executable} por la sentencia \texttt{add\_library} al final del \texttt{CMakeLists.txt} generado por GNU Radio.
+
+Una característica importante de \textit{CMake} es que permite manejar flujos de compilación complejos donde existen numerosos subdirectorios mediante el comando \texttt{add\_subdirectory}. Este nos permite agregar un nuevo subdirectorio al flujo de compilación, donde \textit{CMake} espera encontrar otro archivo \texttt{CMakeLists.txt} que indique como tratarlo. 
+
+De esta manera, puede tenerse un \texttt{CMakeLists.txt} principal, donde se compilen el servidor y el cliente y a su vez se añada el subdirectorio con el código de GNU Radio, el cual ya tiene su propio archivo \texttt{CMakeLists.txt}.
+
+\textit{Pybind11} incluye sentencias de \textit{CMake} para compilar el código de C++ como librerías de Python, en particular, la sentencia \texttt{pybind11\_add\_module}. Así, con los archivos de código fuente ubicados en \texttt{Streaming-on-demand/server/src/} y \texttt{Streaming-on-demand/client/src/} se pueden compilar el cliente y el servidor.
+
+La última configuración necesaria para una compilación exitosa son las correspondientes al \textit{linker}, mostrado en la figura \ref{fig::compilation-flow}. Este se encarga de generar los \textit{links} entre el programa compilado y las librerías utilizadas.
+
+En el desarrollo del servidor se utilizaron técnicas de \textit{multithreading} y de bloqueo, los cuales requieren realizar el \textit{linking} con las librerías nativas de Linux \textit{pthread} y \textit{rt}. \todo{agregar referencia} Esto puede lograrse desde \textit{CMake} extendiendo el contenido de la variable \texttt{CMAKE\_CXX\_FLAGS}, ya definida por \textit{CMake}.
+
+El archivo \texttt{CMakeLists.txt} final se encuentra en \texttt{Streaming-on-demand/CMakeLists.txt}.
+
+\figura{compilation-flow}{Flujo de compilación de un programa de C\cite{computer-systems}.}
+
+\figura[0.85]{flujo-cmake}{Proceso desde el archivo \texttt{CMakeLists.txt} hasta el ejecutable final.}
 \section{Capturas de prueba}
-%se usó hash para chequear integridad
+En la figura \ref{client-server-side} se muestra el flujo de una captura en base a lo implementado en las secciones \ref{sec::implementacion-servidor} y \ref{sec::implementacion-cliente}.
+
+Este flujo se puso en marcha primero empleando capturas ya guardadas en disco y luego con capturas reales desde la placa.
+
+\subsection{Verificación del sistema de control de acceso}
+Dado que la etapa de procesamiento fue validada en el capítulo \ref{cap::gnu-radio}, se optó por removerla temporalmente para comprobar el funcionamiento del resto del sistema mediante la adquisición y envío de datos crudos.
+
+La eliminación de la etapa de procesamiento permite verificar el funcionamiento del sistema de manera más sencilla ya que la captura recibida del lado del cliente debe ser la misma que la recibida del lado del servidor (sin procesamiento no hay cambios a los datos). Luego, si el sistema de transmisión funciona y los mecanismos de control de acceso implementados entre los procesos de captura y envío son adecuados, se debería observar que los archivos en el servidor y el cliente coinciden.
+
+Para verificar integridad una forma sencilla es aplicar algún algoritmo de \textit{hashing} \todo{ref?} a ambos archivos. Luego, estos serán iguales únicamente si sus \textit{hashes} lo son. Se empleó el comando \texttt{md5sum} para computar el \textit{hash} MD5, el cual es una cadena alfanumérica de 128 bits \todo{ref?}. De esta manera, se comprobó experimentalmente que el archivo tanto capturado por el servidor como el recibido por el cliente dan como el resultado el mismo \textit{hash}.
+
+\figura[0.8]{client-server-side}{Diagrama del flujo de captura, envío y recepción de los datos.}
+
 \end{document}

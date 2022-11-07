@@ -6,7 +6,9 @@
 \backcite {ruidos-adc}{{\es@scroman {vii}}{(document)}{Doc-Start}}
 \backcite {haykin}{{\es@scroman {vii}}{(document)}{Doc-Start}}
 \backcite {uvm}{{\es@scroman {viii}}{(document)}{Doc-Start}}
+\backcite {threading-foto}{{\es@scroman {viii}}{(document)}{Doc-Start}}
 \backcite {GIL-foto}{{\es@scroman {viii}}{(document)}{Doc-Start}}
+\backcite {computer-systems}{{\es@scroman {viii}}{(document)}{Doc-Start}}
 \backcite {uvm}{{\es@scroman {ix}}{(document)}{Doc-Start}}
 \backcite {LeoConstellation}{{1}{1}{chapter.1}}
 \backcite {itu-banda-amateur}{{3}{1.2}{section.1.2}}
@@ -90,11 +92,16 @@
 \backcite {orbit-predictor}{{50}{6.2.2}{section*.141}}
 \backcite {pybind11}{{50}{6.2.2}{section*.141}}
 \backcite {GIL}{{51}{6.2.2}{section*.142}}
-\backcite {GIL-foto}{{52}{6.2}{figure.caption.144}}
+\backcite {threading-foto}{{52}{6.2}{figure.caption.144}}
+\backcite {GIL-foto}{{52}{6.3}{figure.caption.145}}
 \backcite {orbit-predictor}{{52}{6.2.2}{section*.146}}
-\backcite {click}{{55}{7.3}{section.7.3}}
-\backcite {Qt-framework}{{55}{7.3.1}{subsection.7.3.1}}
-\backcite {pyqt5}{{55}{7.3.1}{subsection.7.3.1}}
-\backcite {gnuradio-qt}{{55}{7.3.1}{subsection.7.3.1}}
-\backcite {qprocess}{{56}{7.3.2}{section*.155}}
-\backcite {paramiko}{{56}{7.3.2}{Item.61}}
+\backcite {CMake}{{56}{6.4}{section.6.4}}
+\backcite {computer-systems}{{56}{6.4}{section.6.4}}
+\backcite {Make}{{56}{6.4}{section.6.4}}
+\backcite {computer-systems}{{57}{6.5}{figure.caption.160}}
+\backcite {click}{{60}{7.3}{section.7.3}}
+\backcite {Qt-framework}{{60}{7.3.1}{subsection.7.3.1}}
+\backcite {pyqt5}{{60}{7.3.1}{subsection.7.3.1}}
+\backcite {gnuradio-qt}{{60}{7.3.1}{subsection.7.3.1}}
+\backcite {qprocess}{{61}{7.3.2}{section*.173}}
+\backcite {paramiko}{{61}{7.3.2}{Item.71}}
