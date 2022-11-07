@@ -2,11 +2,145 @@
 \begin{document}
 \graphicspath{{./figures}}
 \chapter{Captura de datos \textit{on demand}}
+Los datos adquiridos y preprocesados son actualmente recibidos y procesados con GNU Radio en la computadora conectada a la CIAA-ACC mediante SSH como se describió en el capítulo~\ref{cap::gnu-radio}.
+
+En este capítulo se propone extender la funcionalidad del sistema de procesamiento, permitiendo transmitir datos procesados a clientes no conectados a la placa. Para esto se llevará a cabo el diseño y la implementación de un servidor de capturas a demanda capaz de transmitir en tiempo real datos procesados de capturas específicadas por el usuario.
 
 \section{Diseño conceptual}
+El modelo elegido para el servicio de envío de capturas fue el de cliente-servidor~\cite{client-server-model}, esto implica el desarrollo del software para ambas partes del sistema. Los requerimientos tanto del cliente como del servidor se mencionan en la tabla~\ref{tab::reqs-cliente-servidor}.
 
-\section{Implementación en C++}
+El flujo de una sesión de cliente se ilustra en la figura~\ref{fig::flujo-captura} y puede verbalizarse de la siguiente manera:
+\begin{enumerate}
+    \item El servidor se inicializa y escucha conexiones entrantes.
+    \item El cliente se conecta y envía los datos del satélite que desea escuchar. Esto incluye el envío de los TLE y la frecuencia de operación.
+    \item El servidor interpreta la información recibida, la valida y luego aguarda hasta la próxima pasada de la misión de interés.
+    \item Al terminar el tiempo de espera el servidor comienza la captura de datos empleando el sistema de adquisición con la etapa de preprocesamiento ya integrada.
+    \item Al mismo tiempo que comienza la captura, de manera paralela el servidor pone en marcha el procesamiento de la señal capturada a medida que hay datos crudos disponibles.
+    \item De manera análoga al punto anterior, en la medida que nuevos datos ya procesados se vuelven disponibles, estos son enviados al cliente.
+    \item Finalmente, el cliente se encarga de recibir y almacenar los datos procesados.
+\end{enumerate}
+
+Cabe destacar que para que el sistema sea de \textit{tiempo real}, los procesos de captura, procesamiento, \textit{streaming} y recepción deben ocurrir de forma simultánea. Esto tendrá que tenerse en cuenta a la hora de la implementación.
+
+Otro punto relevante es que el servidor emplea los TLE de un satélite para determinar la próxima pasada del mismo sobre la estación terrena. Durante la pasada, con ayuda de los mismos, el servidor también puede realizar el seguimiento del satélite, actualizando los datos de configuración del algoritmo de conformación de haz.\todo{revisar esto con lo hecho en la sección aterior}
+
+
+\begin{table}[H]
+    \centering
+    \resizebox{0.7\textwidth}{!}{%
+    \begin{tabular}{|cl|}
+    \hline
+    \multicolumn{2}{|c|}{\textbf{Requerimientos}}                                                                \\ \hline
+    \multicolumn{1}{|c|}{\multirow{3}{*}{\textbf{Cliente}}}  & Atender múltiples clientes de forma simultánea.   \\ \cline{2-2} 
+    \multicolumn{1}{|c|}{}                                   & Leer e interpretar TLEs.                          \\ \cline{2-2} 
+    \multicolumn{1}{|c|}{}                                   & Capturar, procesar y enviar datos en tiempo real. \\ \hline
+    \multicolumn{1}{|l|}{\multirow{2}{*}{\textbf{Servidor}}} & Enviar información del satélite al server (TLEs y frecuencia)  \\ \cline{2-2} 
+    \multicolumn{1}{|l|}{}                                   & Recibir datos y guardar en disco.                 \\ \hline
+    \end{tabular}%
+    }
+    \caption{Requerimientos del cliente y el servidor en el diseño del sistema de envío de capturas en tiempo real.}\label{tab::reqs-cliente-servidor}
+\end{table}
+
+\figura{flujo-captura}{Diagrama de flujo de una sesión de cliente.}
+
+La implementación de la arquitectura mostrada en la figura~\ref{fig::flujo-captura} se realizó en C++ y se encuentra en el directorio \texttt{Streaming-on-demand/}. Dicha implementación se detalla a continuación.
+
+\section{Implementación del servidor}
+
+\subsection{Gestión de sesiones activas}
+Uno de los requerimientos del servidor, especificado en la tabla~\ref{tab::reqs-cliente-servidor}, es el de prooveer servicios de manera simultánea a múltiples clientes. Para esto se hizo uso de diversas librerías y técnicas dispnibles, a mencionar a continuación:
+\begin{itemize}
+    \item Se empleó el soporte de \textit{threads} brindado en la librería estándar de C++.
+    \item Se hizo uso de la interfaz de \textit{sockets} de Linux~\cite{linux-sockets}.
+    \item Se implementaron técnicas de acceso múltiple como \textit{mutex} y \textit{condition\_variable}, también de la librería estándar.
+    \item Se utilizaron los objetos \texttt{std::set} y \texttt{std::queue} de la librería estándar.
+\end{itemize}
+
+Al inicializarse, el servidor abre un \textit{socket} TCP y crea un \texttt{std::set} de clientes activos y una \texttt{std::queue} de clientes a ser removidos. Además, se dispara un nuevo \textit{thread} de ejecución, llamado \texttt{Cleaner Thread}, que será el encargado de terminar la conexión y eliminar a los clientes cuya sesión haya finalizado; estos son los clientes que están en la \texttt{std::queue}. Este \textit{thread} permanece bloqueado mediante el uso de una \textit{condition\_variable}, la cual será notificada convenientemente cuando haya clientes para ser eliminados.
+
+Luego, el servidor comienza a correr a través del método \texttt{start}, donde se dispara un nuevo \textit{thread} de ejecución, llamado \texttt{Listener Thread}, el cual se encargará de escuchar en el \textit{socket} previamente abierto a posibles conexiones entrantes de clientes. De esta manera el \textit{thread} principal queda liberado para poder escuchar comandos por consola del usuario administrador.
+
+Cuando un cliente nuevo se conecta, el \texttt{Listener Thread} lo acepta. En dicho momento, el sistema operativo crea un nuevo \texttt{socket} y deja el original liberado. Al mismo tiempo, el \texttt{Listener Thread} instacia un nuevo cliente de la clase \texttt{Client} y lo agrega al \texttt{std::set} de clientes activos.
+
+Finalmente, cuando el cliente finaliza su sesión, hace una petición al servidor para ser eliminado y este \texttt{Client} es agregado a la \texttt{std::queue} de clientes a eliminar. El \texttt{Cleaner Thread} es rápidamente notificado de esto y procede a tomar el control momentáneo de la \texttt{std::queue} de clientes a eliminar mediante un \textit{mutex}, para quitar el cliente de la cola y liberar los recursos asociados al mismo.
+
+
+
+\subsection{Manejo de cliente}
+La creación de un nuevo \texttt{Client} por parte del \texttt{Listener Thread} representa el comienzo de la gestión del mismo. El \texttt{Client} debe ser  inicializado junto con el \textit{file descriptor} correspondiente al nuevo \textit{socket} abierto tras aceptar la conexión. 
+
+La inicialización del cliente dispara además otro \texttt{thread} de ejecución, en este caso el \texttt{Client Thread}. Este estará a cargo del manejo de la sesión de cada cliente en particular. La sesión tiene diversas etapas, estas se mencionan a continuación:
+\begin{enumerate}
+    \item Lectura de TLE enviados por el \textit{socket} del lado del cliente.
+    \item Lectura de la frecuencia de operación de la misión que se desea escuchar. Esta información también es enviada por el cliente a través del \textit{socket}.
+    \item Determinación de la próxima pasada del satélite. En caso que los TLE no sean válidos, el servidor pide que se ingresen nuevamente.
+    \item Notificar al cliente a través del \textit{socket} cuando la pasada esté por comenzar.
+    \item Comenzar con la captura, el procesamiento y el envío de datos.
+\end{enumerate}
+
+Los puntos 1, 2 y 4 consisten en simples lecturas y escrituras al \textit{socket}. Para esto se implementó una función \textit{wrapper} a las funciones \texttt{read} y \texttt{write} de Linux para garantizar la lectura o escritura del número de bytes deseados, estos \textit{wrappers} se encuentran declarados en \texttt{Streaming-on-demand/src/helpers.h}.
+
+El punto 5 se desarrollará en la próxima subsección y el punto 3 se desarrollan con mayor detalle a continuación.
+
+\subsubsection{Integración con Python}
+La validación de los TLE y la determinación de la próxima pasada del satélite se realizan empleando la librería \textit{orbit-predictor} \cite{orbit-predictor}. Esta librería fue desarrollada con Python, con lo cual su integración en C++ no es directa. Para lograrlo se hizo uso de la librería \textit{pybind11} \cite{pybind11}, hoy en día utilizada también con este fin por GNU Radio desde su versión 3.9 en adelante. \change{ya mencionamos esto antes?}
+
+Existen dos enfoques para emplear C++ y Python juntos. El primer enfoque es utilizar Python como lenguaje principal, compilar el código de C++ como un módulo de Pythony ejecutarlo desde allí. El segundo enfoque consiste en usar C++ como lenguaje principal y embeber dentro del código una instancia del intérprete de Python para así poder ejecutar código escrito en Python. 
+
+Debido a que todo el código del sistema de envío de capturas se está desarrollando en C++, pareciera más sencillo y directo tomar el segundo enfoque.Lamentablemente, este enfoque no funciona en el presente escenario debido a la propia estructura del intérprete de Python.
+
+Actualmente en la implementación del servidor se están empleando técnicas de \textit{multithreading} y de control de acceso a recursos compartidos entre \textit{threads} (\textit{mutex}, \textit{condition\_variable}). Por otro lado, el intérprete de Python tiene un \textit{lock} global, llamado el \textit{Global Interpreter Lock} (GIL) \cite{GIL}. Este es esencialmente un \textit{mutex} que no permite que múltiples \textit{threads} ejecuten código de Python en paralelo. Dado que se necesita llamar a funciones de la librería \textit{orbit-predictor} en todos los \textit{threads} de clientes, eso incurre inevitablemente en la necesidad de ejecutar código de Python de manera simultánea o en la necesidad de ejecutar múltiples intérpretes.
+
+Como consecuencia de esto, resulta más práctico optar por el primer enfoque, donde la base de código de C++ se compila a una librería a ser llamada desde Python. Esta tarea es altamente simplificada por la librería \textit{pybind11}, la cual solo requiere la instanciación de un \texttt{PYBIND11\_MODULE} referenciado a la dirección de memoria de la función que se quiere ejecutar para generar todos los \textit{bindings} necesarios. En este caso, la función a ejecutar es la que instancia y corre el servidor.
+
+Un hecho notable es que las modificaciones necesarias en el código son mínimas. Más aún, se puede continuar tranquilamente con el desarrollo del resto del servidor en C++ ya que esto no representa ningún inconveniente. 
+
+A la hora de realizar la compilación, sin embargo, debe tenerse en cuenta que se trata de una librería y no de un programa \textit{standalone}, pero esto se desarrollará más adelante.
+
+\subsubsection{Manejo del GIL}
+Habiendo tomado la decisión de manejar el sistema desde Python, se simplifica el uso de la librería \textit{orbit-predictor} pero no se resuelve del todo. Ahora ya no se debe lidiar con múltiples intérpretes o el manejo de Python desde C++, pero aún se tienen las incompatibilidades entre los modelos de \textit{threading} empleados por ambos lenguajes.
+
+En C++ los \textit{threads} son hilos de ejecución que realmente pueden ser simultáneos. Sin embargo, esta situación es imposible al ejecutar código de Python como consecuencia de la existencia del GIL. Los \textit{threads} de Python no son simultáneos, sino que se ejecutan realizando una multiplexación temporal en un único procesador como se muestra en la figura \ref{fig::threading}.
+
+Durante esta multiplexación temporal, un \textit{thread} libera el GIL y otro lo toma como se muestra en la figura \ref{fig::gil-dynamics}. Esto es lo que debe hacerse cada vez que un \textit{thread} de C++ llame a una función de la librería \textit{orbit-predictor}; es decir, se debe poder gestionar el GIL del intérprete principal desde el código de C++. 
+Afortunadamente, la librería \textit{pybind11} incorpora las clases \texttt{pybind11::gil\_scoped\_release} y \texttt{pybind11::gil\_scoped\_acquire}, las cuales permiten soltar y adquirir el GIL desde C++. Luego, en cada llamada a código de Python desde C++ se adquiere y luego se libera el GIL, asegurando que no haya colisiones.
+
+\figura[0.7]{threading}{Ilustración de la implementación de \textit{threading} en Python (izq.) y en C++ (der.)\cite{threading-foto}.}
+
+\figura[0.8]{gil-dynamics}{Manejo del GIL entre varios \textit{threads}\cite{GIL-foto}.}
+
+\subsubsection{La librería \textit{orbit-predictor}}
+Ya resuelta la interfaz entre Python y C++ pueden emplearse las funciones provistas en la librería \textit{orbit-predictor} desarrollada en un repositorio de GitHub de Satellogic\cite{orbit-predictor}. Esta librería incluye numerosas funciones relacionadas a la predicción de órbitas. De interés resulta la posibilidad de introducir como parámetro para el predictor los TLE de un satélite, que es el dato que el servidor va a recibir del cliente.
+El uso de esta librería se encuentra en el archivo \texttt{Streaming-on-demand/lib/tle\_parser.py}. 
+
+La librería cuenta con objetos de tipo \texttt{Location} que representan un punto en el planeta Tierra mediante la especificación de latitud, longitud y altura. Se definió un nuevo objeto \texttt{Location} ubicado en las coordenadas de la futura instalación de la estación terrena, estas son:
+\todo{Poner cordenadas}
+
+Se implementaron además tres funciones para las siguientes tareas:
+\begin{itemize}
+    \item Calcular la próxima pasada del satélite por la estación terrena
+    \item Obtener las coordenadas del satélite respecto a la estación terrena.
+    \item Calcular el factor de corrimiento Doppler respecto a la ubicación de la estación terrena.
+\end{itemize}
+
+\subsection{Etapa de captura, procesamiento y envío a clientes}
+
+
+%hablar del proceso de validacion   
+%Hablar del proceso de determinacion de pasada
+%Hablar de filenames
+%hablar de shm
+
 \subsection{Control de acceso a recursos compartidos}
-\subsection{Integración con GNU Radio}
 
+\section{Implementación del cliente}
+
+\section{Comunicación cliente-servidor}
+Para la comunicación entre cliente y el servidor se estableció un \textit{socket} de Linux
+
+\section{Compilación}
+%mencionar Cmkae, gnu radio es un shared object, y el server tambien
+\subsection{Integración con GNU Radio}
+\section{Capturas de prueba}
+%se usó hash para chequear integridad
 \end{document}

@@ -1,7 +1,7 @@
 \documentclass[../../main.tex]{subfiles}
 \begin{document}
 \graphicspath{{./figures}}
-\chapter{Integración con GNU Radio}
+\chapter{Integración con GNU Radio}\label{cap::gnu-radio}
 El \textit{core} de adquisición y preprocesamiento desarrollado en la CIAA-ACC empaqueta y envía los datos de los 16 canales preprocesados por un \textit{socket} UDP de acuerdo al software que corre dentro del PS desarrollado en \cite{proyecto-jose}. Por otro lado, en \cite{proyecto-grigo} se desarrollaron bloques en GNU Radio para detectar DoA y realizar la conformación digital de haz. En este capítulo se busca desarrollar un puente entre estos dos proyectos para lograr integrarlos.
 
 \section{Flujo de trabajo en GNU Radio}

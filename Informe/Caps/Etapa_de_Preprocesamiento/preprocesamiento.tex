@@ -2,9 +2,9 @@
 \begin{document}
 \graphicspath{{./figures}}
 \chapter{Preprocesamiento de los datos adquiridos}\label{cap::preproc}
-Las señales externas son muestreadas por el ADC a 65~MSps en un ancho de banda de 25~MHz como se desarrolló en el \cref{sec::planteo-front-end}. Sin embargo, los \textit{beams} de salida poseen un ancho de banda de apenas 25~kHz, de manera que puede reducirse considerablemente tanto el ancho de banda como la tasa de muestreo. Si se lograse centrar el ancho de banda de un  \textit{beam} en banda base por ejemplo, este solo ocuparía $12.5\un{kHz}$. Esto permitiría teóricamente reducir el ancho de banda de trabajo a $12.5\un{kHz}$ y trabajar con una tasa de muestreo ligeramente superior a 25~kSps cumpliendo con el teorema del muestreo. \cite{teorema-del-muestreo}.
+Las señales externas son muestreadas por el ADC a 65~MSps en un ancho de banda de 25~MHz como se desarrolló en el \cref{sec::planteo-front-end}. Sin embargo, los \textit{beams} de salida poseen un ancho de banda de apenas 25~kHz, de manera que puede reducirse considerablemente tanto el ancho de banda como la tasa de muestreo. Si se lograse centrar el ancho de banda de un  \textit{beam} en banda base por ejemplo, este solo ocuparía $12.5\un{kHz}$. Esto permitiría teóricamente reducir el ancho de banda de trabajo a $12.5\un{kHz}$ y trabajar con una tasa de muestreo ligeramente superior a 25~kSps cumpliendo con el teorema del muestreo~\cite{teorema-del-muestreo}.
 
-Como se dijo en el \cref{sec::planteo-sist-adq}, esta parte del \textit{core} de adquisición se desarrolla en el presente proyecto. Su diseño, implementación y validación se realizaron primero de manera aislada e independiente a lo desarrollado en \cite{proyecto-jose} y, posteriormente, se integró dentro de dicho sistema.
+Como se dijo en el \cref{sec::planteo-sist-adq}, esta parte del \textit{core} de adquisición se desarrolla en el presente proyecto. Su diseño, implementación y validación se realizaron primero de manera aislada e independiente a lo desarrollado en~\cite{proyecto-jose} y, posteriormente, se integró dentro de dicho sistema.
 
 \section{Requerimientos de diseño}
 La etapa de preprocesamiento debe ser capaz de seleccionar uno o varios canales de frecuencia de 25~kHz de ancho de banda, a partir de ahora a estos se les llamará \textit{beams} o haces, reservándose el término \textit{canal} para los canales del ADC.
@@ -37,12 +37,12 @@ Nuevamente, si bien los haces tienen 25~kHz de ancho de banda, el filtrado debe 
 A modo de primera comprobación del diseño conceptual previo a su implementación en hardware, se hizo una prueba de concepto en software de la etapa de preprocesamiento empleando Python. 
 Esta se encuentra en \texttt{Simulaciones/preprocesamiento.ipynb}. 
 
-Partiendo de la señal submuestreada a 65~MSps mostrada en la figura \ref{fig::undersampling} se aplicó un DDC \cite{DDC}, cuyo diagrama de bloques se muestra en la figura \ref{fig::DDC}. 
+Partiendo de la señal submuestreada a 65~MSps mostrada en la figura \ref{fig::undersampling} se aplicó un DDC~\cite{DDC}, cuyo diagrama de bloques se muestra en la figura \ref{fig::DDC}. 
 Este incluye un NCO el cual genera una exponencial compleja para realizar la rotación de espectro en sentido horario a una frecuencia de $18.5\un{MHz}$, de manera de trasladar la banda de $[-20\un{MHz}, -17\un{MHz}]$ a $[-1.5\un{MHz}, 1.5\un{MHz}]$. 
 
-Ya en banda base, el DDC contiene una etapa de filtrado pasabajos, cuya frecuencia de corte se configuró como $f_c = 1.5\un{MHz}$ de manera de capturar toda la banda de interés dentro de la banda de paso del filtro. El filtrado aplicado fue de tipo Butterworth \cite{Butterworth} y sus coeficientes del mismo se obtuvieron mediante la función \texttt{butter} \cite{butter} de la librería de SciPy \cite{scipy} y el filtrado propiamente dicho se realizó usando la función \texttt{lfilter} \cite{lfilter} también de la librería de SciPy. 
+Ya en banda base, el DDC contiene una etapa de filtrado pasabajos, cuya frecuencia de corte se configuró como $f_c = 1.5\un{MHz}$ de manera de capturar toda la banda de interés dentro de la banda de paso del filtro. El filtrado aplicado fue de tipo Butterworth~\cite{Butterworth} y sus coeficientes del mismo se obtuvieron mediante la función \texttt{butter}~\cite{butter} de la librería de SciPy~\cite{scipy} y el filtrado propiamente dicho se realizó usando la función \texttt{lfilter}~\cite{lfilter} también de la librería de SciPy. 
 
-Por último, el DDC posee una etapa de decimación en la cual se reduce la tasa de muestreo. Para determinar el factor de decimación debe tenerse en cuenta que la tasa de Nyquist \cite{Nyquist-rate} es ahora de 3~MHz, lo cual implica que la tasa actual de muestreo de 65~MSps podría reducirse hasta en un factor $65/3 = 21.66$ aproximadamente. 
+Por último, el DDC posee una etapa de decimación en la cual se reduce la tasa de muestreo. Para determinar el factor de decimación debe tenerse en cuenta que la tasa de Nyquist~\cite{Nyquist-rate} es ahora de 3~MHz, lo cual implica que la tasa actual de muestreo de 65~MSps podría reducirse hasta en un factor $65/3 = 21.66$ aproximadamente. 
 No obstante, para esta prueba de concepto se eligió un factor de decimación de 10, de manera que la tasa de muestras a la salida del DDC resulta $6.5\un{MSps}$. La salida de este primer DDC se muestra en la figura \ref{fig::DDC-band}.
 
 Teniendo toda la banda de UHF ya en BB, se procede a seleccionar un haz o \textit{beam} como se muestra en la figura \ref{fig::espectro-canal}. 
@@ -64,11 +64,11 @@ Para esta última se empleo un factor \todo{Agregar factor}. La salida de este s
 \end{figure}
 
 \section{Implementación en hardware}
-Habiendo validado el diseño conceptual mediante una implementación en software se procede a realizar una implementación del mismo en la placa CIAA-ACC. Dado que el SoC Zynq-7030 incluido en la CIAA-ACC es fabricado por la compañía Xilinx, se hizo uso de su entorno de desarrollo, el cual incluye al software \textit{Vivado} \cite{vivado} para el desarrollo, síntesiss e implementación en la FPGA y al software \textit{Vitis Unified Software Platform} \cite{vitis} para el desarrollo y la compilación cruzada \cite{cross-compilation} del software para el PS. La versión del entorno de desarrollo usada en este proyecto fue la 2020.2.
+Habiendo validado el diseño conceptual mediante una implementación en software se procede a realizar una implementación del mismo en la placa CIAA-ACC. Dado que el SoC Zynq-7030 incluido en la CIAA-ACC es fabricado por la compañía Xilinx, se hizo uso de su entorno de desarrollo, el cual incluye al software \textit{Vivado}~\cite{vivado} para el desarrollo, síntesiss e implementación en la FPGA y al software \textit{Vitis Unified Software Platform}~\cite{vitis} para el desarrollo y la compilación cruzada~\cite{cross-compilation} del software para el PS. La versión del entorno de desarrollo usada en este proyecto fue la 2020.2.
 
 La tasa de muestreo del AD9249 es de 65~MSps como se indica en la tabla \ref{tab::ADC}, esto fija la tasa de datos que tiene que procesar la FPGA y representa una frecuencia mínima de reloj a emplear. En base a esto, se eligió una frecuencia de reloj de 260~MHz para realizar el preprocesamiento de manera de disponer de 4 ciclos de reloj entre cada muestra que entrega el ADC\footnote{$260\un{MHz} = 4 \cdot 65\un{MHz}.$}. Esto puede otorgar cierta flexibilidad a la hora de diseñar el \textit{pipeline} de preprocesamiento.
 
-Esta implementación es de tipo \textit{standalone}, es decir, se hizo de manera aislada al sistema desarrollado en \cite{proyecto-jose} y se consideró un único \textit{beam} de salida como primera prueba de concepto.
+Esta implementación es de tipo \textit{standalone}, es decir, se hizo de manera aislada al sistema desarrollado en~\cite{proyecto-jose} y se consideró un único \textit{beam} de salida como primera prueba de concepto.
 
 Un esquema general con finalidad de servir como guía para la implementación se muestra en la figura \ref{fig::disenio-para-hw}, donde las señales de datos se encuentran en negro y las de control en naranja. En esta figura también se observan las etapas de mezcla y filtrado concebidas en la sección \ref{sec::disenio-conceptual-preproc} junto con los bloques
 \begin{itemize}
@@ -79,7 +79,7 @@ Un esquema general con finalidad de servir como guía para la implementación se
 \figura[0.85]{disenio-para-hw}{Esquema guía para la implementación de la etapa de preprocesamiento en hardware. Se indican en negro las señales de datos y en naraja las de control.}
 
 \subsection{IPs empleadas}
-\textit{Vivado} cuenta con interfaces o bloques propietarios en su librería de propiedad intelectual o IP \cite{IP-Xilinx}. Estos \textit{IP Blocks}, a partir de ahora simplemente IPs, funcionan como caja negra para el usuario ya que su implementación está encriptada. Los IPs actuan recibiendo entradas y produciendo salidas acordes a su funcionalidad.
+\textit{Vivado} cuenta con interfaces o bloques propietarios en su librería de propiedad intelectual o IP~\cite{IP-Xilinx}. Estos \textit{IP Blocks}, a partir de ahora simplemente IPs, funcionan como caja negra para el usuario ya que su implementación está encriptada. Los IPs actuan recibiendo entradas y produciendo salidas acordes a su funcionalidad.
 
 En el desarrollo de la etapa de preprocesamiento se utilizaron las IPs de \textit{Vivado} nombradas en la tabla \ref{tab::ip-vivado-preproc}.
 \begin{table}[H]
@@ -89,10 +89,10 @@ En el desarrollo de la etapa de preprocesamiento se utilizaron las IPs de \texti
     \hline
     \multicolumn{3}{|c|}{\textbf{IPs nativas utilizadas}}                                                                                                                                                                                                                                                        \\ \hline
     \multicolumn{1}{|l|}{\textbf{Nombre}}    & \multicolumn{1}{l|}{\textbf{Función}}                                                                                                                                                                                  & \textbf{Documentación}                   \\ \hline
-    \multicolumn{1}{|l|}{\texttt{AXI Interconnect}}   & \multicolumn{1}{l|}{\begin{tabular}[c]{@{}l@{}}Conecta uno o más dispositivos maestros AXI mapeados\\ en memoria a uno o más dispositivos esclavos mapeados\\ en memoria.\end{tabular}}                                & \cite{axi-interconnect} \\ \hline
-    \multicolumn{1}{|l|}{\texttt{Complex Multiplier}} & \multicolumn{1}{l|}{\begin{tabular}[c]{@{}l@{}}Implementa multiplicadores complejos optimizados, de\\ alto rendimiento y compatibles con AXI4-Stream basados\\ en opciones especificadas por el usuario.\end{tabular}} & \cite{complex-mult}     \\ \hline
-    \multicolumn{1}{|l|}{\texttt{DDS Compiler}}       & \multicolumn{1}{l|}{Genera señales sinusoidales.}                                                                                                                                                                      & \cite{dds-compiler}     \\ \hline
-    \multicolumn{1}{|l|}{\texttt{FIR Compiler}}       & \multicolumn{1}{l|}{Genera un filtro tipo FIR.}                                                                                                                                                                        & \cite{fir-compiler}     \\ \hline
+    \multicolumn{1}{|l|}{\texttt{AXI Interconnect}}   & \multicolumn{1}{l|}{\begin{tabular}[c]{@{}l@{}}Conecta uno o más dispositivos maestros AXI mapeados\\ en memoria a uno o más dispositivos esclavos mapeados\\ en memoria.\end{tabular}}                                &~\cite{axi-interconnect} \\ \hline
+    \multicolumn{1}{|l|}{\texttt{Complex Multiplier}} & \multicolumn{1}{l|}{\begin{tabular}[c]{@{}l@{}}Implementa multiplicadores complejos optimizados, de\\ alto rendimiento y compatibles con AXI4-Stream basados\\ en opciones especificadas por el usuario.\end{tabular}} &~\cite{complex-mult}     \\ \hline
+    \multicolumn{1}{|l|}{\texttt{DDS Compiler}}       & \multicolumn{1}{l|}{Genera señales sinusoidales.}                                                                                                                                                                      &~\cite{dds-compiler}     \\ \hline
+    \multicolumn{1}{|l|}{\texttt{FIR Compiler}}       & \multicolumn{1}{l|}{Genera un filtro tipo FIR.}                                                                                                                                                                        &~\cite{fir-compiler}     \\ \hline
     \end{tabular}%
     }
     \caption{IPs nativas utilizadas en el desarrollo de la etapa de preprocesamiento.}
@@ -128,10 +128,10 @@ La integración de estos módulos con las IPs de Xilinx serán más claras en br
 \subsection{Filtros y decimación}\label{subsec::filtros-decimacion}
 Según el esquema guía de la figura \ref{fig::disenio-para-hw} y lo desarrollado en \ref{sec::disenio-conceptual-preproc} deben implementarse dos etapas digitales de filtrado pasabajos y decimación, una después de realizar cada mezcla. 
 
-Al diseñar la etapa de filtrado deben tenerse en cuenta las consideraciones habituales \unsure{No mg mucho esa palabra} como la evaluación del tipo de filtro, la frecuencia de corte, el orden del filtro, entre otros. Pero además, al tratarse de un filtro a ser implementado en hardware, debe tenerse en cuenta que el mismo hará uso de aritmética de punto fijo \cite{pto-fijo}. Esto implica que el número de dígitos decimales con los que se trabaja se mantiene constante.
+Al diseñar la etapa de filtrado deben tenerse en cuenta las consideraciones habituales \unsure{No mg mucho esa palabra} como la evaluación del tipo de filtro, la frecuencia de corte, el orden del filtro, entre otros. Pero además, al tratarse de un filtro a ser implementado en hardware, debe tenerse en cuenta que el mismo hará uso de aritmética de punto fijo~\cite{pto-fijo}. Esto implica que el número de dígitos decimales con los que se trabaja se mantiene constante.
 
 \subsubsection{Diseño de los filtros}
-Para el diseño de los filtros se utilizó el programa MATLAB de la empresa MathWorks, el cual incorpora herramientas tales como \texttt{Filter Builder} \cite{filter-builder} y \texttt{Filter Designer} \cite{filter-designer}. Estas herramientas permiten realizar el diseño de filtros de todo tipo a partir de los parámetros de interés de cada aplicación en particular. 
+Para el diseño de los filtros se utilizó el programa MATLAB de la empresa MathWorks, el cual incorpora herramientas tales como \texttt{Filter Builder}~\cite{filter-builder} y \texttt{Filter Designer}~\cite{filter-designer}. Estas herramientas permiten realizar el diseño de filtros de todo tipo a partir de los parámetros de interés de cada aplicación en particular. 
 
 \texttt{Filter Builder} y \texttt{Filter Designer} también son capaces de trabajar con aritmética de punto fijo y generar el código en VHDL para utilizar directamente en \textit{Vivado}. A priori esta puede ser una opción viable, sin embargo, dado que los filtros se implementarán con el \textit{IP Block} \texttt{FIR Compiler} nativo de Xilinx, no se necesita el código en VHDL. En cambio, el \texttt{FIR Compiler} requiere que se lo configure con los valores de los coeficientes. Para esto se usa un archivo con extensión \textit{coe} que es un archivo de texto indicando los valores de todos los coeficientes, la base numérica en la que están expresados (llamado \textit{radix}) y el ancho en bits de los mismos. Un recorte de un archivo de coeficientes se muestra en la figura \ref{fig::coef-file}. Este recorte corresponde al archivo empleado en la configuración del primer filtro pasabajos.
 
@@ -148,7 +148,7 @@ Para el caso del segundo filtrado, a partir de ahora \textit{filtrado de haz} o 
 \subsubsection{Tasas de decimación}
 Tras el primer filtrado se tiene toda la información de la banda de UHF de interés ahora en el rango de frecuencias $-1.5\un{MHz}<f<1.5\un{MHz}$. De esta manera, se requiere una tasa de muestreo mínima superior a los 3~MHz (\cite{teorema-del-muestreo}). Partiendo de la tasa actual de muestreo de 65~MSps, puede incorporarse un factor de decimación máximo:
 \[\textrm{Factor de decimación máximo} = \left\lfloor\frac{65\un{MSps}}{3\un{MSps}}\right\rfloor = 21.\]
-Para esta implementación \textit{standalone} se eligió un factor de decimación de 8. Este parámetro es configurable directamente en el \texttt{FIR Compiler}, el cual se encarga de la optimización de recursos \cite{fir-compiler}. Así, la tasa de datos a la salida del filtrado de banda es $f'_s = 8.125\un{MHz}$.
+Para esta implementación \textit{standalone} se eligió un factor de decimación de 8. Este parámetro es configurable directamente en el \texttt{FIR Compiler}, el cual se encarga de la optimización de recursos~\cite{fir-compiler}. Así, la tasa de datos a la salida del filtrado de banda es $f'_s = 8.125\un{MHz}$.
 
 Tras el filtrado de canal se tiene que a la salida el ancho de banda es de 50~kHz. Luego, se requiere una frecuencia de muestreo de al menos 100~kHz. Esto permite tener el siguiente factor máximo de decimación:
 \[\textrm{Factor de decimación máximo} = \left\lfloor\frac{8.125\un{MSps}}{100\un{kSps}}\right\rfloor = 81.\] En este caso se eligió una tasa de decimación de 50.
@@ -205,7 +205,7 @@ Sin embargo, dicho módulo por si solo se emplea para sincronizar un único bit 
 
 \figura{CDC-preproc}{Sincronizador de 2 bits para señales lentas empleado para realizar el CDC de la señal de control del multiplexor desde el dominio de reloj del \texttt{AXI Interconnect} al dominio de reloj de 260~MHz.}
 
-\subsection{Implementación en \textit{Vivado}}
+\subsection{Implementación en \textit{Vivado}}\label{subsec::implementacion-vivado}
 Haciendo uso e interconectando los bloques de IP de las tablas \ref{tab::ip-vivado-preproc} y \ref{tab::ip-fran} puede implementarse el diseño conceptual descrito en la sección \ref{sec::disenio-conceptual-preproc} tomando comó guía el esquema de la figura \ref{fig::disenio-para-hw}. 
 
 Cabe destacar que el diseño realizado implica trabajar con números complejos ya sea en las mezclas, en los filtros y en toda la cadena de preprocesamiento en general. Como consecuencia de esto se tendrán que realizar las adaptaciones correspondientes, las cuales se describirán oportunamente a medida que surjan naturalmente.
@@ -247,7 +247,7 @@ El \texttt{DDS Compiler} es capaz de generar un coseno puro, un seno puro o una 
 
 Para configurar el ancho de la señal de salida del \texttt{DDS Compiler} debe elegirse la opción \textit{Hardware Parameters} en el campo de \textit{Parameter Selection}. Se configura entonces la señal salida a 16 bits en todos los casos, contemplando que si se le pide que genere una señal tipo exponencial compleja, el ancho será de 32 bits (16 bits para la parte real y 16 para la imaginaria).
 
-La frecuencia del oscilador en el modo de \textit{Hardware Parameters} se elige a través de la escritura en binario del incremento de fase deseado. Para calcular el incremento de fase $\Delta \theta$ correspondiente a una frecuencia de configuración $f_\textrm{conf}$ se utiliza la siguiente fórmula \cite[p. 17]{dds-compiler}:
+La frecuencia del oscilador en el modo de \textit{Hardware Parameters} se elige a través de la escritura en binario del incremento de fase deseado. Para calcular el incremento de fase $\Delta \theta$ correspondiente a una frecuencia de configuración $f_\textrm{conf}$ se utiliza la siguiente fórmula~\cite[p. 17]{dds-compiler}:
 
 \begin{equation}
      \Delta \theta = \frac{2^N}{f_\textrm{clk}} f_\textrm{conf},
@@ -323,9 +323,9 @@ Dicha interconexión se muestra en la figura \ref{fig::bd-preproc}, la cual corr
 \figura{bd-preproc}{BD preproc}
 
 \section{Verificación con UVM}\label{sec::simu-uvm}
-Habiendo implementado el diseño en \textit{Vivado}, se procedió a verificar su correcto funcionamiento mediante simulaciones. \textit{Vivado} provee herramientas de simulación, sin embargo resultan demasiado lentas y demandantes en términos computacionales. Para lograr simulaciones más rápidas se hizo uso del simulador de la empresa Siemens \textit{Questa Advanced Simulator} \cite{questa}. \unsure{Mencionamos a Questa o mejor me ahorro esto??}
+Habiendo implementado el diseño en \textit{Vivado}, se procedió a verificar su correcto funcionamiento mediante simulaciones. \textit{Vivado} provee herramientas de simulación, sin embargo resultan demasiado lentas y demandantes en términos computacionales. Para lograr simulaciones más rápidas se hizo uso del simulador de la empresa Siemens \textit{Questa Advanced Simulator}~\cite{questa}. \unsure{Mencionamos a Questa o mejor me ahorro esto??}
 
-Para el desarrollo de la simulación se utilizó \textit{Universal Verification Methodology} (UVM) \cite{uvm}. Este comenzó como un una librería de clases para el desarrollo de simulaciones en \textit{SystemVerilog} creado por la empresa Accellera para proveer un estándar en el ámbito de la verificación. Finalmente, UVM fue adoptado como estándar por la IEEE \cite{uvm-ieee}.
+Para el desarrollo de la simulación se utilizó \textit{Universal Verification Methodology} (UVM)~\cite{uvm}. Este comenzó como un una librería de clases para el desarrollo de simulaciones en \textit{SystemVerilog} creado por la empresa Accellera para proveer un estándar en el ámbito de la verificación. Finalmente, UVM fue adoptado como estándar por la IEEE~\cite{uvm-ieee}.
 
 El para las simulaciones se encuentra en el directorio \texttt{Fpga/prj/preprocessing\_stage/sim/}.
 
@@ -342,7 +342,7 @@ Para el caso del agente ADC se tiene un generador de secuencia (\textit{sequence
 
 En el caso del agente AXI, se generaron dos secuencias, una de lectura y una de escritura. Esto permite simular de manera íntegra la lectura y escritura de registros de la FPGA y, en consecuencia, verificar el correcto funcionamiento de la señal de control.
 
-\figura[0.7]{uvm-structure}{Estructura del estándar UVM \cite{uvm}.}
+\figura[0.7]{uvm-structure}{Estructura del estándar UVM~\cite{uvm}.}
 
 
 \begin{table}[H]
@@ -359,7 +359,7 @@ En el caso del agente AXI, se generaron dos secuencias, una de lectura y una de 
     \textit{Sequencer}   & \begin{tabular}[c]{@{}l@{}}Normalmente forma parte de un \textit{UVM Agent} y controla el flujo de transacciones de secuencias de\\ estímulos hacia el DUT.\end{tabular}                                                           \\ \hline
     \end{tabular}%
     }
-    \caption{Breve explicación del funcionamiento de algunos componentes relevantes de UVM. Una explicación más detallada se encuentra en \cite{uvm}}\label{tab::uvm-components}
+    \caption{Breve explicación del funcionamiento de algunos componentes relevantes de UVM. Una explicación más detallada se encuentra en~\cite{uvm}}\label{tab::uvm-components}
     \end{table}
 
 \subsection{Casos simulados y resultados}
@@ -430,18 +430,18 @@ Para evaluar más detalladamente la implementación de los filtros entonces, se 
 \end{figure}
 
 \section{Integración con el sistema de adquisición}
-Habiendo desarrollado y validado la etapa de preprocesamiento de manera aislada (\textit{standalone}), se procede a realizar la integración con el \textit{core} de adquisición desarrollado en \cite{proyecto-jose}.
+Habiendo desarrollado y validado la etapa de preprocesamiento de manera aislada (\textit{standalone}), se procede a realizar la integración con el \textit{core} de adquisición desarrollado en~\cite{proyecto-jose}.
 
 Todo el código relacionado con la integración de los proyectos se encuentra en el submódulo \texttt{PIQuinteros/} del respositorio, en las ramas \texttt{dev-fran} y \texttt{dev-fran-opt} ya que se extendió directamente el proyecto existente, que se ubica dentro de ese repositorio. Más especificamente, se encuentra en el directorio \texttt{PIQuinteros/Fpga/}
 
 \subsection{Recreación del proyecto preexistente}
-Para lograr la integración de la etapa de preprocesamiento con el proyecto llevado a cabo en \cite{proyecto-jose}, resulta necesario entender los aspectos más importantes del mismo. Para esto se recreó el proyecto original con los archivos ubicados en la rama \texttt{main} del submódulo.
+Para lograr la integración de la etapa de preprocesamiento con el proyecto llevado a cabo en~\cite{proyecto-jose}, resulta necesario entender los aspectos más importantes del mismo. Para esto se recreó el proyecto original con los archivos ubicados en la rama \texttt{main} del submódulo.
 
 Se empleó \textit{Vivado} para generar el \textit{bitstream}, esto es, el archivo de configuración de la FPGA correspondiente al proyecto y \textit{Vitis Unified Software Platform} para generar los archivos binarios a correr en el PS y en una computadora externa.
 
-Un diagrama de lo implementado dentro de la CIAA-ACC en \cite{proyecto-jose} se muestra en la figura \ref{fig::pipeline-ciaa}, a excepción de la etapa de preprocesamiento, la cual no se implementó en dicho proyecto.
+Un diagrama de lo implementado dentro de la CIAA-ACC en~\cite{proyecto-jose} se muestra en la figura \ref{fig::pipeline-ciaa}, a excepción de la etapa de preprocesamiento, la cual no se implementó en dicho proyecto.
 
-Se logró exitósamente replicar los resultados mostrados en \cite{proyecto-jose}, transmitiendo y recibiendo capturas utilizando el software allí desarrollado.
+Se logró exitósamente replicar los resultados mostrados en~\cite{proyecto-jose}, transmitiendo y recibiendo capturas utilizando el software allí desarrollado.
 
 \subsection{Módulos y IPs empleados en la integración}
 %FIFO Generator
@@ -477,7 +477,7 @@ La integración del presente proyecto con el \textit{core} de adquisición ya ex
 
 La adaptación del formato de datos y el ancho de las FIFOs resulta directa ya que el \textit{core} de adquisición fue diseñado de manera de trabajar con dos datos de 16 bits ya que el ancho de los registros del bus AXI fue fijado a 32 bits. La transición de 16 a 32 bits se lleva a cabo en las colas FIFO, las almacenan los datos capturados para luego ser leídos por el PS mediante el bus AXI.
 
-La instanciación de las colas FIFO se hace a través del IP \texttt{FIFO Generator} de Xilinx \cite{fifo-generator}. Este IP provee la configuración de los parámetros \textit{Input Data Width} y \textit{Output Data Width}, los cuales en el \textit{core} de adquisición fueron configurados como 16 y 32 bits respectivamente.
+La instanciación de las colas FIFO se hace a través del IP \texttt{FIFO Generator} de Xilinx~\cite{fifo-generator}. Este IP provee la configuración de los parámetros \textit{Input Data Width} y \textit{Output Data Width}, los cuales en el \textit{core} de adquisición fueron configurados como 16 y 32 bits respectivamente.
 
 De esta manera, la única adaptación necesaria consiste es aumentar el parámetro \textit{Input Data Width} del IP \texttt{FIFO Generator} a 32 bits para poder escribir a las FIFOs datos complejos.
 
@@ -546,11 +546,11 @@ El \texttt{FIFO Input Mux} es, como su nombre lo indica, un multiplexor que perm
 El multiplexor se controla mediante una señal asociada a un registro, con lo cual debe ser sincronizada de manera acorde como una señal de control según se explicó en \ref{subsec::cdcs-integracion}.
 
 \subsection{Adaptación de los \textit{constraints} del proyecto}
-Las \textit{constraints} o restricciones de diseño definen los requisitos que debe cumplir el flujo de compilación en \textit{Vivado} para que el diseño sea funcional en la placa \cite{xdc-constraints}. En \textit{Vivado}, estos se especifican mediante un archivo de texto con extensión \texttt{.xdc} (\textit{Xilinx Design Constraints}), en el cual todos los \textit{constraints} se especifican mediante comandos de TCL (lenguaje de \textit{scripting}).
+Las \textit{constraints} o restricciones de diseño definen los requisitos que debe cumplir el flujo de compilación en \textit{Vivado} para que el diseño sea funcional en la placa~\cite{xdc-constraints}. En \textit{Vivado}, estos se especifican mediante un archivo de texto con extensión \texttt{.xdc} (\textit{Xilinx Design Constraints}), en el cual todos los \textit{constraints} se especifican mediante comandos de TCL (lenguaje de \textit{scripting}).
 
 El proyecto preexistente ya implementa un archivo XDC en el cual se especifican las asociaciones de puertos con pines de la FPGA (llamado \textit{pinout}) y se fijan estándares eléctricos entre otras cosas. Estos archivos se encuentan en \texttt{PIQuinteros/Fpga/src/constraints/}.
 
-En dicho directorio se incorporó un nuevo archivo llamado \texttt{ciaa\_acc\_SistAdq\_timing.xdc}. En este archivo se especificaron \textit{constraints} relacionados al \textit{timing} del sistema. En particular, se empleó el comando \texttt{set\_false\_path} para que \textit{Vivado} ignore ciertos \textit{caminos} a la hora de realizar el análisis de \textit{timing} \cite{false-paths}.
+En dicho directorio se incorporó un nuevo archivo llamado \texttt{ciaa\_acc\_SistAdq\_timing.xdc}. En este archivo se especificaron \textit{constraints} relacionados al \textit{timing} del sistema. En particular, se empleó el comando \texttt{set\_false\_path} para que \textit{Vivado} ignore ciertos \textit{caminos} a la hora de realizar el análisis de \textit{timing}~\cite{false-paths}.
 
 Los caminos a ser ignorados por la herramienta están son aquellos que incurren en un CDC, ya que estos casos fueron debidamente abordados empleando lógica adicional de sincronización para evitar problemas de metaestabilidad. 
 
@@ -558,16 +558,37 @@ En general, las señales involucradas en los CDCs son lentas o cuasiestáticas c
 
 En este caso particular se tienen datos generados a 65~MSps empleando un reloj de 455~MHz, los cuales deben muestrearse a medida que salen con el reloj de 260~MHz. De manera,que se dispone de 4 ciclos del reloj de 260~MHz para muestrear la señal que sale del deserializador. Sin embargo, también debe considerarse que el módulo \texttt{Pulse Sync} hace uso de 2 ciclos de reloj para sincronizar la señal de \textit{valid}, la cual luego se utilizará como \textit{clock enable} para el módulo \texttt{Sampler with CE} (ver subsección \ref{subsec::cdcs-integracion}). Como consecuencia, la señal de datos proveniente del deserializador debe estar estable para ser muestreada luego de 2 ciclos de reloj de 260~MHz.
 
-Este requerimiento puede expresarse en el archivo XDC a través de la función \texttt{set\_max\_delay}, la cual permite fijar un retraso máximo para un dado \textit{datapath} \cite{set-max-delay}. En este caso, dicho retraso máximo es de $1000 \cdot 2/260\un{ns}$.
-\subsection{Refactorización del código preexistente}
+Este requerimiento puede expresarse en el archivo XDC a través de la función \texttt{set\_max\_delay}, la cual permite fijar un retraso máximo para un dado \textit{datapath}~\cite{set-max-delay}. En este caso, dicho retraso máximo es de $1000 \cdot 2/260\un{ns}$.
+
+\section{Refactorización del código preexistente}
 %Simplificación del adc_receiver
 %Eliminación del bd_top para poder instanciar bds
 %Incorporación del data_handler
 %Ordenamiento natural de los canales
+Durante la integración de la etapa de preprocesamiento con el \textit{core} de adquisición se realizó una refactorización del código desarrollado en el sistema de adquisición original con el objetivo de simplificar la estructura del mismo y optimizar el uso de recursos dentro de la FPGA.
+
+Para poder entender las modificaciones realizadas a la base de código y las subsecuentes optimizaciones resultantes, es necesario primero familiarizarse con algunos aspectos relevantes de la implementación original del \textit{core} llevada a cabo en~\cite{proyecto-jose}, los cuales se mencionan a continuación:
+\begin{enumerate}
+    \item El módulo principal del sistema (\textit{top module}) se instancia dentro de un diagrama de bloques o \textit{block design} generado mediante el \textit{Vivado IP Integrator}~\cite{vivado-ip-integrator}.
+    \item Parte de la lógica se repite en dos instancias del módulo \texttt{ADC Receiver}.
+\end{enumerate}
+
+La relevancia del primer punto mencionado radica en que la versión 2020.2 de \textit{Vivado} utilizada en este proyecto no permite anidar diagramas de bloques. Es decir, no es posible instanciar un diagrama de bloques dentro de otro. En consecuencia, dado que la etapa de preprocesamiento diseñada en \ref{subsec::implementacion-vivado} fue implementada en un \textit{block design}, fue necesario transcribir el módulo \textit{top} a un módulo de VHDL. El mismo se encuentra en \texttt{PIQuinteros/Fpga/src/hdl/SistAdq\_top.vhd}.
+
+El módulo \texttt{ADC Receiver}, ubicado en \texttt{PIQuinteros/Fpga/src/hdl/adc\_receiver.vhd}, contiene la lógica de los retardos de entrada y el deserializador, entre otras cosas. Este módulo se instancia dos veces debido a que, en el \textit{mapeo} de pines del conector FMC, de los 16 canales de datos del ADC, 14 se encuentran en el banco 12 de la FPGA y 2 en el banco 13 de esta (para mayor detalle ver \cite{proyecto-jose}).
+
+Originalmente, en el módulo \texttt{ADC Receiver} se instanciaba no solo a los retardos de entrada y el deserializador, sino también las herramientas de \textit{debug} desarrolladas en el proyecto del \textit{core} de adquisición y las colas FIFO. Además, en una primera incorporación de la etapa de preprocesamiento, esta misma se instanció también dentro del módulo \texttt{ADC Receiver}. Viendo la figura \ref{fig::pipeline-ciaa}, en líneas generales, toda la lógica desde los retardos de entrada hasta las FIFO estaba instanciada en este módulo.
+
+Se propuso entonces mantener las dos instancias del \texttt{ADC Receiver} pero minimizando el contenido de las mismas. De esta manera, solo se conservó en este módulo la lógica relacionada a los retardos de entrada y el deserializador.
+
+Se creó un nuevo módulo en VHDL llamado \texttt{Data Handler}, el mismo sirvió como 
+
+\todo{Poner imagen de data handler y como está formado}
 \section{Ampliaciones}
 %Mas herramientas de debug, todas las salidas del mux
 \subsection{Incorporación de múltiples haces}
 \subsection{Optimizaciones}
+%primeras optimizaciones (un solo beam osc, un solo band osc)
 
 \section{\textit{Mapeo} de registros}
 
