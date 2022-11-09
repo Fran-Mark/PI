@@ -53,7 +53,7 @@ void handler_int( )
 {
   double d;
   double f;
-  double phi_0, phi_1, phi_2, phi_3, ampl; 
+  double phase_1, phase_2, phase_3, phase_4, ampl; 
   
   #ifdef TIME_SCANNING
   double theta;
@@ -70,10 +70,10 @@ void handler_int( )
   #endif
   
   f = frequency( theta );
-  phi_0 = phase( 1, theta );
-  phi_1 = phase( 2, theta );
-  phi_2 = phase( 3, theta );
-  phi_3 = phase( 4, theta );
+  phase_1 = phase(1, theta);
+  phase_2 = phase( 2, theta );
+  phase_3 = phase( 3, theta );
+  phase_4 = phase( 4, theta );
   ampl = amplitude( d );
   
   /* PRINT VARIABLES (CAN'T DO IT IF TIME_SCANNING TOO LOW */
@@ -81,12 +81,12 @@ void handler_int( )
 //  Serial.print( String( (String)"d = " + d + "\r" ) );
   Serial.print( String( (String)"theta = " + theta * 57.296 + "\r" ) );
 //  Serial.print( String( (String)"f = " + f + "\r" ) );
-//  Serial.print( String( (String)"phi_0 = " + phi_0 + "\r" ) );
-//  Serial.print( String( (String)"phi_1 = " + phi_1 + "\r" ) );
-//  Serial.print( String( (String)"phi_2 = " + phi_2 + "\r" ) );
-//  Serial.print( String( (String)"phi_3 = " + phi_3 + "\r" ) );
+//  Serial.print( String( (String)"phase_1 = " + phase_1 + "\r" ) );
+//  Serial.print( String( (String)"phase_2 = " + phase_2 + "\r" ) );
+//  Serial.print( String( (String)"phase_3 = " + phase_3 + "\r" ) );
+//  Serial.print( String( (String)"phase_4 = " + phase_4 + "\r" ) );
 //  Serial.print( String( (String)"ampl = " + ampl + "\r\r" ) );
-//  Serial.print( String( (String)"[ " + t + "    " + d + "    " + theta + "    " + f + "    " + phi_0 + "    " + phi_1 + "    " + phi_2 + "    " + phi_3 + "    " + ampl + "   ]\r\r" ) );
+//  Serial.print( String( (String)"[ " + t + "    " + d + "    " + theta + "    " + f + "    " + phase_1 + "    " + phase_2 + "    " + phase_3 + "    " + phase_4 + "    " + ampl + "   ]\r\r" ) );
 
   /* MODIFY ALL CHANNEL FREQUENCY AND AMPLITUDE */
   channelSel(4);             //select a channel (0,1,2,3) to write to.  4 selects all channels
@@ -95,16 +95,16 @@ void handler_int( )
 
   /* MODIFY CHANNEL 2 SIGNAL */
   channelSel(0);
-  writePhase(phi_0);
+  writePhase(phase_1);
 
   channelSel(1);
-  writePhase(phi_1);
+  writePhase(phase_2);
 
   channelSel(2);
-  writePhase(phi_2);
+  writePhase(phase_3);
 
   channelSel(3);
-  writePhase(phi_3);
+  writePhase(phase_4);
 
   /* UPDATE CHANGES */
   pulseUpdate();        //update output to the new frequency
