@@ -109,6 +109,7 @@ Afortunadamente, la librería \textit{pybind11} incorpora las clases \texttt{pyb
 
 \figura[0.8]{gil-dynamics}{Manejo del GIL entre varios \textit{threads}\cite{GIL-foto}.}
 
+\change{Revisar esta subsubsección que ya lo puse en el capitulo de proc externo}
 \subsubsection{La librería \textit{orbit-predictor}}
 Ya resuelta la interfaz entre Python y C++ pueden emplearse las funciones provistas en la librería \textit{orbit-predictor} desarrollada en un repositorio de GitHub de Satellogic\cite{orbit-predictor}. Esta librería incluye numerosas funciones relacionadas a la predicción de órbitas. De interés resulta la posibilidad de introducir como parámetro para el predictor los TLE de un satélite, que es el dato que el servidor va a recibir del cliente.
 El uso de esta librería se encuentra en el archivo \texttt{Streaming-on-demand/lib/tle\_parser.py}. 

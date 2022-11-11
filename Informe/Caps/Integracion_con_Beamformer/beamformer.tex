@@ -1,8 +1,22 @@
 \documentclass[../../main.tex]{subfiles}
 \begin{document}
 \graphicspath{{./figures}}
-\chapter{Integración con GNU Radio}\label{cap::gnu-radio}
+\chapter{Procesamiento externo}\label{cap::gnu-radio}
 El \textit{core} de adquisición y preprocesamiento desarrollado en la CIAA-ACC empaqueta y envía los datos de los 16 canales preprocesados por un \textit{socket} UDP de acuerdo al software que corre dentro del PS desarrollado en \cite{proyecto-jose}. Por otro lado, en \cite{proyecto-grigo} se desarrollaron bloques en GNU Radio para detectar DoA y realizar la conformación digital de haz. En este capítulo se busca desarrollar un puente entre estos dos proyectos para lograr integrarlos.
+
+Además, en esta etapa también deben incorporarse los algoritmos de procesamiento necesarios, los cuales incluyen:
+\begin{itemize}
+    \item Corrección de corrimiento Doppler.
+    \item Lectura y decodificación de \textit{header} de paquetes.
+    \item Detección de dirección de arribo.
+    \item Conformación digital de haz.
+\end{itemize}
+
+Se trabajó en paralelo en el desarrollo de dos aspectos de carácter más fundamental que los recién mencionados en el sentido de que resultan necesarios para alcanzarlos. En particular, dos cuestiones deben resolverse para lograr la implentación exitosa de la etapa de procesamiento externo. Estas cuestiones serán tratadas en las secciones subsiguientes y pueden enunciarse como:
+\begin{itemize}
+    \item La comunicación entre la CIAA-ACC y el sistema de procesamiento externo.
+    \item La validación de los algoritmos de conformación de haz y detección de dirección de arribo preexistentes.
+\end{itemize}
 
 \section{Flujo de trabajo en GNU Radio}
 Como se comentó en la sección \ref{sec::procesamiento-externo}, GNU Radio es un software para el desarrollo de SDR \cite{GNURadio}. El mismo consiste de una librería desarrollada parte en C++ y parte en Python. Cuenta además con una interfaz de usuario que provee una forma sencilla de desarrollo de tipo \textit{low code} mediante bloques. Cuando se elige este enfoque de desarrollo, GNU Radio luego se encarga de escribir en código de C++ o Python la configuración expresada mediante el diagrama de bloques. Esto resulta útil ya que le permite al usuario modificar el código generado según le sea conveniente.
@@ -26,11 +40,84 @@ Además de los bloques incluidos con la librería como los recién mencionados, 
     \label{fig::gnu-dummy}
 \end{figure}
 
-\section{Recepción con GNU Radio}
 \todo{Poner tabla con bloques nativos utilizados y otra con bloques custom o de otros usuarios (parecido a lo que hicimos con las IPs en el preproc)}
-\subsection{Adquisición de capturas guardadas}
-\todo{Hacer esto mencionando las capturas de Jose}
-\subsection{Comunicación entre CIAA-ACC y GNU Radio}\ref{subsec::comuicacion-con-gnuradio}
+
+\section{Comprobación de algoritmos preexistentes}
+Como primera instancia se evaluaron el algoritmo previamente implementado en \cite{proyecto-grigo} para realizar la estimación de DoA y la conformación digital de haz. Estos algoritmos se incorporó a GNU Radio en forma de bloque OOT, cuyas declaraciones y definiciones pueden encontrarse en el directorio \texttt{GNU-Radio/OOT/gr-beamforming/lib/}.
+
+Para llevar a cabo la comprobación de funcionamiento de dichos bloques se generaron señales sintéticas mediante la utilización de \textit{Jupyter Notebook}, el generador se encuentra en \texttt{DOA/signal\_generator.ipynb}
+
+Los desfases relativos para cada uno de los elementos $\Delta \varphi_{ij}$ viene dado por:
+\begin{equation}
+    \Delta \varphi_{ij} = k d \cos (\theta) \cdot (i \cos \phi + j \sin \phi),
+    \label{eq::desfases}
+\end{equation}
+donde $\theta$ representa el ángulo de elevación y $\phi$ el de acimut, $k$ representa el número de onda y $d$ la separación entre elementos como se muestra en la figura \ref{fig::theta-phi}.
+
+Dado que \[k =  \frac{2 \pi}{\lambda}\] y la separación entre elementos se eligió en el capítulo \todo{ref!} como \[d = 0.55\lambda,\] la ecuación \ref{eq::desfases} se simplifica a 
+\begin{equation}
+    \Delta \varphi_{ij} = 1.1 \pi \cos (\theta) \cdot (i \cos \phi + j \sin \phi).
+    \label{eq::desfases-simplificada}
+\end{equation}
+Se ve entonces de la ecuación \ref{eq::desfases-simplificada} que, al elegir la separación entre elementos como un valor proporcional a la longitud de onda, los desfases asociados resultan independientes de la frecuencia.
+
+Las señales generadas, de carácter complejo, fueron escritas a un archivo binario, el cual se leyó desde GNU Radio empleando el bloque \texttt{File Source}. Un detalle relevante en la configuración de este bloque es que deben saltearse los primeros 16 números complejos (los primeros 128~bytes) ya que corresponden al \textit{header} de los datos generados sintéticamente y no son de interés. 
+
+Si bien no es necesario conocer el funcionamiento interno ni la implementación de estos bloques, si es necesario conocer su interfaz de entrada/salida para poder trabajar con ellos. En el caso del \texttt{DoA Esprit Estimation} recibe un vector complejo de tamaño $M_x \times M_y = 4 \times 4 = 16$ (ver figura \ref{fig::theta-phi}); por otro lado, a la salida se implementó un puerto de mensajes, el cual comunicará la dirección de arribo detectada al \texttt{Beamformer (C++)}. Este último recibe también un vector complejo de $M_x \times M_y = 4 \times 4 = 16$ elementos y su salida es un \textit{stream} de números complejos representando a la señal conformada. El bloque \texttt{File Source} puede configurarse para entregar un vector de 16 elementos complejos en cada lectura, que es exactamente lo que necesitan los bloques siendo evaluados.
+
+Se probaron diversos valores tanto de acimut como de elevación y pudo conformarse la señal exitósamente utilizando el esquemático mostrado en la figura \ref{fig::doa-test}. En todos los casos logró detectarse correctamente la dirección de arribo y se realizó de manera exitosa la conformación de haz, verificando así el comportamiento de estos bloques.
+
+\figura[0.7]{theta-phi}{Geometría de una arreglo rectangular uniforme. Para la generación de señales se tomo este modelo con $M_x = M_y = 4$\cite{proyecto-grigo}.}
+
+\figura[0.8]{doa-test}{Diagrama de bloques empleado para verificar el funcionamiento de los bloques \texttt{DoA Esprit Estimation} y \texttt{Beamformer (C++)}.}
+
+\section{Desarrollo de algoritmos propios}
+Se desarrollaron dos nuevos bloques OOT, uno de ellos es una reimplementación con algunas diferencias del \texttt{Beamformer (C++)} y el otro incorpora también la corrección del corrimiento Doppler. Su estructura y funcionamiento se detallan a continuación.
+
+\subsection{Conformador de haz a partir de dirección de arribo}
+Se reimplementó un nuevo bloque de conformación de haz ya que el preexistente fue diseñado para usarse exclusivamente en conjunto con \texttt{DoA Esprit Estimator}, dado que la única forma de comunicar la dirección de arribo es mediante el \texttt{doa\_port} como puede verse en la figura \ref{fig::doa-test}. 
+
+Esto resulta impráctico cuando ya se conoce la dirección de arribo, como es el caso por ejemplo de las señales sintéticas. Para estas situaciones resultaría útil poder comunicar al conformador de haz la dirección de arribo de manera directa mediante la modificación de un parámetro. Con esto en mente se implementó un nuevo bloque OOT para conformar un haz a partir de una dirección de arribo configurada en los parámetros del bloque, el mismo puede encontrarse en \todo{Poner donde, ahora está en streaming on demand. Sacar de ahí y ponerlo en GNU Radio}. El esquemático empleado en la verificación de este bloque se muestra en la figura \ref{fig::bf-from-angles}.
+
+\todo{Explicar el algoritmo de BF? Es basícamente revertir los defases de la ecuación \ref{eq::desfases-simplificada}}
+
+
+\figura[0.9]{bf-from-angles}{Diagrama de bloques utilizado para la verificación del nuevo bloque conformador de haz.}
+
+\subsection{Seguimiento y conformación de haz a partir de TLE}
+El TLE codifica toda la información necesaria para describir la órbita de un satélite (ver apéndice \ref{ap::tle}), de manera que conociendo la ubicación de la estación terrena y la órbita de la misión objetivo es posible determinar la ubicación en el cielo de la misión respecto a la estación terrena, obteniendo así valores para los ángulos de elevación y acimut los cuales son necesarios para realizar la conformación de haz.
+
+\subsubsection{La librería \textit{orbit-predictor}}
+Para la implementación de este bloque se hizo uso de las funciones provistas en la librería \textit{orbit-predictor} de Python desarrollada en un repositorio de GitHub de Satellogic\cite{orbit-predictor}. Esta librería incluye numerosas funciones relacionadas a la predicción de órbitas. De interés resulta la posibilidad de introducir el TLE como parámetro para el predictor de órbita de un satélite.
+
+La librería cuenta con objetos de tipo \texttt{Location} que representan un punto en el planeta Tierra mediante la especificación de latitud, longitud y altura. Se definió un nuevo objeto \texttt{Location} ubicado en las coordenadas de la futura instalación de la estación terrena, estas son:
+\todo{Poner cordenadas}
+
+Se implementaron además tres funciones para las siguientes tareas:
+\change{Chequear si hice esto así o si mejor lo digo en el streaming on demand}
+\begin{itemize}
+    \item Calcular la próxima pasada del satélite por la estación terrena. La librería permite además la configuración de un ángulo de elevación mínimo a patir del cual considerar que comienza la pasada.Se configuró el comienzo de una pasada cuando el satélite se encuentra a $10\degree$ sobre el horizonte ($\theta = 10\degree$).
+    \item Obtener y actualizar los ángulos de conformación de haz en base al cálculo de la ubicación del satélite en el cielo respecto a la estación terrena.
+    \item Calcular  y actualizar el factor de corrimiento Doppler respecto a la ubicación de la estación terrena.
+\end{itemize}
+
+
+\figura[0.9]{bf-from-tle}{Diagrama de bloques que utiliza los TLE para realizar la conformación de haz.}
+
+
+\subsection{Pruebas en capturas reales}
+Se comprobó el funcionamiento de los algoritmos tanto preexistentes como el nuevo algoritmo de \textit{beamforming} mediante la lectura de capturas reales adquiridas en \cite{proyecto-jose} con el emulador de arreglo de 16 canales realizado en ese mismo proyecto.
+
+La integración de estas capturas con los bloques de conformación de haz disponibles no es directa ya que las mismas contienen la información de cada canal codificada como enteros de 16 bits (\textit{shorts}), los cuales fueron escritos en formato \textit{offset binary} \todo{ref de qué es off bin}, \unsure{Realmente vale la pena explicar esto?}
+
+
+\figura{signal-complexer2}{Complejizador}
+
+
+
+
+
+\subsection{Comunicación entre CIAA-ACC y GNU Radio}\label{subsec::comuicacion-con-gnuradio}
 Se mencionó anteriormente que el sistema de adquisición y preprocesamiento envía paquetes con los datos adquiridos mediante un socket UDP. Luego, del lado de GNU Radio, esos paquetes deben capturarse e interpretarse correctamente. 
 
 La captura de los paquetes puede lograrse a través de la instanciación del bloque \texttt{UDP Source}\todo{ref}, disponible con la instalación de la librería. Este bloque escucha el tráfico UDP entrante a un dado puerto y proveniente de una dirección IP \unsure{Acá IP es Internet Protocol, no es Intellectual Property, cómo se resuelve esto?} determinada. De esta forma, configurándolo con la dirección IP de la CIAA-ACC y el número de puerto al que la placa transmite, pueden recibirse los datos exitósamente en GNU Radio. 
@@ -57,26 +144,27 @@ Para corroborar que la comunicación entre la placa y el SDR estaba funcionando 
 
 En la figura \ref{fig::gnu-simplificado} se muestra el esquemático utilizado para esta comprobación. El mismo incorpora lo anteriormente discutido junto con dos puntos de visualización donde se colocaron instancias del bloque \texttt{QT GUI Sink}, el cual brinda, entre otras cosas un gráfico en tiempo y en frecuencia de la señal de entrada.
 
-Se separaron los datos en \textit{header} y \textit{payload}
+Se separaron los datos en \textit{header} y \textit{payload} \todo{Continuar}
 
 \figura{gnu-simplificado}{Esquemático utilizado para la prueba de comunicación entre la CIAA-ACC y GNU Radio.}
 
+\section{Validación de la cadena de adquisición y procesamiento}
+A lo largo del desarrollo del sistema de adquisición y preprocesamiento en el capítulo \ref{cap::preproc} se validaron las etapas de manera aislada. De igual manera, en el desarrollo de la etapa de procesamiento externo se comprobó el funcionamiento del conformador de haz, la detección de dirección de arribo y la lectura de \textit{header} de manera individual.
 
+Resulta igualmente importante para la validación del sistema la realización de pruebas de integración o \textit{integration tests}. Para esto se hizo uso de un sistema de emulación de un arreglo lineal de 4 elementos desarrollado en \cite{proyecto-arce}.
 
+En dicho proyecto se programó un microcontrolador STM32F1\cite{stm32f1} para generar señales que emulen las señales recibidas por un arreglo lineal de 4 antenas. Estas señales en principio digitales, pasan a través de un DAC y se emiten de manera analógica empleando el integrado AD9959\cite{ad9959}. 
 
-\section{Algoritmos de \textit{beamforming}}
-\subsection{Verificación de bloques previamente desarrollados}
-\subsection{Implementación de bloque propio de BF}
+Las señales de salida del integrado entonces emulan la recepción de señales resultantes de la pasada de un satélite, la implementación realizada en~\cite{proyecto-arce} tiene parámetros ajustables, estos son:
+\begin{itemize}
+    \item Altura del satélite.
+    \item Frecuencia central.
+    \item Distancia entre elementos.
+\end{itemize}
 
-\section{Algoritmos de seguimiento de señal}
-\subsection{Verificación de algoritmo de DoA}
-\subsection{Implementación de seguimiento mediante TLEs}
-\subsubsection{Librería orbit-predictor}
-
-\section{Efecto Doppler}
-%comentar y mostrar gráficos
-\subsection{Corrección mediante TLEs}
-
-\section{Tests? Screenshots de las cosas andando?}
-
+\todo{Qué se probó? Poner frecs, capturas}
+\todo{Replicación para probar en 16 canales}
+\todo{Incorporación de acimut?}
+\subsection{Adaptación del emulador}
+El emulador original replica un arreglo lineal de $4 \times 1$ elementos, sin embargo, para que el bloque \texttt{DoA Esprit Estimation} funcione debe recibir señales de un arreglo cuadrado. Por esto es necesario refactorizar el código desarrollado en \cite{proyecto-arce} para emular un arreglo cuadrado de $2 \times 2$ elementos.
 \end{document}

@@ -1,7 +1,7 @@
 \documentclass[../../main.tex]{subfiles}
 \begin{document}
 \graphicspath{{./figures}}
-\chapter{Planteamiento del receptor}
+\chapter{Planteo del receptor}
 El receptor de la estación terrena se diseñará para la recepción de señales de satélites LEO en la banda amateur de UHF, que abarca desde los 435~MHz hasta los 438~MHz. Dentro de esta banda, los satélites emiten en canales o \textit{beams} de alrededor 25~kHz de ancho de banda. \change{Agregar referencia?}
 
 El sistema de recepción consta de cinco partes principales como se muestra en la figura \ref{fig::planteo-receptor}, estas son:
@@ -156,14 +156,16 @@ Esta etapa consta de cuatro partes principales, estas son:
 \begin{enumerate}
     \item La resolución de la interfaz con el sistema de adquisición. Se deben capturar y leer correctamente los paquetes transmitidos por la CIAA-ACC por un socket UDP.
     \item La corrección del corrimiento Doppler. Los satélites LEO tienen un movimiento relativo respecto a la ET, en consecuencia habrá que analizar el corrimiento Doppler generado.
-    \item La resolución de la dirección de arribo ya sea por medio de los TLE o empleando algoritmos de detección de DOA. Esto es crucial para realizar la conformación de haz.
+    \item La resolución de la dirección de arribo empleando algoritmos de detección de DOA. Esto es crucial para realizar la conformación de haz.
     \item La conformación digital de haz partiendo de la estimación de la DOA, y conociendo la geometría del arreglo.
 \end{enumerate}
 
-Los puntos 1 y 2 se desarrollarán más adelante en este proyecto. Por otro lado, los puntos 3 y 4 fueron implementados y evaluados en \cite{proyecto-grigo}, pero de todas formas serán verificados y modificados más adelante en el presente proyecto.
+Los puntos 1 y 2 se desarrollarán más adelante en este proyecto. Por otro lado, los puntos 3 y 4 fueron implementados y evaluados en \cite{proyecto-grigo}, pero de todas formas serán verificados y extendidos más adelante en el presente proyecto.
 
 \section{Servidor de capturas en tiempo real}
-La parte final del planteo presentado al principio del capítulo incluye el desarrollo de un servidor de \textit{streaming} de capturas en tiempo real. Este servidor debe ser capaz de soportar múltiples conexiones simultáneas, como se muestra en la figura \ref{fig::streaming-server}, y además transmitir datos capturados y procesados en tiempo real. \unsure{JQ: está medio pobre esto}
+La parte final del planteo presentado al principio del capítulo incluye el desarrollo de un servidor de \textit{streaming} de capturas en tiempo real. Este servidor debe ser capaz de soportar múltiples conexiones simultáneas, como se muestra en la figura \ref{fig::streaming-server}, y además transmitir datos capturados y procesados en tiempo real. 
+
+El objetivo es proveer servicios de acceso a capturas a clientes, en principio, dentro de una red interna. Esto permite al cliente acceder a capturas de satélites con haz ya conformado sin necesidad de disponer de ningún hardware. Los únicos datos que debe brindar el cliente son el TLE (ver apéndice \ref{ap::tle}) y la frecuencia de operación de la misión que desea escuchar. 
 
 \figura[0.7]{streaming-server}{Esquema conceptual de un servidor de \textit{streaming} que soporta múltiples conexiones simultáneas.}
 \end{document}

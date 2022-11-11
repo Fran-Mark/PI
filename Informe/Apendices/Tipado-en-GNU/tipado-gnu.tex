@@ -3,5 +3,23 @@
 \graphicspath{{./figures}}
 \chapter{Tipado en GNU Radio}\label{ap::tipado-gnu}
 
-Explicar como funciona el sistema de tipos.
+GNU Radio es un software de SDR el cual fue ampliamente usado en este proyecto en diversos aspectos del mismo como la recepción de señales, el procesamiento de ellas, la conformación de haz y también en el diseño de la interfaz de usuario.
+
+Una característica fundamental de GNU Radio es su sistema de tipado de datos. Cada interfaz de entrada/salida de un bloque está asignada a un tipo de dato. Todos los tipos disponibles se muestran en la figura \ref{fig::Types}.
+
+El software se estructura en un sistema de bloques escritos en C++ y Python y brinda una interfaz gráfica que permite construir diagramas de bloques donde se interconectan estos bloques, como se muestra en la figura \ref{fig::bd-tipado}. Estos diagramas serán convertidos en código por GNU Radio solo cuando los tipos de las interfaces coincidan. En caso de necesitar una conversión de tipos para satisfacer esta condición, GNU Radio provee bloques con ese propósito, dos de estos bloques se muestran en la figura\ref{fig::ExamplePortColors}.
+
+Se mencionan a continuación los tipos utilizados durante este proyecto:
+\todo{Referenciar figura con el proc final}
+\begin{itemize}
+    \item \texttt{Integer 16}: conocido como \textit{short} es un entero de 2 bytes. Se utilizó para la recepción de paquetes de datos a través de un \textit{socket} UDP.
+    \item \texttt{Integer 8}: llamado \textit{byte} o \textit{char}, es el formato utilizado para decodificar el \textit{header} de los paquetes de datos.
+    \item \texttt{Complex Float 32}: número complejo de 64 bits en total compuesto por dos números de punto flotante de 32 bits cada uno. Se empleó en el procesamiento de las señales luego de haber removido el \textit{header}.
+    \item \texttt{Async Message}: el mensaje asíncrono es un tipo especial definido por GNU Radio que permite comunicar mensajes entre bloques de manera directa y asíncrona (sin codificarlos dentro de una señal). Se utilizó para comunicar la actualización de la dirección de arribo desde el bloque estimador al conformador de haz.
+\end{itemize}
+
+\figura[0.6]{Types}{Tipos de dato disponibles en GNU Radio\cite{tipo-dato}.}
+\figura[0.8]{ExamplePortColors}{Ejemplos de bloques de conversión de tipos\cite{tipo-dato}.}
+
+
 \end{document}

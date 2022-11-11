@@ -575,18 +575,48 @@ Para poder entender las modificaciones realizadas a la base de código y las sub
 
 La relevancia del primer punto mencionado radica en que la versión 2020.2 de \textit{Vivado} utilizada en este proyecto no permite anidar diagramas de bloques. Es decir, no es posible instanciar un diagrama de bloques dentro de otro. En consecuencia, dado que la etapa de preprocesamiento diseñada en \ref{subsec::implementacion-vivado} fue implementada en un \textit{block design}, fue necesario transcribir el módulo \textit{top} a un módulo de VHDL. El mismo se encuentra en \texttt{PIQuinteros/Fpga/src/hdl/SistAdq\_top.vhd}.
 
-El módulo \texttt{ADC Receiver}, ubicado en \texttt{PIQuinteros/Fpga/src/hdl/adc\_receiver.vhd}, contiene la lógica de los retardos de entrada y el deserializador, entre otras cosas. Este módulo se instancia dos veces debido a que, en el \textit{mapeo} de pines del conector FMC, de los 16 canales de datos del ADC, 14 se encuentran en el banco 12 de la FPGA y 2 en el banco 13 de esta (para mayor detalle ver \cite{proyecto-jose}).
+El módulo \texttt{ADC Receiver}, ubicado en \texttt{PIQuinteros/Fpga/src/hdl/adc\_receiver.vhd}, contiene la lógica de los retardos de entrada y el deserializador, entre otras cosas. Este módulo se instancia dos veces debido a que, en el \textit{mapeo} de pines del conector FMC, de los 16 canales de datos del ADC, 14 se encuentran en el banco 12 de la FPGA y 2 en el banco 13 de esta (para mayor detalle ver \cite{proyecto-jose}).\unsure{Debería acá indicar algo de los bancos de la FPGA? Debería haber un esquemático por ahí en el capítulo del planteo del receptor?}
 
-Originalmente, en el módulo \texttt{ADC Receiver} se instanciaba no solo a los retardos de entrada y el deserializador, sino también las herramientas de \textit{debug} desarrolladas en el proyecto del \textit{core} de adquisición y las colas FIFO. Además, en una primera incorporación de la etapa de preprocesamiento, esta misma se instanció también dentro del módulo \texttt{ADC Receiver}. Viendo la figura \ref{fig::pipeline-ciaa}, en líneas generales, toda la lógica desde los retardos de entrada hasta las FIFO estaba instanciada en este módulo.
+Originalmente, en el módulo \texttt{ADC Receiver} se instanciaba no solo a los retardos de entrada y el deserializador, sino también las herramientas de \textit{debug} desarrolladas en el proyecto del \textit{core} de adquisición junto con las colas FIFO. Más aún, en una primera incorporación de la etapa de preprocesamiento, la misma se instanció también dentro del módulo \texttt{ADC Receiver}, lo cual implicaba la replicación de aún más lógica. Viendo la figura \ref{fig::pipeline-ciaa}, en líneas generales, toda la lógica desde los retardos de entrada hasta las FIFO estaba instanciada en este módulo.
 
 Se propuso entonces mantener las dos instancias del \texttt{ADC Receiver} pero minimizando el contenido de las mismas. De esta manera, solo se conservó en este módulo la lógica relacionada a los retardos de entrada y el deserializador.
 
-Se creó un nuevo módulo en VHDL llamado \texttt{Data Handler}, el mismo sirvió como 
+Se creó un nuevo módulo en VHDL llamado \texttt{Data Handler}, el cual sirvió como unificador de las 16 señales de datos ya que procesaba en conjunto y de forma ordenada todos los canales del ADC. Resulta relevante destacar el ordenamiento de los canales ya que los dos canales que se encuentran en el banco 13 de la FPGA son los canales 11 y 16, de manera que las señales de salida los dos \texttt{ADC Receiver} deben ser reordenadas. Este reordenamiento se explicita en la tabla \ref{tab::reordenamiento-adc-receivers}.
+
+\begin{table}[H]
+    \centering
+    \resizebox{0.8\textwidth}{!}{%
+    \begin{tabular}{|c|c|c|c|}
+    \hline
+     & \textbf{Entrada al} \texttt{Data Handler} & \textbf{Salida del} \texttt{ADC Receiver 1} & \textbf{Salida del} \texttt{ADC Receiver 2} \\ \hline
+    \multirow{16}{*}{\textbf{\begin{tabular}[c]{@{}c@{}}Número de\\ canal\end{tabular}}} & 1 & 1 & - \\ \cline{2-4} 
+     & 2 & 2 & - \\ \cline{2-4} 
+     & 3 & 3 & - \\ \cline{2-4} 
+     & 4 & 4 & - \\ \cline{2-4} 
+     & 5 & 5 & - \\ \cline{2-4} 
+     & 6 & 6 & - \\ \cline{2-4} 
+     & 7 & 7 & - \\ \cline{2-4} 
+     & 8 & 8 & - \\ \cline{2-4} 
+     & 9 & 9 & - \\ \cline{2-4} 
+     & 10 & 10 & - \\ \cline{2-4} 
+     & 11 & - & 1 \\ \cline{2-4} 
+     & 12 & 11 & - \\ \cline{2-4} 
+     & 13 & 12 & - \\ \cline{2-4} 
+     & 14 & 13 & - \\ \cline{2-4} 
+     & 15 & 14 & - \\ \cline{2-4} 
+     & 16 & - & 2 \\ \hline
+    \end{tabular}%
+    }
+    \caption{Asignación de canales de datos del \texttt{Data Handler} a partir de la salida de ambas instancias del \texttt{ADC Receiver}.}\label{tab::reordenamiento-adc-receivers}
+    \end{table}
+
+Dentro del \texttt{Data Handler} se instanció la etapa de \textit{debug} desarrollada en \cite{proyecto-jose} junto con toda la lógica relacionada con el preprocesamiento, abstraída en un archivo aparte, el cual puede encontrarse en \texttt{PIQuinteros/Fpga/src/hdl/preprocessing.vhd}. \unsure{Capaz mejor sacar el directorio y decirlo directamente al ppio}. Finalmente, las colas FIFO también fueron trasladadas a este módulo.
 
 \todo{Poner imagen de data handler y como está formado}
 \section{Ampliaciones}
 %Mas herramientas de debug, todas las salidas del mux
 \subsection{Incorporación de múltiples haces}
+%Aces configurables, freq y signo
 \subsection{Optimizaciones}
 %primeras optimizaciones (un solo beam osc, un solo band osc)
 

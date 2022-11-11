@@ -1,11 +1,22 @@
 \documentclass[../../main.tex]{subfiles}
 \begin{document}
 \graphicspath{{./figures}}
-\chapter{Análisis de la cadena de RF}
+\chapter{Análisis del enlace de RF}
 
 La definición de la especificación de la cadena de RF es una parte fundamental en el diseño del receptor. 
 Para todos los cálculos realizados en este capítulo se tomó como referencia la misión BEESAT-9 \cite{BEESAT-9} de la Universidad de Berlín. 
-La razón de esta elección radica en que se trata de un satélite LEO a $h_\textrm{sat} = 530\un{km}$ de altura el cual opera en la banda de interés de UHF amateur, más específicamente a una frecuencia central $f_0 = 435.95\un{MHz}$.
+La razón de esta elección radica en que se trata de un satélite LEO a $h_\textrm{sat} = 530\un{km}$ de altura el cual opera en la banda de interés de UHF amateur, más específicamente a una frecuencia central $f_c = 435.95\un{MHz}$.
+
+\section{Consideraciones de corrimiento Doppler}
+La estación terrena recibirá señales de satélites LEO a alrededor de 500~km de altura. Esto implica que no solo habrá considerables pérdidas de espacio libre sino también corrimiento Doppler no despreciable. Se discute a continuación de manera más precisa este último punto, relegando el cálculo de las pérdidas de espacio libre a la sección \ref{sec::analisis-potencia}.
+
+El corrimiento de frecuencia Doppler viene dado por
+\begin{equation}
+    \Delta f = \frac{\Delta v}{c} f_c,
+\end{equation}
+donde $c$ es la velocidad de la luz y $\Delta v$ representa la velocidad relativa entre la misión en cuestión y la estación terrena, siendo positiva cuando estas se acercan y negativa cuando se alejan.
+
+\todo{Hacer calculitos y grafiquitos usando lo de Lucas Gomez}
 
 \section{Planteo del front-end de RF}
 Un esquema simplificado del \textit{front-end} de RF se presentó ya en la figura \ref{fig::front-end-rf-16}, una ilustración más detallada  se muestra en la figura \ref{fig::cadena-de-recepcion}. Allí se observa que se compone de los siguientes elementos:
@@ -23,9 +34,10 @@ Un esquema simplificado del \textit{front-end} de RF se presentó ya en la figur
 Como se mencionó anteriormente, la figura de ruido del \textit{front-end} de RF estará determinada principalmente por el LNA. Dado que su caracterización no es una tarea propia del presente proyecto, se considerará para este análisis $\textrm{NF}_\textrm{FE} = 3\un{dB}$ que representa un valor estimativo.
 
 \figura[0.7]{cadena-de-recepcion}{Diagrama de la cadena de recepción.}
-\unsure{Debería agregar ganancias a aplificadores y longitudes a cables?}
+\unsure{Debería agregar ganancias a amplificadores y longitudes a cables?}
+\unsure{JQ: está medio confuso de seguir este diagrama. Habría que pensar en hacerlo netamente horizontal, o netamente vertical.}
 \change{Sacar el ADC. Señalizar que la NF es de aprox 3 dB}
-\section{Análisis de potencia} 
+\section{Análisis de potencia}\label{sec::analisis-potencia}
 Se comenzó realizando un análisis de potencia en la antena receptora con el objetivo de determinar la SNR de partida para luego, en base a esta, realizar los cálculos subsiguientes para la determinación de la ganancia $G$. La potencia en la antena receptora viene dada por la ecuación \ref{eq::potencias}:
 
 \begin{equation}
@@ -89,7 +101,7 @@ El conversor analógico-digital es un dispositivo complejo con numerosas fuentes
 \end{itemize}
 
 \subsection{Ruido térmico}
-En la figura \ref{fig::ruido-termico} se muestra la SNR en dBFS en función de la frecuencia. Se observa que, para el caso bajo análisis de $f_0 = 435.95\un{MHz}$, la SNR es de aproximadamente 65~dBFS. Esto implica que el ruido térmico o ruido Johnson en dBFS es de -65~dBFS. Esto es:
+En la figura \ref{fig::ruido-termico} se muestra la SNR en dBFS en función de la frecuencia. Se observa que, para el caso bajo análisis de $f_c = 435.95\un{MHz}$, la SNR es de aproximadamente 65~dBFS. Esto implica que el ruido térmico o ruido Johnson en dBFS es de -65~dBFS. Esto es:
 \begin{equation}
     N_T = -65\un{dBFS}
     \label{eq::ruido-termico}
@@ -132,9 +144,9 @@ para $f_{\textrm{in}} = 435.95\un{MHz}$, la frecuencia de operación de la misi�
 
 \subsection{SNR a la salida del ADC en función de la ganancia $G$}
 El parámetro libre en este análisis es la ganancia $G$ de la segunda etapa de amplificación, la cual puede verse en la figura \ref{fig::cadena-de-recepcion}. Por esto resulta de relevancia analizar las implicancias que tiene la variación de este parámetro en el sistema.
-Empleando \textit{full scale} como $1~V_\textrm{pp}$, se tiene que 
+Empleando \textit{full scale} como $1~V_\textrm{pp}$\unsure{JQ: por qué?}, se tiene que 
 $$0\un{dBFS} \approx 4\un{dBm},$$ 
-\unsure{Hace falta que explique de donde sale?} 
+\unsure{Hace falta que explique de donde sale? \\ JQ: no está de más} 
 lo cual según las ecuaciones \ref{eq::ruido-termico} y \ref{eq::ruido-cuantizacion} implica que los ruidos térmico y de cuantizacion resultan:
 \[N_T = -61\un{dBm},\] \[N_q = -82\un{dBm}.\]
 
@@ -169,7 +181,7 @@ La relación señal a ruido (SNR) puede calcularse a través del parámetro $\fr
 \end{equation}
 donde $R_b$ es la tasa de bits y $B$ es el ancho de banda ocupado.
 
-Habiendo fijado la BER objetivo de $10^{-5}$ a la salida del demodulador, el siguiente paso es determinar la SNR requerida a la entrada del mismo. Esto depende del esquema de modulación utilizado que, en el caso de la misión de referencia, es GMSK. Para este esquema de modulación, la probabilidad de error de bit en presencia de RABG se relaciona con $\frac{E_b}{N_0}$ mediante la ecuación \ref{eq::BER2EbN0} \cite{haykin}:
+Habiendo fijado la BER objetivo de $10^{-5}$ a la salida del demodulador, el siguiente paso es determinar la SNR requerida a la entrada del mismo. Esto depende del esquema de modulación utilizado que, en el caso de la misión de referencia, es GMSK. Para este esquema de modulación, la probabilidad de error de bit en presencia de RABG\todo{JQ: ver si esto está en las abreviaturas, sino cambiarlo por AWGN (para ser consistente con las otras abreviaturas en inglés) o directamente por ruido blanco aditivo gaussiano} se relaciona con $\frac{E_b}{N_0}$ mediante la ecuación \ref{eq::BER2EbN0} \cite{haykin}:
 
 \begin{equation}
     \textrm{BER} = \frac{1}{2} \textrm{erfc}\left(\sqrt{\frac{\alpha E_b}{2 N_0}}\right),
@@ -180,7 +192,7 @@ donde $\alpha$ es un factor de degradación respecto a MSK, el cual depende del 
     \textrm{Degradación} = 10 \log_{10}{\left(\frac{\alpha}{2}\right).}
     \label{eq::degradacion}
 \end{equation}
-En la figura \ref{fig::degradacion-bt} se muestra la degradación de la BER en función del producto $B T_b$ ($W T_b$ en inglés).
+En la figura \ref{fig::degradacion-bt} se muestra la degradación de la BER en función del producto $B T_b$ ($W T_b$ en \change{JQ: mismo comentario que arriba sobre inglés vs español}).
 
 Para la misión de referencia, el factor de ancho de banda por tiempo de bit es $BT_b = 0.3$ \cite{BEESAT-9}. A partir de la figura \ref{fig::degradacion-bt} se observa que este factor corresponde con una degradación de aproximadamente $0.5\un{dB}$, lo que, mediante la ecuación \ref{eq::degradacion}, implica un factor $\alpha \approx 1.78$.
 
