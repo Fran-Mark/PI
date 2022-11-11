@@ -6,7 +6,7 @@
 %% Creciente número de sats LEO en órbita (ejemplos)
 %% Antenas mecánicas -> solo 1 obj por vez
 
-En los últimos años, el número de satélites en órbita baja (LEO) ha crecido considerablemente debido a la creación de constelaciones de dichos satélites a manos de diversas empresas \cite{LeoConstellation} con el objetivo de brindar diversos servicios, entre los que se destaca el referente al acceso a internet. 
+En los últimos años, el número de satélites en órbita baja (LEO) ha crecido considerablemente debido a la creación de constelaciones de dichos satélites por parte de diversas empresas \cite{LeoConstellation} con el objetivo de brindar diversos servicios, entre los que se destaca el referente al acceso a internet. 
 
 Estos satélites tienen la ventaja de orbitar a una altura baja (alrededor de 500~km), de manera que la latencia de \textit{round-trip} de las comunicaciones, limitadas por la velocidad de la luz, es del orden de los 10 ms. 
 Por otro lado, tienen un tiempo de pasada inferior a 10 minutos, lo cual vuelve necesario disponer de algún mecanismo que permita seguir al satélite durante el limitado tiempo de comunicación.
@@ -39,16 +39,16 @@ con $k$ un número entero.
 \subsection{¿Por qué trabajar en el dominio digital?}
 
 La conformación de haz mostrada en la figura \ref{fig::phased-array} es analógica o en RF. Si bien se elimina la necesidad de realizar apuntamiento mecánico, aún tiene la limitación de seguir únicamente a un satélite a la vez. Para deshacerse de esta segunda limitación se necesitaría aplicar un conjunto de retrasos distintos a las señales provenientes de cada elemento del arreglo, de manera de conformar más de un haz.
-Si bien es posible realizar esto en RF \change{Esta bien decir RF?} por ejemplo, rápidamente se vuelve impráctico ya que requiere equipamiento adicional, y, además, implica incurrir en nuevos costos cada vez que se quiera hacer el seguimiento en simultáneo de un nuevo haz.
+Si bien es posible realizar esto de forma analógica por ejemplo, rápidamente se vuelve impráctico ya que requiere equipamiento adicional, y, además, implica incurrir en nuevos costos cada vez que se quiera hacer el seguimiento en simultáneo de un nuevo haz.
 Todas estas problemáticas pueden resolverse de manera más sencilla y menos costosa al pasar al dominio digital. 
 
-La conformación digital de haz o digital beamforming consiste en muestrear las señales ``crudas'' para luego, digitalmente, aplicar los retrasos correspondientes y poder apuntar simultáneamente a varios satélites sin necesidad de mover físicamente el arreglo de antenas como puede verse en la figura \ref{fig::digital-bf}. Esta fue la técnica empleada en este proyecto.
+La conformación digital de haz o \textit{digital beamforming} consiste en muestrear las señales ``crudas'' para luego, digitalmente, aplicar los retrasos correspondientes y poder apuntar simultáneamente a varios satélites sin necesidad de mover físicamente el arreglo de antenas como puede verse en la figura \ref{fig::digital-bf}. Esta fue la técnica empleada en este proyecto.
 
 \figura[0.7]{digital-bf}{Ilustración de conformación digital de $n$ haces en simultáneo empleando un arreglo lineal de cinco antenas en fase.}
 
 \section{Alcance y organización del proyecto}
-El presente proyecto integrador se enmarca dentro de un proyecto más amplio que consiste en el diseño y construcción de una estación terrena que implemente conformación digital de haz 
-para la recepción de señales de radiofrecuencia provenientes de satélites en órbita LEO que hacen uso de la banda de frecuencias asignada por la ITU para aplicaciones amateur, comprendida entre los 435 y 438 MHz \cite{itu-banda-amateur}.
+El presente proyecto integrador se enmarca dentro de un proyecto más amplio. El mismo consiste en el diseño y construcción de una estación terrena que implemente conformación digital de haz 
+para la recepción de señales de radiofrecuencia provenientes de satélites en órbita LEO, que hacen uso de la banda de frecuencias asignada por la ITU para aplicaciones amateur, comprendida entre los 435 y 438 MHz \cite{itu-banda-amateur}.
 Este último fue comenzado y avanzado considerablemente en los proyectos integradores \cite{proyecto-jose}, en cuanto a la plataforma de adquisición de las señales, y \cite{proyecto-grigo}, respecto a la conformación de haz digital y la detección de la dirección de arribo de las señales. 
 
 Este proyecto es, en gran medida, una continuación e integración de ellos. En el mismo se busca continuar con el desarrollo del \textit{core} de adquisición de señales comenzado en \cite{proyecto-jose}, y resolver la integración de dicho \textit{core} con los algoritmos de beamforming y detección de arribo desarrollados en \cite{proyecto-grigo}.
