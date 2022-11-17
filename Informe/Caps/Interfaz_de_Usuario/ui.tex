@@ -2,22 +2,22 @@
 \begin{document}
 \graphicspath{{./figures}}
 \chapter{Interfaz de usuario}
-Al observar el sistema completo como se ilustró en la figura \ref{fig::planteo-receptor} se ve que existen \unsure{JQ: mejoraría el 'se ve que existen'} varios puntos donde el usuario puede intervenir. En la etapa de preprocesamiento dentro del sistema de adquisición por ejemplo, desarrollado en el capítulo \ref{cap::preproc}, el usuario tiene la capacidad seleccionar la fuente de datos que quiere recibir; en la etapa de procesamiento el usuario debe ser capaz de visualizar los datos, por nombrar unos ejemplos.
+Al observar el sistema completo como se ilustró en la figura \ref{fig::planteo-receptor} se reconocen varios puntos donde el usuario puede intervenir. En la etapa de preprocesamiento dentro del sistema de adquisición por ejemplo, desarrollado en el capítulo \ref{cap::preproc}, el usuario tiene la capacidad seleccionar la fuente de datos que quiere recibir; en la etapa de procesamiento externo el usuario debe ser capaz de visualizar los datos, por nombrar unos ejemplos.
 
-Además, de los diversos puntos de interacción con el sistema existente, también ocurre que esta interacción no siempre es sencilla para aquellos no familiarizados con el sistema. Para escribir un registro en la FPGA por ejemplo debe tenerse acceso a un binario que lo haga, debe conocerse la dirección de memoria del registro y debe saberse el valor que debe escribirse para lograr el efecto deseado.
+Además, de los diversos puntos de interacción con el sistema existente, también ocurre que esta interacción no siempre es sencilla para aquellos no familiarizados con el sistema. Para escribir un registro en la FPGA por ejemplo debe tenerse acceso a un binario que lo haga, debe conocerse la dirección de memoria del registro y debe saberse el valor a escribir para lograr el efecto deseado.
 
 La existencia de diversos puntos de interacción dispersos a lo largo del sistema y la dificultad que esta interacción puede representar para un usuario no familiarizado son los puntos que motivan la creación de una interfaz de usuario (UI).
 
 El código desarrollado en este capítulo puede encontrarse en \texttt{UI/}.
 
-\section{Requerimientos}
-Según lo recién explicado, se tienen dos grandes requerimientos, los cuales se satisfacen mediante el cumplimiento de otros requerimientos como se lista a continuación:
+\section{Requerimientos}\label{sec::ui-reqs}
+Según lo recién explicado, se tienen dos grandes objetivos, los cuales se satisfacen mediante el cumplimiento de otros requerimientos como se lista a continuación:
 \begin{enumerate}
     \item Permitir el acceso a los diversos puntos del sistema desde un solo lugar, esto implica facilitar:
     \begin{enumerate}
-        \item La escritura de registros\todo{JQ: en algún lugar debería haber una referencia a una lista de registros y su funcionalidad. Puede ser un apéndice o un .h de SW} dentro de la FPGA para las diversas configuraciones desarrolladas en \todo{Donde? Cap? Sec?}.
+        \item La escritura de registros especificados en la tabla \ref{tab::axi-16-reg} dentro de la FPGA para las diversas configuraciones desarrolladas en el capítulo \ref{cap::preproc}.
         \item El acceso a los datos capturados y procesados en GNU Radio.
-        \item El monitoreo y control del servidor de \textit{streaming} a demanda desarrollado en el capitulo \todo{Cap?}
+        \item El monitoreo y control del servidor de \textit{streaming} a demanda desarrollado en el capitulo \ref{cap::server-capturas}.
     \end{enumerate}
     \item Simplificar la interacción del usuario con el receptor, para esto la UI debe encargarse de:
     \begin{enumerate}
@@ -34,15 +34,14 @@ La interfaz de usuario se compone de tres partes claramente distinguidas: el con
 \begin{itemize}
     \item Control del SoC:
     \begin{enumerate}
-        \item Inicialización: establecimiento de la conexión SSH con el PS, configuración de tensiones \unsure{Menciono tensiones antes?}, configuración por defecto de registros.
+        \item Inicialización: establecimiento de la conexión SSH con el PS, configuración de tensiones, configuración por defecto de registros.
         \item Estado de haces: mostrar y modificar la frecuencia de los haces mediante la lectura y escritura de registros.
-        \item Control de datos adquiridos: selección de fuente de datos que se quiere adquirir en base a todos los puntos de \textit{debug} del sistema \change{Redactar mejor}.
+        \item Control de datos adquiridos: selección de fuente de datos que se quiere adquirir, estos pueden ser datos preprocesados del ADC o datos de las interfaces de \textit{debug} descritas en el capítulo \ref{cap::preproc}.
     \end{enumerate}
     \item SDR:
     \begin{enumerate}
-        \item Información de señal: mostrar la frecuencia de la señal detectada, el ángulo de arribo \unsure{Mostramos diff con TLE?} y la potencia recibida por antena.
+        \item Información de señal: mostrar la frecuencia de la señal detectada, el ángulo de arribo y la potencia recibida por antena.
         \item Visualización de los datos capturados, esto incluye gráficos en tiempo, frecuencia, gráficos de cascada, etc.
-        \todo{Calibración de orientación de arreglo?}
     \end{enumerate}
     \item Monitoreo del servidor:
     \begin{enumerate}
@@ -51,42 +50,39 @@ La interfaz de usuario se compone de tres partes claramente distinguidas: el con
     \end{enumerate}
 \end{itemize}
 
-\section{Implementación de UI}
+\section{Selección de entorno de desarrollo}
 La interfaz de usuario mencionada puede ser implementada el línea de comandos (CLI) o como una interfaz gráfica (GUI).  En un principio se implementó parcialmente en forma de CLI en Python usando la librería \texttt{Click} \cite{click} debido a la simplicidad ligada a su desarrollo. Sin embargo, rápidamente se concluyó que una GUI es una mejor solución en este caso debido a que, de acuerdo a los requerimientos, se necesita tener control en simultáneo del SoC, el SDR y el servidor, lo cual implica el manejo de múltiples procesos. Esto no resulta natural en una CLI, como si lo hace en una GUI.
 
 Por un lado, la principal ventaja de la GUI es la facilidad que representa su uso para el usuario en comparación a una CLI. Pero por otro lado, demanda más trabajo en el desarrollo que una CLI.
 
-\subsection{Selección de entorno}
-Al comenzar el desarrollo de una GUI debe seleccionarse el lenguaje y el \textit{framework} que se utilizará para hacerlo. En este caso se eligió desarrollar en el \textit{framework} de \texttt{Qt} \cite{Qt-framework}, más específicamente el el \textit{wrapper} para Python\footnote{El \textit{framework} está originalmente escrito en C++.} llamado \texttt{PyQt5} \cite{pyqt5}. Esta elección radica en el hecho de que GNU Radio utiliza \texttt{PyQt5} en la generación de su interfaz de usuario con los bloques del grupo \textit{QT GUI Blocks} \cite{gnuradio-qt}. De esta manera, el desarrollo de la GUI empleando \texttt{PyQt5} simplificará la integración de la parte de SDR (hecha en GNU Radio) en la misma.
+Al comenzar el desarrollo de una GUI debe seleccionarse el lenguaje y el \textit{framework} que se utilizará para hacerlo. En este caso se eligió desarrollar en el \textit{framework} de \texttt{Qt} \cite{Qt-framework}, más específicamente el el \textit{wrapper} para Python\footnote{El \textit{framework} está originalmente escrito en C++.} llamado \textit{PyQt5} \cite{pyqt5}. Esta elección radica en el hecho de que GNU Radio utiliza \textit{PyQt5} en la generación de su interfaz de usuario con los bloques del grupo \textit{QT GUI Blocks} \cite{gnuradio-qt}. De esta manera, el desarrollo de la GUI empleando \textit{PyQt5} simplificará la integración de la parte de SDR (hecha en GNU Radio) en la misma.
 
-%Adaptaciones de lo existente: wapper de server, QProcessess
-%Backend: Qprocesses, write to stdin listen to stdout, stderr. 
-\subsection{Manejo de procesos en simultáneo}
-Según se expuso en la sección \ref{sec::disenio-conceptual}, la GUI se compone de tres partes bien distinguidas. A la hora de la implementación lo que se tiene son tres entidades distintas (el control del SoC, el SDR y el monitoreo del servidor) que deben ocurrir de manera simultánea. Una situación similar ya fue resuelta en el capítulo \todo{decir capitulo} donde se recurrió al uso de \textit{threads} y procesos en C++ para lograr la operación en paralelo del sistema de adquisición, procesamiento y \textit{streaming}. 
+\section{Manejo de procesos en simultáneo}
+Según se expuso en la sección \ref{sec::disenio-conceptual}, la GUI se compone de tres partes bien distinguidas. A la hora de la implementación lo que se tiene son tres entidades distintas (el control del SoC, el SDR y el monitoreo del servidor) que deben ocurrir de manera simultánea. Una situación similar ya fue resuelta en el capítulo \ref{cap::server-capturas} donde se recurrió al uso de \textit{threads} y procesos en C++ para lograr la operación en paralelo del sistema de adquisición, procesamiento y \textit{streaming}. 
 
-Estas herramientas también están disponibles en Python con algunas diferencias. Sin embargo, al estar desarrollando una GUI con \texttt{PyQt5} puede hacerse uso de las herramientas que el mismo \textit{framework} brinda. Un ejemplo es el objeto \texttt{QProcess} \cite{qprocess}, el cual permite correr un nuevo proceso y establecer canales de comunicación con el mismo para poder escribir al \textit{stdin} (\textit{standard input}) y poder leer del \textit{stdout} (\textit{standard output}) y del \textit{stderr} (\textit{standard error}).
+Estas herramientas también están disponibles en Python con algunas diferencias. Sin embargo, al estar desarrollando una GUI con \textit{PyQt5} puede hacerse uso de las herramientas que el mismo \textit{framework} brinda. Un ejemplo es el objeto \texttt{QProcess} \cite{qprocess}, el cual permite correr un nuevo proceso y establecer canales de comunicación con el mismo para poder escribir al \textit{stdin} (\textit{standard input}) y poder leer del \textit{stdout} (\textit{standard output}) y del \textit{stderr} (\textit{standard error}).
 
-\subsubsection{Interacción con el SoC}
+\subsection{Interacción con el SoC}
 %SSH Client con paramiko, shell instance, channels
-La interacción con la CIAA-ACC desde una computadora externa se realiza mediante SSH como se explicó \todo{Donde? En el cap de preproc? \\ JQ: me parece que podés referenciar mi PI ahí}. Para incorporar esto dentro de la GUI es necesario resolver dos cuestiones:
+La interacción con la CIAA-ACC desde una computadora externa se realiza mediante SSH (ver \cite{proyecto-jose}). Para incorporar esto dentro de la GUI es necesario resolver dos cuestiones:
 \begin{enumerate}
     \item Cómo establecer una conexión SSH desde Python y,
     \item Cómo mantener el estado de la sesión de SSH corriendo en paralelo con la GUI.
 \end{enumerate}
 
-Para resolver el primer punto se hace uso de la librería \texttt{Paramiko} de Python \cite{paramiko}, que es una implementación del protocolo SSHv2 brindando funcionalidades de cliente y de servidor.
+Para resolver el primer punto se hace uso de la librería \textit{Paramiko} de Python \cite{paramiko}, que es una implementación del protocolo SSHv2 brindando funcionalidades de cliente y de servidor.
 
-El segundo punto también se resuelve parcialmente mediante la librería \texttt{Paramiko} ya que la misma no solo permite establecer la conexión por SSH con la placa de desarrollo, sino que también brinda la posibilidad de invocar una consola para mantener una sesión corriendo, esto hace posible conservar el estado en la conexión. 
+El segundo punto también se resuelve parcialmente mediante la librería \textit{Paramiko} ya que la misma no solo permite establecer la conexión por SSH con la placa de desarrollo, sino que también brinda la posibilidad de invocar una consola para mantener una sesión corriendo, esto hace posible conservar el estado en la conexión. 
 
-Al invocar a la consola, se establece un canal de comunicación a través del cual puede escribirse al \textit{stdin} de la consola y leer del \textit{stdout} y edl \textit{stderr}. De esta forma, puede tenerse acceso total al PS del SoC.
+Al invocar a la consola, se establece un canal de comunicación a través del cual puede escribirse al \textit{stdin} de la consola y leer del \textit{stdout} y del \textit{stderr}. De esta forma, puede tenerse acceso total al PS del SoC.
 
 Por último, retomando el segundo punto, ya sabiendo cómo mantener una sesión, esto debe llevarse a cabo de manera paralela a la ejecución de la GUI. Para esto se instancia un \texttt{QProcess} el cual se ejecuta al inciar la GUI y se elimina al cerrarla.
 
-La implementación del cliente SSH se encuentra en \texttt{UI/sshClient.py} y los comandos de interacción con el SoC de definen en \texttt{UI/socCommands.py}. \todo{Decir de donde salen estos comandos}
+La implementación del cliente SSH se encuentra en \texttt{UI/sshClient.py} y los comandos de interacción con el SoC de definen en \texttt{UI/socCommands.py}. Estos últimos se descrbirán con mayor detalle en la sección \ref{subsec::params-configurables}.
 
-\subsubsection{SDR}
+\subsection{SDR}
 %Uso de cdigo de GNU Radio en thread ppal, él se encarga del paralelismo (hace varios procesos). Incorporación de la GUI generada por GNU Radio
-Como se mencionó anteriormente, GNU Radio, el software de SDR empleado en el procesamiento, posee bloques de generación de GUI usando \texttt{PyQt5}. Esto es, en parte, lo que motivó el uso de este \textit{framework}. 
+Como se mencionó anteriormente, GNU Radio, el software de SDR empleado en el procesamiento, posee bloques de generación de GUI usando \textit{PyQt5}. Esto es, en parte, lo que motivó el uso de este \textit{framework}. 
 
 Al generar un diagrama de bloques en GNU Radio, este lo traduce a código en C++ o Python dependiendo de la preferencia del usuario. Los bloques de \textit{Qt GUI}, sin embargo, solo se encuentran disponibles en Python. 
 
@@ -95,13 +91,93 @@ El código generado por GNU Radio consiste de un objeto\footnote{Esto es, una \t
 Resulta importante notar que el diagrama de bloques elaborado por GNU Radio corre ya en paralelo a la GUI automáticamente generada. Esto implica que es el mismo GNU Radio el que se encarga del paralelismo en la ejecución, de manera que la GUI en desarrollo no debe preocuparse por eso como sí debía hacerlo en el caso del SoC por ejemplo.
 
 Lo que debe hacerse entonces es eliminar la función \texttt{main} del código generado e implementar parte de su funcionamiento en la GUI que se está desarrollando, aprovechando la definición de los bloques y las conexiones hechas por GNU Radio en la clase principal generada. 
-Más específicamente, debe recuperarse el diseño de GUI generado automáticamente y embeberlo dentro de la GUI en desarrollo. Esto se logra mediante el uso del objeto de tipo \texttt{QLayout}, esto se desarrollará más adelante en este capítulo y se encuentra implementado en los archivos \texttt{UI/main.py} y \texttt{UI/gnu\_schematic.py}. \todo{Desarrollar este concepto más adelante en este capítulo.} 
+Más específicamente, debe recuperarse el diseño de GUI generado automáticamente y embeberlo dentro de la GUI en desarrollo. Esto se logra mediante el uso del objeto de tipo \texttt{QLayout}, esto se desarrollará más adelante en este capítulo y se encuentra implementado en los archivos \texttt{UI/main.py} y \texttt{UI/gnu\_schematic.py}.
 
-\subsubsection{Servidor de \textit{streaming}}
+\subsection{Servidor de \textit{streaming}}
 %Wrapper
-El servidor de \textit{streaming} de capturas \textit{on demand} desarrollado en el capítulo \todo{poner capítulo} fue escrito en C++. Como consecuencia de esto, para poder comunicarse desde Python existen algunas alternativas. 
+El servidor de \textit{streaming} de capturas \textit{on demand} desarrollado en el capítulo \ref{cap::server-capturas} fue escrito en C++. Sin embargo, en dicho capítulo también se desarrolló un \textit{wrapper} del mismo en Python utilizando \textit{pybind11}\cite{pybind11}. Este \textit{wrapper} resulta de utilidad para el desarrollo de la GUI ya que soluciona la comunicación desde Python a C++, haciendo directa la integración del servidor a la interfaz de usuario.
+
+Luego, al igual que se hizo en el caso de la conexión SSH, puede instanciarse un nuevo \texttt{QProcess} que corra de manera paralela a la GUI y pueda comunicarse con la misma mediante los canales de comunicación brindados por el mismo objeto \texttt{QProcess}.
+
+\section{Parámetros configurables}\label{subsec::params-configurables}
+Los parámetros configurables del sistema son:
+\begin{itemize}
+    \item La fuente de datos del sistema.
+    \item La salida del \texttt{FIFO Input Mux} como se describió en el capítulo \ref{cap::preproc}.
+    \item Las frecuencias de los osciladores de \textit{beam} y del oscilador local de \textit{debug}.
+    \item La selección del haz que desea observarse (la salida del \texttt{Beam Mux}).
+\end{itemize}
+
+Todos estos parámetros deben configurarse dentro de la FPGA mediante la escritura de registros. Utilizando el mapa de registros de la tabla \ref{tab::axi-16-reg} se escriben registros enviando comandos a través de la sesión SSH establecida al iniciar la GUI.
+
+Para la escritura de registros se hace uso del binario \texttt{axi\_rw.elf}, el cual se encuentra en \texttt{Fpga/axi\_rw.elf}. La sintaxis sintaxis para usar este binario es \[\texttt{./axi\_rw.elf w <addr> \ <value>,}\] donde la dirección del registro y el valor correspondiente se obtienen de las tablas \ref{tab::axi-16-reg}, \ref{tab::data-source-mux} y \ref{tab::fifo-input-mux}.
+
+También existen parámetros configurables dentro de la GUI generada por GNU Radio, siendo estos manejados por el \textit{framework}.
+
+\subsection{Codificación de valores de frecuencia}\label{subsec::codificacion-freq}
+Una GUI debe incorporar abstracciones para que la experiencia del usuario resulte natural. Una abstracción necesaria es la que se desprende de la frecuencia del haz que se desea capturar.
+
+El usuario desea por ejemplo capturar un haz a 437~MHz en la banda de UHF amateur para aplicaciones satelitales. Luego, el usuario debería poder ingresar el número 437~MHz como frecuencia deseada, aunque este no sea el valor que corresponde escribir en los registros.
+
+Según lo desarrollado en el capítulo \ref{cap::preproc}, tras el submuestreo, la banda de interés se \textit{mapea} al rango [-20,-17]~MHz, luego la frecuencia 437~MHz se \textit{mapea} a -18~MHz. Tras la mezcla compleja de banda centrada en $18.5\un{MHz},$ la señal de interés quedará centrada en 500~kHz (ignorando el posible corrimiento Doppler). Finalmente, para trasladar la señal a banda base se necesita un oscilador de haz que genere una exponencial compleja centrada en -500~kHz. Es decir, la frecuencia de 437~MHz introducida por el usuario implica que el valor de frecuencia a configurar sea de 500~kHz, y el valor del registro de signo se coloque en alto.
+
+Luego, para escribir un valor de frecuencia se requieren dos escrituras de registro, uno indica el valor absoluto y el otro el signo. Más aún, el valor absoluto determinado, en este caso 500~kHz debe ser codificado en un incremento de fase según la ecuación \ref{eq::calculo-incremento-fase-v2}. El valor hexadecimal resultante de dicha conversión será el que finalmente se escribirá a la FPGA.
+
+Generalizando a partir del ejemplo presentado, para un dado valor de frecuencia de haz introducida por el usuario $f_i$, la frecuencia a la que debe operar el oscilador de haz $f_o$ para lograr el efecto deseado es \[f_o = 436.5 - f_i,\] el valor absoluto de $f_o$ debe codificarse según la ecuación \ref{eq::calculo-incremento-fase-v2} y escribirse al registro de configuración de frecuencia. Por otro lado, el signo de $f_o$ debe escribirse también a la FPGA, esta vez en el registro de signo para ese \textit{beam}.
+
+\subsection{Terminales de control}
+Resulta conveniente que la GUI incorpore terminales de control o consolas para poder escribir directamente a los distintos procesos como si se corrieran directamente de una consola. 
+
+Este comportamiento puede emularse perfectamente utilizando los canales de comunicación establecidos por \texttt{QProcess} y también con ayuda de \textit{Paramiko} en el caso de la conexión SSH.
+
+\section{\textit{Front-end}}
+Como se comentó en la sección \ref{sec::ui-reqs}, la GUI debe resultar fácil de usar para un usuario no familiarizado. Gran parte de la sencillez en el uso radica en el \textit{front-end}, esto es la parte visible para el usuario, a través de la cual el mismo interactuará con el sistema.
+
+El \textit{framework} \textit{PyQt5} provee una serie de componentes básicos con los cuales el usuario puede interactuar llamados \textit{widgets}. Un ejemplo de cómo lucen algunos \textit{widgets} se muestra en la figura \ref{fig::widgets-example}. 
+
+En dicha figura puede verse además el concepto de \textit{parent} y \textit{child widget}. Este concepto permite agrupar \textit{widgets} en jerarquías y compartir estado entre ellos.
+
+\figura[0.6]{widgets-example}{Interfaz de ejemplo donde pueden visualizarse algunos \textit{widgets} de \textit{PyQt5}\cite{pyqt-widgets}.}[Interfaz de ejemplo donde pueden visualizarse algunos \textit{widgets} de \textit{PyQt5}.]
+
+\subsection{Diseño conceptual}
+El diseño conceptual de la GUI se muestra en la figura \ref{fig::ui-disenio}. Se plantea un diseño de una única ventana con dos \textit{pestañas}, con los siguientes controles:
+\begin{itemize}
+    \item \textit{Data}: esta pestaña embebe la GUI generada por GNU Radio, la cual toma la mayor parte del lugar para facilitar la visualización de los datos adquiridos. Incluye además todos los controles del sistema de adquisición y preprocesamiento mencionados en la subsección \ref{subsec::params-configurables}.
+    \item \textit{Consoles}: en esta pestaña se ubicarán dos terminales, una conectada a la CIAA-ACC y otra al servidor de capturas \textit{on demand}. De esta manera, se le permite al usuario más experimentado tener acceso total a la placa en caso de que los controles ubicados en la pestaña de \textit{Data} resulten insuficientes. Aquí también se establece la conexión con el servidor donde puede consultarse el estado del mismo, cuantos clientes tiene conectados, qué frecuencias está escuchando, entre otros parámetros.
+\end{itemize}
+\figura[1]{ui-disenio}{Diseño conceptual de la GUI.}
 
 
-\subsection{Disposición de controles}
+\subsection{Implementación}
+Para la implementación del diseño mostrado en la figura\ref{fig::ui-disenio} se utilizaron \textit{widgets} de la librería de \textit{PyQt5}, los cuales se mencionan en la tabla \ref{tab::widgets-utilizados}. Una imagen de la GUI implementada puede verse en la figura \ref{fig::ui-impl}.
 
+Se generaron dos \textit{pestañas} o \textit{tabs} como se planteó en la figura\ref{fig::ui-disenio}. Para lograr esto se hizo uso de el \texttt{QTabWidget}, al cual, mediante el método \texttt{addTab} se le pueden adjuntar \textit{widgets} en forma de \textit{tabs}. 
+
+\subsubsection{Control del SoC}
+En la sección del control del SoC, se incorporaron dos \texttt{QComboBox}, una para la selección del \textit{Data Source} y otra para la selección del \textit{FIFO Input}. Los valores posibles a elegir son los descriptos en el capítulo \ref{cap::preproc} para las herramientas de \textit{debug}. Además, cada uno tiene una etiqueta, implementada con un \textit{widget} \texttt{QLabel} y se agrupan con un recuadro generado por un \texttt{QGroupBox}.
+
+Al clickear sobre alguna de las opciones de la \texttt{QComboBox} se dispara el método \texttt{currentIndexChanged}, el cual dispara la escritura del registro correspondiente (ver tabla \ref{tab::axi-16-reg}) mediante el envío del comando adecuado (ver subsección \ref{subsec::params-configurables}) por la consola SSH abierta por \textit{Paramiko}.
+
+En cuanto al control de la frecuencia de operación de los osciladores, la cual se fija mediante la escritura de dos registros, como se desarrollo en la sección \ref{subsec::codificacion-freq}, se desarrollaron dos métodos para configurarla:
+\begin{enumerate}
+    \item Mediante la modificación del número dentro del \textit{widget} \texttt{QLineEdit}.
+    \item Mediante el uso del \texttt{QSlider}.
+\end{enumerate}
+
+La escritura de registro con el valor indicado en el \texttt{QLineEdit} se dispara tras enviar un \textit{return} (esto es, un \textit{enter}), lo cual activa el método \texttt{returnPressed}.
+
+Por otro lado, cuando se usa el deslizador (\texttt{QSlider}), el valor se escribe en la FPGA al soltar el deslizador, de manera de que la actualización no ocurre mientras se está deslizando. Se tomo este enfoque para evitar escrituras constantes. El mismo se logra utilizando el método \texttt{sliderReleased} del \texttt{QSlider}.
+
+Además, entre el \texttt{QSlider} y el \texttt{QLineEdit} se comparte el estado, de manera que si uno cambia, también lo hace el otro de manera acorde. Finalmente, se incorporó también una validación a los datos de entrada utilizando el objeto \texttt{QDoubleValidator}. Para los osciladores de haz por ejemplo, solo se aceptan valores reales entre 435~MHz y 438~MHz, los cuales representan la banda de interés del receptor.
+
+Finalmente, para la selección del \textit{beam} activo, se utilizó el \textit{widget} \texttt{QButtonGroup}, al cual se adjuntaron 5 instancias del \texttt{QPushButton}. El \texttt{QButtonGroup} se encarga de que los botones sean mutuamente excluyentes, esto es, que clickear sobre uno implique deseleccionar el previamente clickeado. Cada click dispara la escritura del registro que controla el multiplexor de selección de \textit{beam}. Además, por claridad, el haz seleccionado se pinta de verde como puede verse en la figura \ref{ui-impl}.
+
+Todos estos \textit{widgets} se adjuntaron a una instancia de \texttt{QVBoxLayout} (\textit{layout} vertical), la cual a su vez se adjuntó a la \texttt{QHBoxLayout} (\textit{layout} horizontal) que conforma la parte visible de la \textit{pestaña} de \textit{Data Control}.
+
+\subsubsection{GNU Radio}
+Se adjuntó el \textit{widget} generado automáticamente por GNU Radio a una \texttt{QVBoxLayout}, la cual finalmente se adjuntó al \texttt{QHBoxLayout} de la pestaña \textit{Data Control} como se hizo anteriormente.
+
+La GUI generada por GNU Radio incluye visualizadores en tiempo y en frecuencia de la señal \todo{Ampliar/cambiar si decide alterarse la UI}.
+
+\figura[1]{ui-impl}{Implementación de la GUI.}
 \end{document}

@@ -1,123 +1,136 @@
-\backcite {proyecto-grigo}{{\es@scroman {vii}}{(document)}{Doc-Start}}
-\backcite {AD9249}{{\es@scroman {vii}}{(document)}{Doc-Start}}
-\backcite {CIAA-ACC}{{\es@scroman {vii}}{(document)}{Doc-Start}}
-\backcite {AD9249}{{\es@scroman {vii}}{(document)}{Doc-Start}}
-\backcite {ruidos-adc}{{\es@scroman {vii}}{(document)}{Doc-Start}}
-\backcite {ruidos-adc}{{\es@scroman {vii}}{(document)}{Doc-Start}}
-\backcite {haykin}{{\es@scroman {vii}}{(document)}{Doc-Start}}
-\backcite {uvm}{{\es@scroman {viii}}{(document)}{Doc-Start}}
-\backcite {proyecto-grigo}{{\es@scroman {viii}}{(document)}{Doc-Start}}
-\backcite {threading-foto}{{\es@scroman {viii}}{(document)}{Doc-Start}}
-\backcite {GIL-foto}{{\es@scroman {viii}}{(document)}{Doc-Start}}
-\backcite {computer-systems}{{\es@scroman {viii}}{(document)}{Doc-Start}}
-\backcite {tle-wiki}{{\es@scroman {viii}}{(document)}{Doc-Start}}
-\backcite {uvm}{{\es@scroman {ix}}{(document)}{Doc-Start}}
+\backcite {tle-wiki}{{\es@scroman {x}}{(document)}{Doc-Start}}
+\backcite {tipo-dato}{{\es@scroman {x}}{(document)}{Doc-Start}}
+\backcite {tipo-dato}{{\es@scroman {x}}{(document)}{Doc-Start}}
 \backcite {LeoConstellation}{{1}{1}{chapter.1}}
-\backcite {itu-banda-amateur}{{3}{1.2}{section.1.2}}
-\backcite {proyecto-jose}{{3}{1.2}{section.1.2}}
-\backcite {proyecto-grigo}{{3}{1.2}{section.1.2}}
+\backcite {itu-banda-amateur}{{4}{1.2}{section.1.2}}
+\backcite {proyecto-jose}{{4}{1.2}{section.1.2}}
+\backcite {proyecto-grigo}{{4}{1.2}{section.1.2}}
 \backcite {proyecto-jose}{{4}{1.2}{section.1.2}}
 \backcite {proyecto-grigo}{{4}{1.2}{section.1.2}}
 \backcite {github}{{4}{1.3}{section.1.3}}
-\backcite {proyecto-grigo}{{6}{2.2}{figure.caption.22}}
+\backcite {itu-banda-amateur}{{5}{2}{chapter.2}}
+\backcite {proyecto-grigo}{{6}{2.2}{figure.caption.18}}
 \backcite {AD9249}{{7}{2.3.1}{subsection.2.3.1}}
-\backcite {AD9249}{{8}{2.4}{figure.caption.28}}
-\backcite {teorema-del-muestreo}{{8}{2.3.1}{section*.29}}
+\backcite {AD9249}{{8}{2.4}{figure.caption.22}}
+\backcite {teorema-del-muestreo}{{8}{2.3.1}{section*.23}}
 \backcite {CIAA-ACC}{{9}{2.3.2}{subsection.2.3.2}}
 \backcite {CIAA}{{9}{2.3.2}{subsection.2.3.2}}
-\backcite {SoC}{{9}{2.3.2}{section*.37}}
-\backcite {Kintex-7}{{9}{2.3.2}{section*.37}}
-\backcite {CIAA-ACC}{{9}{2.6}{figure.caption.40}}
-\backcite {proyecto-jose}{{10}{2.3.3}{Item.17}}
-\backcite {GNURadio}{{10}{2.4}{section.2.4}}
-\backcite {proyecto-grigo}{{10}{2.4}{section.2.4}}
-\backcite {proyecto-grigo}{{11}{2.4}{Item.21}}
-\backcite {BEESAT-9}{{12}{3}{chapter.3}}
-\backcite {ruidos-adc}{{16}{3.4}{section.3.4}}
-\backcite {AD9249}{{16}{3.4}{section.3.4}}
-\backcite {AD9249}{{16}{3.3}{figure.caption.56}}
-\backcite {formula-cuantizacion}{{17}{3.4.2}{subsection.3.4.2}}
-\backcite {formula-cuantizacion}{{17}{3.4.2}{subsection.3.4.2}}
-\backcite {ruidos-adc}{{17}{3.4}{figure.caption.58}}
-\backcite {ruidos-adc}{{17}{3.5}{figure.caption.59}}
-\backcite {formula-jitter}{{18}{3.4.3}{subsection.3.4.3}}
-\backcite {haykin}{{20}{3.5.1}{equation.3.5.9}}
-\backcite {BEESAT-9}{{20}{3.5.1}{equation.3.5.11}}
-\backcite {haykin}{{21}{3.9}{figure.caption.67}}
-\backcite {teorema-del-muestreo}{{23}{4}{chapter.4}}
-\backcite {proyecto-jose}{{23}{4}{chapter.4}}
-\backcite {DDC}{{25}{4.3}{section.4.3}}
-\backcite {Butterworth}{{25}{4.3}{section.4.3}}
-\backcite {butter}{{25}{4.3}{section.4.3}}
-\backcite {scipy}{{25}{4.3}{section.4.3}}
-\backcite {lfilter}{{25}{4.3}{section.4.3}}
-\backcite {Nyquist-rate}{{26}{4.3}{section.4.3}}
-\backcite {vivado}{{27}{4.4}{section.4.4}}
-\backcite {vitis}{{27}{4.4}{section.4.4}}
-\backcite {cross-compilation}{{27}{4.4}{section.4.4}}
-\backcite {proyecto-jose}{{27}{4.4}{section.4.4}}
-\backcite {IP-Xilinx}{{27}{4.4.1}{subsection.4.4.1}}
-\backcite {axi-interconnect}{{28}{\caption@xref {??}{ on input line 97}}{table.caption.82}}
-\backcite {complex-mult}{{28}{\caption@xref {??}{ on input line 97}}{table.caption.82}}
-\backcite {dds-compiler}{{28}{\caption@xref {??}{ on input line 97}}{table.caption.82}}
-\backcite {fir-compiler}{{28}{\caption@xref {??}{ on input line 97}}{table.caption.82}}
-\backcite {pto-fijo}{{29}{4.4.3}{section*.84}}
-\backcite {filter-builder}{{29}{4.4.3}{section*.85}}
-\backcite {filter-designer}{{29}{4.4.3}{section*.85}}
-\backcite {teorema-del-muestreo}{{30}{4.4.3}{section*.88}}
-\backcite {fir-compiler}{{30}{4.4.3}{section*.88}}
-\backcite {dds-compiler}{{34}{4.4.6}{section*.98}}
-\backcite {questa}{{37}{4.5}{section.4.5}}
-\backcite {uvm}{{37}{4.5}{section*.104}}
-\backcite {uvm-ieee}{{37}{4.5}{section*.104}}
-\backcite {AXI-4}{{37}{4.5.1}{section*.106}}
-\backcite {uvm}{{38}{4.15}{figure.caption.107}}
-\backcite {uvm}{{38}{4.5}{table.caption.108}}
-\backcite {proyecto-jose}{{40}{4.6}{section.4.6}}
-\backcite {proyecto-jose}{{40}{4.6.1}{subsection.4.6.1}}
-\backcite {proyecto-jose}{{40}{4.6.1}{subsection.4.6.1}}
-\backcite {proyecto-jose}{{40}{4.6.1}{subsection.4.6.1}}
-\backcite {fifo-generator}{{41}{4.6.3}{table.caption.117}}
-\backcite {xdc-constraints}{{43}{4.6.6}{subsection.4.6.6}}
-\backcite {false-paths}{{43}{4.6.6}{subsection.4.6.6}}
-\backcite {set-max-delay}{{43}{4.6.6}{subsection.4.6.6}}
-\backcite {proyecto-jose}{{44}{4.7}{section.4.7}}
-\backcite {vivado-ip-integrator}{{44}{1}{Item.31}}
-\backcite {proyecto-jose}{{44}{4.7}{Item.32}}
-\backcite {proyecto-jose}{{45}{4.7}{table.caption.127}}
-\backcite {proyecto-jose}{{46}{5}{chapter.5}}
-\backcite {proyecto-grigo}{{46}{5}{chapter.5}}
-\backcite {GNURadio}{{46}{5.1}{section.5.1}}
-\backcite {gr-modtool}{{47}{5.1}{section*.130}}
-\backcite {proyecto-grigo}{{47}{5.2}{section.5.2}}
-\backcite {proyecto-grigo}{{48}{5.2}{figure.caption.134}}
-\backcite {orbit-predictor}{{50}{5.3.2}{section*.139}}
-\backcite {proyecto-jose}{{50}{5.3.3}{subsection.5.3.3}}
-\backcite {proyecto-jose}{{52}{5.3.5}{subsection.5.3.5}}
-\backcite {proyecto-arce}{{53}{5.4}{section.5.4}}
-\backcite {stm32f1}{{53}{5.4}{section.5.4}}
-\backcite {ad9959}{{53}{5.4}{section.5.4}}
-\backcite {proyecto-arce}{{53}{5.4}{section.5.4}}
-\backcite {proyecto-arce}{{53}{5.4.1}{subsection.5.4.1}}
-\backcite {client-server-model}{{54}{6.1}{section.6.1}}
-\backcite {linux-sockets}{{55}{6.2.1}{subsection.6.2.1}}
-\backcite {orbit-predictor}{{56}{6.2.2}{section*.159}}
-\backcite {pybind11}{{56}{6.2.2}{section*.159}}
-\backcite {GIL}{{57}{6.2.2}{section*.160}}
-\backcite {threading-foto}{{58}{6.2}{figure.caption.162}}
-\backcite {GIL-foto}{{58}{6.3}{figure.caption.163}}
-\backcite {orbit-predictor}{{58}{6.2.2}{section*.165}}
-\backcite {CMake}{{62}{6.4}{section.6.4}}
-\backcite {computer-systems}{{62}{6.4}{section.6.4}}
-\backcite {Make}{{62}{6.4}{section.6.4}}
-\backcite {computer-systems}{{63}{6.5}{figure.caption.179}}
-\backcite {click}{{66}{7.3}{section.7.3}}
-\backcite {Qt-framework}{{66}{7.3.1}{subsection.7.3.1}}
-\backcite {pyqt5}{{66}{7.3.1}{subsection.7.3.1}}
-\backcite {gnuradio-qt}{{66}{7.3.1}{subsection.7.3.1}}
-\backcite {qprocess}{{67}{7.3.2}{section*.192}}
-\backcite {paramiko}{{67}{7.3.2}{Item.71}}
-\backcite {tle-wiki}{{70}{A}{appendix.Alph1}}
-\backcite {orbitron}{{70}{A}{section*.201}}
-\backcite {gpredict}{{70}{A}{section*.201}}
-\backcite {tle-wiki}{{71}{A.1}{figure.caption.202}}
+\backcite {CIAA-ACC}{{10}{2.7}{figure.caption.27}}
+\backcite {SoC}{{10}{2.3.2}{section*.28}}
+\backcite {Kintex-7}{{10}{2.3.2}{section*.28}}
+\backcite {zynq-7000}{{11}{2.8}{figure.caption.29}}
+\backcite {GNURadio}{{12}{2.4}{section.2.4}}
+\backcite {proyecto-grigo}{{12}{2.4}{section.2.4}}
+\backcite {proyecto-jose}{{13}{2.6}{section.2.6}}
+\backcite {proyecto-grigo}{{13}{2.6}{section.2.6}}
+\backcite {BEESAT-9}{{14}{3}{chapter.3}}
+\backcite {temp-antena}{{19}{3.4.1}{subsection.3.4.1}}
+\backcite {temp-antena}{{20}{3.4.2}{subsection.3.4.2}}
+\backcite {ruidos-adc}{{20}{3.5}{section.3.5}}
+\backcite {AD9249}{{20}{3.5}{section.3.5}}
+\backcite {AD9249}{{21}{3.7}{figure.caption.38}}
+\backcite {formula-cuantizacion}{{21}{3.5.2}{subsection.3.5.2}}
+\backcite {formula-cuantizacion}{{21}{3.5.2}{subsection.3.5.2}}
+\backcite {ruidos-adc}{{21}{3.8}{figure.caption.39}}
+\backcite {ruidos-adc}{{22}{3.9}{figure.caption.40}}
+\backcite {formula-jitter}{{22}{3.5.3}{subsection.3.5.3}}
+\backcite {haykin}{{24}{3.6.1}{equation.3.6.15}}
+\backcite {BEESAT-9}{{24}{3.6.1}{equation.3.6.17}}
+\backcite {haykin}{{25}{3.12}{figure.caption.43}}
+\backcite {teorema-del-muestreo}{{27}{4}{chapter.4}}
+\backcite {proyecto-jose}{{27}{4}{section*.47}}
+\backcite {DDC}{{29}{4.3}{section.4.3}}
+\backcite {Butterworth}{{29}{4.3}{section.4.3}}
+\backcite {butter}{{29}{4.3}{section.4.3}}
+\backcite {scipy}{{29}{4.3}{section.4.3}}
+\backcite {lfilter}{{29}{4.3}{section.4.3}}
+\backcite {Nyquist-rate}{{30}{4.3}{section.4.3}}
+\backcite {vivado}{{31}{4.4}{section.4.4}}
+\backcite {vitis}{{31}{4.4}{section.4.4}}
+\backcite {cross-compilation}{{31}{4.4}{section.4.4}}
+\backcite {proyecto-jose}{{31}{4.4}{section.4.4}}
+\backcite {IP-Xilinx}{{31}{4.4.1}{subsection.4.4.1}}
+\backcite {axi-interconnect}{{32}{\caption@xref {??}{ on input line 96}}{table.caption.54}}
+\backcite {complex-mult}{{32}{\caption@xref {??}{ on input line 96}}{table.caption.54}}
+\backcite {dds-compiler}{{32}{\caption@xref {??}{ on input line 96}}{table.caption.54}}
+\backcite {fir-compiler}{{32}{\caption@xref {??}{ on input line 96}}{table.caption.54}}
+\backcite {pto-fijo}{{33}{4.4.3}{subsection.4.4.3}}
+\backcite {filter-builder}{{33}{4.4.3}{section*.56}}
+\backcite {filter-designer}{{33}{4.4.3}{section*.56}}
+\backcite {teorema-del-muestreo}{{34}{4.4.3}{section*.58}}
+\backcite {fir-compiler}{{34}{4.4.3}{section*.58}}
+\backcite {dds-compiler}{{38}{4.4.6}{section*.67}}
+\backcite {questa}{{41}{4.5}{section.4.5}}
+\backcite {uvm}{{41}{4.5}{section.4.5}}
+\backcite {uvm-ieee}{{41}{4.5}{section.4.5}}
+\backcite {AXI-4-lite}{{41}{4.5.1}{subsection.4.5.1}}
+\backcite {uvm}{{42}{4.15}{figure.caption.72}}
+\backcite {uvm}{{42}{4.6}{table.caption.73}}
+\backcite {proyecto-jose}{{45}{4.6}{section.4.6}}
+\backcite {proyecto-jose}{{45}{4.6.1}{subsection.4.6.1}}
+\backcite {proyecto-jose}{{45}{4.6.1}{subsection.4.6.1}}
+\backcite {proyecto-jose}{{45}{4.6.1}{subsection.4.6.1}}
+\backcite {clk-wizard}{{46}{\caption@xref {??}{ on input line 493}}{table.caption.83}}
+\backcite {binary-counter}{{46}{\caption@xref {??}{ on input line 493}}{table.caption.83}}
+\backcite {fifo-generator}{{46}{\caption@xref {??}{ on input line 493}}{table.caption.83}}
+\backcite {fifo-generator}{{47}{4.6.3}{table.caption.85}}
+\backcite {xdc-constraints}{{48}{4.6.5}{subsection.4.6.5}}
+\backcite {false-paths}{{49}{4.6.5}{subsection.4.6.5}}
+\backcite {set-max-delay}{{49}{4.6.5}{subsection.4.6.5}}
+\backcite {proyecto-jose}{{49}{4.7}{section.4.7}}
+\backcite {vivado-ip-integrator}{{49}{1}{Item.41}}
+\backcite {proyecto-jose}{{49}{4.7}{Item.42}}
+\backcite {proyecto-jose}{{50}{4.7}{table.caption.91}}
+\backcite {filter-designer}{{53}{4.8.4}{section*.96}}
+\backcite {proyecto-jose}{{54}{4.8.5}{subsection.4.8.5}}
+\backcite {fir-compiler}{{55}{4.9.1}{subsection.4.9.1}}
+\backcite {AXI-4-stream}{{58}{4.9.2}{section*.107}}
+\backcite {fir-compiler}{{58}{4.9.2}{section*.108}}
+\backcite {proyecto-jose}{{62}{5}{chapter.5}}
+\backcite {proyecto-grigo}{{62}{5}{chapter.5}}
+\backcite {GNURadio}{{62}{5.1}{section.5.1}}
+\backcite {gr-modtool}{{63}{5.1}{section*.116}}
+\backcite {proyecto-grigo}{{63}{5.2}{section.5.2}}
+\backcite {proyecto-grigo}{{64}{5.2}{figure.caption.120}}
+\backcite {orbit-predictor}{{66}{5.3.2}{section*.125}}
+\backcite {proyecto-jose}{{66}{5.3.3}{subsection.5.3.3}}
+\backcite {proyecto-jose}{{68}{5.3.4}{section*.136}}
+\backcite {proyecto-jose}{{68}{5.7}{figure.caption.137}}
+\backcite {proyecto-jose}{{68}{5.3.5}{subsection.5.3.5}}
+\backcite {proyecto-arce}{{71}{5.4}{section.5.4}}
+\backcite {stm32f1}{{71}{5.4}{section.5.4}}
+\backcite {ad9959}{{71}{5.4}{section.5.4}}
+\backcite {proyecto-arce}{{71}{5.4}{section.5.4}}
+\backcite {proyecto-arce}{{71}{5.4.1}{subsection.5.4.1}}
+\backcite {proyecto-arce}{{73}{5.4.4}{subsection.5.4.4}}
+\backcite {proyecto-jose}{{73}{5.4.4}{subsection.5.4.4}}
+\backcite {client-server-model}{{74}{6.1}{section.6.1}}
+\backcite {linux-sockets}{{75}{6.2.1}{subsection.6.2.1}}
+\backcite {orbit-predictor}{{76}{6.2.2}{section*.153}}
+\backcite {pybind11}{{76}{6.2.2}{section*.153}}
+\backcite {GIL}{{77}{6.2.2}{section*.154}}
+\backcite {threading-foto}{{78}{6.2}{figure.caption.156}}
+\backcite {GIL-foto}{{78}{6.3}{figure.caption.157}}
+\backcite {orbit-predictor}{{78}{6.2.2}{section*.159}}
+\backcite {CMake}{{82}{6.4}{section.6.4}}
+\backcite {computer-systems}{{82}{6.4}{section.6.4}}
+\backcite {Make}{{82}{6.4}{section.6.4}}
+\backcite {computer-systems}{{83}{6.5}{figure.caption.173}}
+\backcite {click}{{86}{7.3}{section.7.3}}
+\backcite {Qt-framework}{{86}{7.3}{section.7.3}}
+\backcite {pyqt5}{{86}{7.3}{section.7.3}}
+\backcite {gnuradio-qt}{{86}{7.3}{section.7.3}}
+\backcite {qprocess}{{87}{7.4}{section.7.4}}
+\backcite {proyecto-jose}{{87}{7.4.1}{subsection.7.4.1}}
+\backcite {paramiko}{{87}{7.4.1}{Item.89}}
+\backcite {pybind11}{{88}{7.4.3}{subsection.7.4.3}}
+\backcite {pyqt-widgets}{{90}{7.1}{figure.caption.178}}
+\backcite {proyecto-jose}{{93}{8}{chapter.8}}
+\backcite {proyecto-grigo}{{93}{8}{chapter.8}}
+\backcite {proyecto-jose}{{94}{8.1.2}{subsection.8.1.2}}
+\backcite {tle-wiki}{{95}{A}{appendix.Alph1}}
+\backcite {orbitron}{{95}{A}{section*.185}}
+\backcite {gpredict}{{95}{A}{section*.185}}
+\backcite {tle-wiki}{{96}{A.1}{figure.caption.186}}
+\backcite {tipo-dato}{{98}{B.1}{figure.caption.188}}
+\backcite {tipo-dato}{{98}{B.2}{figure.caption.189}}

@@ -1,7 +1,7 @@
 \documentclass[../../main.tex]{subfiles}
 \begin{document}
 \graphicspath{{./figures}}
-\chapter{Captura de datos \textit{on demand}}
+\chapter{Captura de datos \textit{on demand}}\label{cap::server-capturas}
 Los datos adquiridos y preprocesados son actualmente recibidos y procesados con GNU Radio en la computadora conectada a la CIAA-ACC mediante SSH como se describió en el capítulo~\ref{cap::gnu-radio}.
 
 En este capítulo se propone extender la funcionalidad del sistema de procesamiento, permitiendo transmitir datos procesados a clientes no conectados a la placa. Para esto se llevará a cabo el diseño y la implementación de un servidor de capturas a demanda capaz de transmitir en tiempo real datos procesados de capturas específicadas por el usuario.
@@ -105,9 +105,9 @@ En C++ los \textit{threads} son hilos de ejecución que realmente pueden ser sim
 Durante esta multiplexación temporal, un \textit{thread} libera el GIL y otro lo toma como se muestra en la figura \ref{fig::gil-dynamics}. Esto es lo que debe hacerse cada vez que un \textit{thread} de C++ llame a una función de la librería \textit{orbit-predictor}; es decir, se debe poder gestionar el GIL del intérprete principal desde el código de C++. 
 Afortunadamente, la librería \textit{pybind11} incorpora las clases \texttt{pybind11::gil\_scoped\_release} y \texttt{pybind11::gil\_scoped\_acquire}, las cuales permiten soltar y adquirir el GIL desde C++. Luego, en cada llamada a código de Python desde C++ se adquiere y luego se libera el GIL, asegurando que no haya colisiones.
 
-\figura[0.7]{threading}{Ilustración de la implementación de \textit{threading} en Python (izq.) y en C++ (der.)\cite{threading-foto}.}
+\figura[0.7]{threading}{Ilustración de la implementación de \textit{threading} en Python (izq.) y en C++ (der.)\cite{threading-foto}.}[Ilustración de la implementación de \textit{threading} en Python (izq.) y en C++ (der.).]
 
-\figura[0.8]{gil-dynamics}{Manejo del GIL entre varios \textit{threads}\cite{GIL-foto}.}
+\figura[0.8]{gil-dynamics}{Manejo del GIL entre varios \textit{threads}\cite{GIL-foto}.}[Manejo del GIL entre varios \textit{threads}.]
 
 \change{Revisar esta subsubsección que ya lo puse en el capitulo de proc externo}
 \subsubsection{La librería \textit{orbit-predictor}}
@@ -232,7 +232,7 @@ En el desarrollo del servidor se utilizaron técnicas de \textit{multithreading}
 
 El archivo \texttt{CMakeLists.txt} final se encuentra en \texttt{Streaming-on-demand/CMakeLists.txt}.
 
-\figura{compilation-flow}{Flujo de compilación de un programa de C\cite{computer-systems}.}
+\figura{compilation-flow}{Flujo de compilación de un programa de C\cite{computer-systems}.}[Flujo de compilación de un programa de C.]
 
 \figura[0.85]{flujo-cmake}{Proceso desde el archivo \texttt{CMakeLists.txt} hasta el ejecutable final.}
 \section{Capturas de prueba}

@@ -1,8 +1,51 @@
 \documentclass[../../main.tex]{subfiles}
 \begin{document}
 \graphicspath{{./figures}}
-\chapter{Trabajo a futuro y conclusiones}
-%Temas de sincornismo (ver bitácora) para usar más de una placa
-%Adaptaciones necesarias para ver los beams en paralelo
+\chapter{Conclusiones y trabajo a futuro}
+
+
+En el presente proyecto, enmarcado dentro del proyecto del diseño e implementación de una estación terrena para satélites LEO con conformación digital de haz empleando un arreglo de fase de 16 antenas, se realizó el análisis del enlace satelital junto con la determinación de la ganancia necesaria de la cadena de RF para una dada BER a la salida del demoudulador. Se consideraron las distintas fuentes de ruido del sistema como el ruido introducido por el \textit{front-end} de RF, el agregado por el ADC y la ganancia por procesamiento.
+
+Por otro lado, se diseñó conceptualmente y posteriormente se implementó en la placa CIAA-ACC un sistema de preprocesamiento de señales para lograr seleccionar primero la banda y luego los haces de interés que desean seguirse. Se incorporaron 5 haces en cada uno de los 16 canales del ADC utilizado, cuya selección se realiza mediante la configuración de la frecuencia que se desea adquirir a partir de la escritura de un registro dentro de la FPGA en la CIAA-ACC.
+
+La etapa de preprocesamiento incluye osciladores, mezclas complejas y etapas de filtrado. Esto implicó el desarrollo de módulos en VHDL y la utlización de \textit{IP Blocks} nativos de \textit{Vivado} junto con la aplicación de técnicas de diseño digital como el manejo de CDCs. También se verificó la etapa de preprocesamiento implementada utilizando el estándar de verificación de UVM, para el cuál debió desarrollarse \textit{testbenches} en SystemVerilog.
+
+Tras la comprobación de funcionamiento se procedió a la integración con el \textit{core} de adquisición realizado en \cite{proyecto-jose}, lo cual implicó realizar diversas adaptaciones y refactorizaciones. Se incorporaron también ampliaciones a las funcionalidades originales del proyecto \textit{standalone}.
+
+Se desarrolló un mecanismo de comunicación entre la CIAA-ACC y la etapa de procesamiento externo, para la cual se utilizó GNU Radio, un software libre de SDR. Además de la interfaz con la CIAA-ACC, en GNU Radio también se incorporó lo desarrollado en \cite{proyecto-grigo} para detección de dirección de arribo y conformación de haz junto con el desarrollo de algoritmos propios de conformación de haz a partir de ángulos de arribo y conformación de haz con corrección de corrimiento Doppler a partir del TLE (\textit{Two-Line Element set}) de un satélite.
+
+Se puso a disposición todo el sistema desarrollado mediante el diseño y la implementación de un servidor de envío de capturas a demanda con procesamiento y conformación de haz en tiempo real a partir del TLE de una misión y su frecuencia de operación. Para esto se desarrolló el software en C++ tanto del servidor como del cliente.
+
+Finalmente, para manejar todas las configuraciones del receptor se desarrolló una GUI empleando \texttt{PyQt5}. Estas configuraciones incluyen las referentes a la placa como la lectura y escritura de registros dentro de la FPGA, el manejo de la etapa de procesamiento externo y el control del servidor del envío de capturas.
+
+\section{Trabajo a futuro}
+%Decir filtros configurables
+%Ver calibracion de potencia entre canales, tal vez trabajo a futuro?
+%Hacer que los beams funcionen en simutáneo
+%Arreglar el espejismo de las señales al submuestrear para poder adquirir señales de naturaleza compleja
+\subsection{Calibración de potencia entre canales}
+Actualmente no se realiza ningún procedimiento de calibración de potencia para asegurar que se esté recibiendo el mismo nivel de potencia por los 16 canales del ADC. La incorporación de una etapa de calibración será necesaria ya que resulta importante garantizar que los canales estén calibrados a la hora de realizar la conformación digital de haz.
+
+Esta etapa podría implementarse en el procesamiento externo o en la FPGA. En el primer caso sería GNU Radio el encargado de medir las potencias de señal de los 16 canales entrantes y calibrarlas empleando un algoritmo que ajuste ganancias de manera automática. En el segundo enfoque, tendría que implementarse un algoritmo similar pero en la lógica.
+
+Implementarlo en software tiene la ventaja de la simplicidad que conlleva en comparación a implementarlo en hardware. No obstante, la implementación en hardware brinda el beneficio de reducir la capacidad de cómputo requerida por GNU Radio.
+
+\subsection{Visualizar múltiples haces en simultáneo}
+En la integración de la etapa de preprocesamiento se incorporaron 4 haces más, alcanzando un total de 5 haces que se preprocesan en simultáneo. No obstante, no es posible actualmente visualizar estos 5 haces al mismo tiempo debido al multiplexor que se colocó a la salida de los filtros de canal. 
+
+Para remover este multiplexor y lograr la visualización de los múltiples haces al mismo tiempo deben incorporarse más FIFOs o bien modificar el protocolo de escritura de las FIFOs ya existentes realizando, por ejemplo, una multiplexación temporal donde en ciclos de reloj consecutivos se escriban datos correspondientes a haces distintos.
+
+Cualquier enfoque que decida tomarse requerirá también una modificación del software desarrollado en \cite{proyecto-jose} para ser compatible con la nueva organización de los datos en el hardware.
+
+\subsection{Incorporación de un CRC}
+Resulta relevante disponer de algún mecanismo que permita verificar la integridad de los datos enviados desde la CIAA-ACC y recibidos en la etapa de procesamiento. Para esto se propone el uso de un CRC o verificación de redundancia cíclica empleado en la detección de errores.
+
+El mismo debe ubicarse en la interfaz entre los datos ...
+\subsection{Extensión a señales complejas en banda base}
+\subsection{Programabilidad de los filtros}
+\subsection{Incorporación de más de una CIAA-ACC}
+%Consideraciones de sincronismo
+
+%En la GUI: chequear reqs del diseño conceptual, lo que no se hizo decirlo (calibración arreglo, decir angulo de arribo y potencia recibida)
 
 \end{document}

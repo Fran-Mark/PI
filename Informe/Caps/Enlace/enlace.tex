@@ -1,13 +1,13 @@
 \documentclass[../../main.tex]{subfiles}
 \begin{document}
 \graphicspath{{./figures}}
-\chapter{Análisis del enlace de RF}
+\chapter{Análisis del enlace de RF}\label{cap::enlace}
 
 La definición de la especificación de la cadena de RF es una parte fundamental en el diseño del receptor. 
 Para todos los cálculos realizados en este capítulo se tomó como referencia la misión BEESAT-9 \cite{BEESAT-9} de la Universidad de Berlín. 
 La razón de esta elección radica en que se trata de un satélite LEO a $h_\textrm{sat} = 530\un{km}$ de altura el cual opera en la banda de interés de UHF amateur, más específicamente a una frecuencia central $f_c = 435.95\un{MHz}$.
 
-\section{Consideraciones de corrimiento Doppler}
+\section{Consideraciones de corrimiento Doppler}\label{sec::doppler}
 La estación terrena recibirá señales de satélites LEO a alrededor de 500~km de altura. Esto implica que no solo habrá considerables pérdidas de espacio libre sino también corrimiento Doppler no despreciable. Se discute a continuación de manera más precisa este último punto, relegando el cálculo de las pérdidas de espacio libre a la sección \ref{sec::analisis-potencia}.
 
 El corrimiento de frecuencia Doppler viene dado por
@@ -16,11 +16,44 @@ El corrimiento de frecuencia Doppler viene dado por
 \end{equation}
 donde $c$ es la velocidad de la luz y $\Delta v$ representa la velocidad relativa entre la misión en cuestión y la estación terrena, siendo positiva cuando estas se acercan y negativa cuando se alejan.
 
-\todo{Hacer calculitos y grafiquitos usando lo de Lucas Gomez}
+En la figura \ref{fig::doppler-explicacion} se muestra la pasada de un satélite sobre una estación terrena. El vector de $\Delta \vec{v}$ en dicha figura, representa la proyección del vector velocidad del satélite $\vec{V}_\textrm{sat}$ sobre la recta que pasa por la ET y el satélite. 
+
+Llamando $\beta$ al ángulo entre dicha recta y la recta que atraviesa el centro de la Tierra y el satélite (como se muestra en la figura \ref{fig::doppler-explicacion}), puede escribirse $\Delta v$\footnote{Esto es, el módulo del vector $\Delta \vec{v}$} como
+\begin{equation}
+    \Delta v = V_\textrm{sat} \cdot \cos(90\degree - \beta) = V_\textrm{sat} \cdot \sin \beta.
+    \label{eq::delta-v}
+\end{equation}
+
+Por otro lado, $V_\textrm{sat}$ representa el módulo del vector de velocidad del satélite, esto es la velocidad tangencial del satélite. Esta puede calcularse conociendo la altura de la órbita y bajo la aproximación de una órbita circular. Para la misión de referencia $h = 530\un{km}$, y la velocidad tangencial resulta 
+\begin{equation}
+    V_\textrm{sat} = \sqrt{\frac{G m_e}{r_e + h}} \approx 7353.8\un{m/s},
+    \label{eq::vsat}
+\end{equation}
+donde $G$ es la constante de gravitación universal, $m_e$ la masa de la tierra y $r_e$ el radio de la tierra como se muestra en la figura \ref{fig::doppler-explicacion}.
+
+Por otro lado, resulta conveniente expresar el ángulo $\beta$ en función del ángulo de elevación $\theta$. Mediante el teorema del seno puede establecerse la siguiente ecuación:
+\begin{equation}
+    \sin \beta = \frac{r_e \sin(90\degree + \theta)}{r_e + h} =  \frac{r_e \cos(\theta)}{r_e + h}.
+    \label{eq::seno-beta}
+\end{equation}
+Finalmente, reemplazando las ecuaciones \ref{eq::vsat} y \ref{eq::seno-beta} en la ecuación \ref{eq::delta-v} se obtiene
+
+\begin{equation}
+    \Delta v = \sqrt{\frac{G m_e}{(r_e + h)^{3}}} \ r_e \cos \theta
+\end{equation}
+
+En la figura \ref{fig::doppler} se muestra el corrimiento Doppler respecto a la frecuencia central $f_c = 435.95\un{MHz}$ para la misión de referencia en función del ángulo de elevación $\theta$. Se observa que el corrimiento es del orden de los $\pm10\un{kHz}$ en el horizonte, siendo simétrico respecto al punto del cénit correspondiente a $\theta = 90\degree$.
+
+La corrección del corrimiento Doppler se realizará más adelante en la etapa de procesamiento externo en el capítulo \ref{cap::gnu-radio}.
+
+\figura[0.5]{doppler-explicacion}{Representación de pasada de satélite sobre la estación terrena.}
+
+\figura[0.5]{doppler}{Corrimiento de frecuencia respecto a la frecuencia central para la misión de referencia BEESAT-9 en función del ángulo de elevación.}
 
 \section{Planteo del front-end de RF}
 Un esquema simplificado del \textit{front-end} de RF se presentó ya en la figura \ref{fig::front-end-rf-16}, una ilustración más detallada  se muestra en la figura \ref{fig::cadena-de-recepcion}. Allí se observa que se compone de los siguientes elementos:
-\begin{itemize}
+\begin{enumerate}
+    \item Antenas con polarización circular.
     \item Un tramo de cable de aproximadamente 50~cm desde los elementos radiantes hasta el híbrido.
     \item Un híbrido en cuadratura el cual combina dos elementos radiantes lineales para lograr una polarización circular.
     \item Un tramo de 5~cm de cable aproximadamente, el cual conecta el híbrido con el resto de la cadena de RF.
@@ -29,14 +62,29 @@ Un esquema simplificado del \textit{front-end} de RF se presentó ya en la figur
     \item Un tramo de cable de aproximadamente 2 metros para conectar con el resto del sistema.
     \item Una etapa de gran ganancia $G$, la cual acondiciona la potencia de la señal de manera de cumplir con los requerimientos del demodulador. Esta es la ganancia a determinar en este análisis.
     \item Un último tramo de cable de alrededor de 30~cm para conectar el final de la cadena de recepción a la entrada del sistema de adquisición.
-\end{itemize}
+\end{enumerate}
 
 Como se mencionó anteriormente, la figura de ruido del \textit{front-end} de RF estará determinada principalmente por el LNA. Dado que su caracterización no es una tarea propia del presente proyecto, se considerará para este análisis $\textrm{NF}_\textrm{FE} = 3\un{dB}$ que representa un valor estimativo.
 
-\figura[0.7]{cadena-de-recepcion}{Diagrama de la cadena de recepción.}
-\unsure{Debería agregar ganancias a amplificadores y longitudes a cables?}
-\unsure{JQ: está medio confuso de seguir este diagrama. Habría que pensar en hacerlo netamente horizontal, o netamente vertical.}
-\change{Sacar el ADC. Señalizar que la NF es de aprox 3 dB}
+\figura[1]{cadena-de-recepcion}{Diagrama de la cadena de recepción.}
+
+\section{Determinación de la ganancia de la cadena de acondicionamiento}
+El parámetro libre en este análisis es la ganancia $G$ de la segunda etapa de amplificación, la cual puede verse en la figura \ref{fig::cadena-de-recepcion}. El objetivo es entonces, bajo la restricción del \textit{front-end} de RF recién descrito, encontrar el rango de valores que puede tomar la ganancia $G$.
+
+Para determinar este parámetro se debe definir algún criterio de diseño, en el presente análisis este rol lo cumple la tasa de error de bit (BER) a la salida del demodulador para la cual se propone obtener un valor de $10^{-5}$. 
+
+El procedimiento a seguir para hallar el rango de posibles valores para G se ilustra en la figura \ref{fig::G-procedimiento} y puede describirse de la siguiente manera:
+\begin{enumerate}
+    \item Fijar un valor de BER a la salida del demodulador.
+    \item Realizar un análisis del enlace de RF, determinando valores máximos y mínimos de SNR a la entrada de la cadena de recepción.
+    \item Considerar los términos de ruido agregados por el ADC, obteniendo un valor de SNR a la salida del ADC en función del parámetro $G$.
+    \item Calcular la SNR requerida a la entrada del demodulador en base a la BER definida en el primer punto.
+    \item Obtener la SNR requerida a la salida del ADC para la BER definida.
+    \item Sabiendo la SNR requerida a la salida del ADC (punto 5) ajustar la ganancia $G$ según la fórmula obtenida en el punto 3.
+\end{enumerate}
+
+\figura[0.9]{G-procedimiento}{Partiendo de la BER como criterio de diseño, se propaga la SNR hacia atrás.}
+
 \section{Análisis de potencia}\label{sec::analisis-potencia}
 Se comenzó realizando un análisis de potencia en la antena receptora con el objetivo de determinar la SNR de partida para luego, en base a esta, realizar los cálculos subsiguientes para la determinación de la ganancia $G$. La potencia en la antena receptora viene dada por la ecuación \ref{eq::potencias}:
 
@@ -46,7 +94,9 @@ Se comenzó realizando un análisis de potencia en la antena receptora con el ob
 \end{equation}
 donde $P_\textrm{ant}$ es la potencia recibida en la antena del receptor, 
 $P_\textrm{sat} = 27~\un{dBm}$ es la potencia transmitida por la misión de referencia, $L_\textrm{FS} = 20 \log \left(\frac{4 \pi d}{\lambda}\right)$ representa las pérdidas de espacio libre, $L_\textrm{pol} = 3~dB$
- son las pérdidas por polarización ya que la misión de referencia transmite en polarización lineal (y la recepción se realiza con polarización circular, ver figura \ref{fig::cadena-de-recepcion}), y $G_\textrm{el} (\theta)$ es la ganancia por elemento para un dado ángulo.
+son las pérdidas por polarización ya que la misión de referencia transmite en polarización lineal (y la recepción se realiza con antenas con polarización circular, ver tabla \ref{tab::parametros-array}), y $G_\textrm{el} (\theta)$ es la ganancia por elemento para un dado ángulo de elevación.
+ 
+Los valores de $G_\textrm{el} (\theta)$ se obtuvieron a partir de simulaciones del patrón de radiación de los elementos, cuyos resultados se muestran en la figura \ref{fig::diagrama-radiacion}.
 
 La distancia $d$ empleada para calcular $L_\textrm{FS}$ representa la distancia del satélite al arreglo de antenas y puede aproximarse mediante el teorema del coseno para un ángulo de elevación $\theta$ respecto al horizonte a partir de la ecuación \ref{eq::distSatelite}:
 \begin{equation}
@@ -57,15 +107,26 @@ donde $r_e = 6371\un{km}$ es el radio promedio de la Tierra.
 
 A continuación se calculó la SNR a la entrada del receptor como la resta en dB de la potencia de señal en la antena receptora dada por la ecuación \ref{eq::potencias} y la potencia de ruido en el ancho de banda de entrada dada por la ecuación \ref{eq::potenciaRuido}:
 \begin{equation}
-    N = N_0 B = k T_\textrm{ant} \cdot 25\un{MHz},
+    N = N_0 W = k T_\textrm{ant} \cdot 25\un{MHz},
     \label{eq::potenciaRuido}
 \end{equation} 
-donde $k$ es la constante de Boltzmann, $T_\textrm{ant}$ la temperatura de la antena receptora y $B = 25\un{MHz}$ es el ancho de banda del primer filtro grueso de la cadena de recepción mostrada en la figura \ref{fig::cadena-de-recepcion}.
+donde $k$ es la constante de Boltzmann, $T_\textrm{ant}$ la temperatura de la antena receptora y $W = 25\un{MHz}$ es el ancho de banda del primer filtro grueso de la cadena de recepción mostrada en la figura \ref{fig::cadena-de-recepcion}.
 
-Se consideraron dos configuraciones extremas para cubrir los posibles rangos de valores de $L_\textrm{FS}$ y $G_\textrm{el}(\theta)$. 
-La primera de estas corresponde al considerado el peor caso; el cual se tiene al al arreglo a $45\degree$ y el satélite se encuentra a $10\degree$ sobre la línea del horizonte como se observa en la figura \ref{fig::peor-caso}
+Se consideraron dos configuraciones extremas para cubrir los posibles rangos de valores de $L_\textrm{FS}$ y $G_\textrm{el}(\theta)$. Ambos se ilustran en la figura \ref{fig::casos-potencia} señalando además de manera orientativa la forma del lóbulo principal de radiación.
 
-Por otro lado, la segunda configuración analizada representa el mejor caso, esto es, aquel en el cual el arreglo de antenas se encuentra horizontal sobre la tierra y el satélite se posiciona en el zénit como se muestra en la figura \ref{fig::mejor-caso}.
+La primera configuración corresponde al considerado el peor caso; en el cual se tiene al arreglo a $45\degree$ mientras que el satélite se encuentra a $10\degree$ sobre la línea del horizonte como se observa en la figura \ref{fig::peor-caso}.
+
+Por otro lado, la segunda configuración analizada representa el mejor caso, esto es, aquel en el cual el arreglo de antenas se encuentra horizontal sobre la tierra y el satélite se posiciona en el cenit como se muestra en la figura \ref{fig::mejor-caso}.
+
+\begin{figure}[H]
+    \centering
+    \subcaptionbox{Diagrama 3D de la ganancia para un elemento.\label{fig::diagrama-radiacion-3d}}
+    {\includegraphics[width=0.7\linewidth]{diagrama-radiacion-3d.png}}\\[1PC]
+    \subcaptionbox{Ganancia del elemento en función del ángulo de elevación $\theta$.\label{fig::diagrama-radiacion-2d}}
+    {\includegraphics[width=0.7\linewidth]{diagrama-radiacion-2d.png}}
+    \caption{Ganancia de cada elemento del arreglo.}
+    \label{fig::diagrama-radiacion}
+\end{figure}
 
 \begin{figure}[H]
     \centering
@@ -79,18 +140,23 @@ Por otro lado, la segunda configuración analizada representa el mejor caso, est
 
 \subsection{Evaluación del peor caso}
 Para la configuración mostrada en la figura \ref{fig::peor-caso}, la distancia de la misión de referencia al satélite según la ecuación \ref{eq::distSatelite} es de aproximadamente $1800\un{km}$. Esta distancia se calcula a partir de la ecuación \ref{eq::distSatelite} y representa unas pérdidas de espacio libre de $L_\textrm{FS} = 150\un{dB}$. 
-Por otro lado, la ganancia de cada elemento en estas condiciones fue determinado mediante simulaciones \unsure{Lo pongo en el apéndice? Ver docs de Nico}, donde se obtuvo $G_\textrm{el}(10\degree) = 3\un{dBi}$. Al sustituir los valores recién obtenidos en la ecuación \ref{eq::potencias} se obtiene que la potencia de señal que alcanza a cada elemento es $P_\textrm{ant} = -123\un{dBm}$.
 
-Para calcular la potencia de ruido empleando la ecuación \ref{eq::potenciaRuido} se debe determinar la temperatura de ruido de la antena\footnote{Esto es de cada elemento, no del arreglo entero.}.
-\todo{Poner como se determinó la temperatura de la antena.}
-\todo{Poner la SNR obtenida restando los valores y labelar la eq}
+La ganancia de cada elemento se extrae del gráfico de la figura \ref{fig::diagrama-radiacion-2d}, donde considerando que el arreglo está a $45\degree$ y el ángulo del satélite respecto al horizonte es de $10\degree$, esto corresponde a evaluar la ganancia en un ángulo $G_\textrm{el}(35\degree) = 3\un{dBi}$. Al sustituir los valores recién obtenidos en la ecuación \ref{eq::potencias} se obtiene que la potencia de señal que alcanza a cada elemento es $P_\textrm{ant} = -123\un{dBm}$.
+
+Para el cálculo de la potencia de ruido en el peor caso se empleó la ecuación \ref{eq::potenciaRuido} con una temperatura de ruido $T_\textrm{ant} = 60\un{K}$\footnote{Esto es de cada elemento, no del arreglo entero.}\cite{temp-antena}, obteniéndose \[N = -107\un{dBm}\]. Luego, la SNR en el peor caso resulta
+\begin{equation}
+    \textrm{SNR}_\textrm{min} = -123\un{dBm} + 107\un{dBm} = -16\un{dB}
+    \label{eq::peor-snr}
+\end{equation}
 
 \subsection{Evaluación del mejor caso}
-El segundo caso extremo a analizar es el mostrado en la figura \ref{fig::mejor-caso}. La distancia de la misión de referencia al arreglo es simplemente su altura $h_{sat}$, esto es 550~km, lo cual implica unas pérdidas de espacio libre de $L_\textrm{FS} = 140\un{dB}$. La ganancia de cada elemento en este escenario es $G_\textrm{el}(90\degree) = 8\un{dBi}$. Así, la potencia de señal a la entrada de cada elemento es $P_\textrm{ant} = -108\un{dBm}$.
+El segundo caso extremo a analizar es el mostrado en la figura \ref{fig::mejor-caso}. La distancia de la misión de referencia al arreglo es simplemente su altura $h_{sat}$, esto es 550~km, lo cual implica unas pérdidas de espacio libre de $L_\textrm{FS} = 140\un{dB}$. La ganancia de cada elemento en este escenario es máxima y es de $8\un{dBi}$. Así, la potencia de señal a la entrada de cada elemento es $P_\textrm{ant} = -108\un{dBm}$.
 
-Para esta configuración, la temperatura de cada antena es
-\todo{Poner como se determinó la temperatura de la antena.}
-\todo{Poner la SNR obtenida restando los valores y labelar la eq}
+Para esta configuración, la temperatura de antena utilizada en el cálculo fue $T_\textrm{ant} = 10\un{K}$\cite{temp-antena}. Le sigue entonces que la potencia de ruido recibida en los 25~MHz de ancho de banda es \[N = -115\un{dBm}.\] De esta manera, la SNR en el mejor caso resulta:
+\begin{equation}
+    \textrm{SNR}_\textrm{max} = -108\un{dBm} + 115\un{dBm} = 7\un{dB}
+    \label{eq::mejor-snr}
+\end{equation}
 
 \section{Ruido introducido por el ADC}
 El conversor analógico-digital es un dispositivo complejo con numerosas fuentes de ruido \cite{ruidos-adc}. En este análisis se consideran las tres fuentes principales en términos del nivel de ruido aportado en la frecuencia de trabajo de la misión de referencia \cite{AD9249}. Estas son:
@@ -107,7 +173,7 @@ En la figura \ref{fig::ruido-termico} se muestra la SNR en dBFS en función de l
     \label{eq::ruido-termico}
 \end{equation}
 
-\figura[0.65]{ruido-termico}{SNR del AD9249 en función de la frecuencia de entrada \cite{AD9249}.}
+\figura[0.65]{ruido-termico}{SNR del AD9249 en función de la frecuencia de entrada \cite{AD9249}.}[SNR del AD9249 en función de la frecuencia de entrada.]
 
 \subsection{Ruido de cuantización}
 Al muestrear una señal se discretiza una magnitud física, en este caso esta magnitud es la tensión. De esta manera, dado que con N bits se pueden representar hasta $2^N$ valores, se comete inevitablemente un error al realizar el muestreo de una variable continua; esto se ilustra en las figuras \ref{fig::cuantizacion} y \ref{fig::sampleo}. Dicho error recibe el nombre de error de cuantización.
@@ -117,7 +183,6 @@ Este error puede modelarse como una variable aleatoria con distribución uniform
     N_q = - (1.763 + 6.02 N_\textrm{b})\un{dBFS},
     \label{eq::ruido-cuantizacion-formula}
 \end{equation}
-\unsure{Lo de bits efectivos está relacionado con el oversampling, ver si lo dejo o no.}
 
 El AD9249 posee una resolución de 14 bits como se indicó en la tabla \ref{tab::ADC}. Luego, de la ecuación \ref{eq::ruido-cuantizacion-formula}, el ruido de cuantización es:
 \begin{equation}
@@ -125,9 +190,9 @@ El AD9249 posee una resolución de 14 bits como se indicó en la tabla \ref{tab:
     \label{eq::ruido-cuantizacion}
 \end{equation}
 
-\figura[0.55]{cuantizacion}{Código de cuantización con 4 bits \cite{ruidos-adc}.}
+\figura[0.55]{cuantizacion}{Código de cuantización con 4 bits \cite{ruidos-adc}.}[Código de cuantización con 4 bits.]
 
-\figura[0.55]{sampleo}{Señal analógica y señal muestreada junto con el error del bit menos significativo \cite{ruidos-adc}.}
+\figura[0.55]{sampleo}{Señal analógica y señal muestreada junto con el error del bit menos significativo \cite{ruidos-adc}.}[Señal analógica y señal muestreada junto con el error del bit menos significativo.]
 
 \subsection{Ruido por \textit{jitter}}
 Existen dos fuentes de incertidumbre en el momento de la conversión, el \textit{jitter} del reloj externo de muestreo y la incertidumbre en el tiempo de apertura del ADC, ambos valores se especifican en la table \ref{tab::ADC}.
@@ -144,9 +209,9 @@ para $f_{\textrm{in}} = 435.95\un{MHz}$, la frecuencia de operación de la misi�
 
 \subsection{SNR a la salida del ADC en función de la ganancia $G$}
 El parámetro libre en este análisis es la ganancia $G$ de la segunda etapa de amplificación, la cual puede verse en la figura \ref{fig::cadena-de-recepcion}. Por esto resulta de relevancia analizar las implicancias que tiene la variación de este parámetro en el sistema.
-Empleando \textit{full scale} como $1~V_\textrm{pp}$\unsure{JQ: por qué?}, se tiene que 
-$$0\un{dBFS} \approx 4\un{dBm},$$ 
-\unsure{Hace falta que explique de donde sale? \\ JQ: no está de más} 
+
+Configurando el ADC con \textit{full scale} de $1~V_\textrm{pp}$ se tiene que, para una senoidal de entrada en \textit{full scale}, es decir a 0~dBFS, la potencia de entrada es
+\[10 \log{\left(\frac{0.5^2}{2 \times 50}\right)} \approx -26\un{dBW} = 4\un{dBm},\] luego \[\un{dBFS} = 4\un{dBm};\]
 lo cual según las ecuaciones \ref{eq::ruido-termico} y \ref{eq::ruido-cuantizacion} implica que los ruidos térmico y de cuantizacion resultan:
 \[N_T = -61\un{dBm},\] \[N_q = -82\un{dBm}.\]
 
@@ -154,61 +219,49 @@ En la figura \ref{fig::ruidovsG} se muestra la potencia en dBm de la señal de e
 
 La SNR está representada en la figura \ref{fig::ruidovsG} por la diferencia entre $P_{in}$ y $N_{tot}$. Se observa a simple vista que aumentar el valor de $G$ mejora la SNR inicialmente hasta cierto punto donde la diferencia entre las curvas parece permanecer constante. Esto se ve con mayor claridad en la figura \ref{fig::SNRvsG} donde se grafica la SNR en función de la ganancia $G$ para el peor caso de recepción. Se ve que aumentar la ganancia $G$ por encima de los 55~dB no representa mejoras a la SNR.
 
-\figura[0.7]{ruidovsG}{Potencia en dBm en función de la ganancia para la señal de entrada, los términos de ruido generados por el ADC y la suma en cuadratura de estos últimos. Se tomó como entrada una senoidal de 1~$V_\textrm{pp}$.}
+\figura[0.7]{ruidovsG}{Potencia en dBm en función de la ganancia para la señal de entrada, los términos de ruido generados por el ADC, el ruido de RF del peor caso y la suma en cuadratura de los mismos. Se tomó como entrada una senoidal de 1~$V_\textrm{pp}$.}
 
-\figura[0.7]{SNRvsG}{Relación señal a ruido en función de la ganancia $G$.}
-\change{Sacar las líneas rojas}
+\figura[0.7]{SNRvsG}{Relación señal a ruido para el peor caso de recepción en función de la ganancia $G$.}
 
-\section{Determinación de la ganancia de la cadena de acondicionamiento}
-El parámetro libre en este análisis es la ganancia $G$ de la segunda etapa de amplificación, la cual puede verse en la figura \ref{fig::cadena-de-recepcion}. Para determinar este parámetro se debe definir algún criterio de diseño, en el presente análisis este rol lo cumple la tasa de error de bit (BER) a la salida del demodulador. Se platea obtener una BER de $10^{-5}$.
-
-El procedimiento a seguir para hallar el rango de posibles valores para G se ilustra en la figura \ref{fig::G-procedimiento} y puede describirse de la siguiente manera:
-\begin{enumerate}
-    \item Fijar un valor de BER a la salida del demodulador.
-    \item Calcular la SNR requerida a la entrada del demodulador en base a la BER definida.
-    \item Obtener la SNR requerida a la salida del ADC para la BER definida.
-    \item Calcular la SNR a la salida del ADC en función del parámetro G.
-    \item Sabiendo la SNR requerida y \change{Mejorar esta redacción}
-\end{enumerate}
-
-\figura[0.9]{G-procedimiento}{Partiendo de la BER como criterio de diseño, se propaga la SNR hacia atrás.}
+\section{Determinación de la SNR requerida a la salida del ADC}
+Habiendo determinado la curva de la SNR en función de la ganancia $G$ a la salida del ADC, graficada en la figura \ref{fig::SNRvsG}, se procede a determinar la SNR requerida a la salida del ADC según el criterio de obtener una BER de $10^{-5}$ a la salida del demodulador.
 
 \subsection{Requerimiento de SNR a la entrada del demodulador}
 La relación señal a ruido (SNR) puede calcularse a través del parámetro $\frac{E_b}{N_0}$, esto es, el cociente entre la energía de bit y la densidad espectral de ruido a partir de la ecuación \ref{eq::EbN02SNR}:
 \begin{equation}
-    \textrm{SNR} = \frac{E_b}{N_0} \cdot \frac{R_b}{B},
+    \textrm{SNR} = \frac{E_b}{N_0} \cdot \frac{R_b}{W},
     \label{eq::EbN02SNR}
 \end{equation}
-donde $R_b$ es la tasa de bits y $B$ es el ancho de banda ocupado.
+donde $R_b$ es la tasa de bits y $W$ es el ancho de banda ocupado.
 
-Habiendo fijado la BER objetivo de $10^{-5}$ a la salida del demodulador, el siguiente paso es determinar la SNR requerida a la entrada del mismo. Esto depende del esquema de modulación utilizado que, en el caso de la misión de referencia, es GMSK. Para este esquema de modulación, la probabilidad de error de bit en presencia de RABG\todo{JQ: ver si esto está en las abreviaturas, sino cambiarlo por AWGN (para ser consistente con las otras abreviaturas en inglés) o directamente por ruido blanco aditivo gaussiano} se relaciona con $\frac{E_b}{N_0}$ mediante la ecuación \ref{eq::BER2EbN0} \cite{haykin}:
+Habiendo fijado la BER objetivo de $10^{-5}$ a la salida del demodulador, el siguiente paso es determinar la SNR requerida a la entrada del mismo, como se muestra en el diagrama de la figura \ref{fig::G-procedimiento}. Esto depende del esquema de modulación utilizado que, en el caso de la misión de referencia, es GMSK. Para este esquema de modulación, la probabilidad de error de bit en presencia de RABG se relaciona con $\frac{E_b}{N_0}$ mediante la ecuación \ref{eq::BER2EbN0} \cite{haykin}:
 
 \begin{equation}
     \textrm{BER} = \frac{1}{2} \textrm{erfc}\left(\sqrt{\frac{\alpha E_b}{2 N_0}}\right),
     \label{eq::BER2EbN0}
 \end{equation}
-donde $\alpha$ es un factor de degradación respecto a MSK, el cual depende del producto entre tiempo de bit ($T_b$) y ancho de banda ocuapado ($B$) del esquema GMSK. La degradación viene dada por la ecuación \ref{eq::degradacion},
+donde $\alpha$ es un factor de degradación respecto al esquema de modulación MSK, el cual depende del producto entre tiempo de bit ($T_b$) y ancho de banda ocuapado ($W$) del esquema GMSK. La degradación viene dada por la ecuación \ref{eq::degradacion},
 \begin{equation}
     \textrm{Degradación} = 10 \log_{10}{\left(\frac{\alpha}{2}\right).}
     \label{eq::degradacion}
 \end{equation}
-En la figura \ref{fig::degradacion-bt} se muestra la degradación de la BER en función del producto $B T_b$ ($W T_b$ en \change{JQ: mismo comentario que arriba sobre inglés vs español}).
+En la figura \ref{fig::degradacion-bt} se muestra la degradación de la BER en función del producto $W T_b$.
 
 Para la misión de referencia, el factor de ancho de banda por tiempo de bit es $BT_b = 0.3$ \cite{BEESAT-9}. A partir de la figura \ref{fig::degradacion-bt} se observa que este factor corresponde con una degradación de aproximadamente $0.5\un{dB}$, lo que, mediante la ecuación \ref{eq::degradacion}, implica un factor $\alpha \approx 1.78$.
 
-Finalmente, con el valor obtenido para $\alpha$, empleando la ecuación \ref{eq::BER2EbN0}, se determina que para una obtener BER de $10^{-5}$ a la salida del demodulador, se necesita una cociente entre la energía de bit y la densidad espectral de ruido $\frac{E_b}{N_0} \approx 10\un{dB}$ a la entrada del mismo. Esto puede verse gráficamente en la figura \ref{fig::BERvsEbN0}.
+Finalmente, con el valor obtenido para $\alpha$, empleando la ecuación \ref{eq::BER2EbN0}, se determina que para una obtener BER de $10^{-5}$ a la salida del demodulador, se necesita un cociente entre la energía de bit y la densidad espectral de ruido $\frac{E_b}{N_0} \approx 10\un{dB}$ a la entrada del mismo. Esto puede verse gráficamente en la figura \ref{fig::BERvsEbN0}.
 
 Una vez determinado el valor de $\frac{E_b}{N_0}$ requerido, puede emplearse la ecuación \ref{eq::EbN02SNR} para hallar la SNR requerida a la entrada del demodulador. Nótese que el ancho de banda ocupado por la señal en banda base puede calcularse como:
-\[B = R_b \ B T_b\].\unsure{Acá saqué el factor 2 que habíamos puesto en la charla de avance}
+\[W = R_b \ W T_b.\]
 Luego, la ecuación \ref{eq::EbN02SNR} toma la forma
-\[\textrm{SNR} = \frac{E_b}{N_0} \cdot \frac{\cancel{R_b}}{\cancel{R_b} \ B T_b},\] donde al reemplazar $BT_b = 0.3$ y $\frac{E_b}{N_0} = 10\un{dB}$ se obtiene:
+\[\textrm{SNR} = \frac{E_b}{N_0} \cdot \frac{\cancel{R_b}}{\cancel{R_b} \ W T_b},\] donde al reemplazar $BT_b = 0.3$ y $\frac{E_b}{N_0} = 10\un{dB}$ se obtiene:
 \begin{equation}
     \textrm{SNR}^\textrm{req}_\textrm{dem} = 15.23\un{dB}
     \label{eq::SNR-req}
 \end{equation}
 
-\figura[0.5]{degradacion-bt}{Degradación de la BER en función del producto $B T_b$ \cite{haykin}.}
-\figura[0.6]{BERvsEbN0}{Probabilidad de error de bit en función de $\frac{E_b}{N_0}$ para GMSK con un factor $BT = 0.3$.}
+\figura[0.5]{degradacion-bt}{Degradación de la BER en función del producto $W T_b$ \cite{haykin}.}[Degradación de la BER en función del producto $W T_b$.]
+\figura[0.6]{BERvsEbN0}{Probabilidad de error de bit en función de $\frac{E_b}{N_0}$ para GMSK con un factor $W T_b = 0.3$.}
 
 \subsection{Ganancias por procesamiento} \label{sec::ganancias-por-preproc}
 Retomando lo ilustrado en la figura \ref{fig::cadena-de-recepcion}, ya habiendo calculado $\textrm{SNR}^\textrm{req}_\textrm{dem}$ se procede a calcular $\textrm{SNR}^\textrm{req}_\textrm{ADC}$ que es la SNR requerida a la salida del ADC. Para esto debe determinarse cómo se ve afectada la SNR al pasar por la etapa de preprocesamiento.
@@ -222,11 +275,11 @@ Si bien esta etapa aún no se ha analizado, se sabe que habrá dos fuentes de ga
 \end{equation}
 
 \subsubsection{Ganancia por filtrado}
-Esta ganancia es consecuencia de la naturaleza plana en el dominio espectral del RABG y de la reducción de ancho de banda durante la etapa de preprocesamiento. Más precisamente, al comienzo de la etapa de preprocesamiento el ancho de banda es el del filtrado grueso del \textit{front-end} de RF, esto es $B_\textrm{RF} = 25\un{MHz}$. Sin embargo, los canales a adquirir poseen alrededor de $B_\textrm{ch} = 25\un{kHz}$ de ancho de banda. 
+Esta ganancia es consecuencia de la naturaleza plana en el dominio espectral del RABG y de la reducción de ancho de banda durante la etapa de preprocesamiento. Más precisamente, al comienzo de la etapa de preprocesamiento el ancho de banda es el del filtrado grueso del \textit{front-end} de RF, esto es $B_\textrm{RF} = 25\un{MHz}$. Sin embargo, los haces a adquirir poseen alrededor de $B_\textrm{haz} = 25\un{kHz}$ de ancho de banda. 
 
 Dado que la densidad espectral de potencia ruido $N_0$ se modela como constante e independiente de la frecuencia, al reducir el ancho de banda, se reduce la potencia de ruido que ingresa al sistema. Esto representa una ganancia que puede calcularse como:
 
-\[G_\textrm{fil} = 10 \log_{10}\left(\frac{\cancel{N_0} B_\textrm{RF}}{\cancel{N_0} B_\textrm{ch}}\right) = 30\un{dB}\]
+\[G_\textrm{fil} = 10 \log_{10}\left(\frac{\cancel{N_0} B_\textrm{RF}}{\cancel{N_0} B_\textrm{haz}}\right) = 30\un{dB}\]
 
 \subsubsection{Ganancia por \textit{beamforming}}
 Al realizar conformación de haz se suman coherentemente las señales de los 16 elementos. No obstante, bajo el modelo de RABG, el ruido entre muestras está descorrelacionado\footnote{Más precisamente, su autocorrelación es la función delta de Kronecker.}, por lo cual, a diferencia de la señal, no se suma de manera coherente.
@@ -239,11 +292,8 @@ Finalmente, reemplazando las ganancias calculadas en la ecuación \ref{eq::SRN2S
     \textrm{SNR}^\textrm{req}_\textrm{ADC} = -26.77\un{dB}.
     \label{eq::SNRreqADC}
 \end{equation}
-
-\subsubsection{Ganancia por Oversampling}
-\unsure{La incluimos? Debo convencerme todavía si está o no dentro de la de filtrado}
-
-\subsection{Rango de valores posibles de $G$}
+ 
+\section{Rango de valores posibles de $G$}
 Para hallar un rango de valores posibles de la ganancia $G$ se deben encontrar dos cotas, una superior y una inferior.
 
 La cota superior viene dada por el ADC ya que la máxima potencia de entrada admitida por el AD9249 es de 10~dBm, como se especifica en la tabla \ref{tab::ADC}. Para la determinación de esta cota debe considerarse el mejor caso de recepción posible (ver figura \ref{fig::mejor-caso}) dado que es en este caso que la potencia de entrada es máxima.
@@ -251,7 +301,7 @@ La cota superior viene dada por el ADC ya que la máxima potencia de entrada adm
 Para una potencia de entrada de $-107\un{dBm}$, según se terminó en el análisis del mejor caso, el máximo valor de ganancia es:
 \[G_\textrm{max} = 10 + 107 = 117\un{dB}.\]
 
-Por otro lado, la cota inferior se desprende del análsis recién realizado donde se determinó el valor de $\textrm{SNR}^\textrm{req}_\textrm{ADC}$. Luego, empleando el gráfico mostrado en la figura \ref{fig::SNRvsG}, el cual muestra la SNR a la salida del ADC en función de la ganancia $G$, puede hallarse el mínimo valor de $G$ tal que la SNR a la salida del ADC sea mayor o igual a $\textrm{SNR}^\textrm{req}_\textrm{ADC}$, dicho valor es la cota inferior.
+Por otro lado, la cota inferior se desprende del análsis recién realizado donde se determinó el valor de $\textrm{SNR}^\textrm{req}_\textrm{ADC}$. Luego, empleando la curva mostrada en la figura \ref{fig::SNRvsG}, el cual describe la SNR a la salida del ADC para el peor caso de recepción en función de la ganancia $G$, puede hallarse el mínimo valor de $G$ tal que la SNR a la salida del ADC sea mayor o igual a $\textrm{SNR}^\textrm{req}_\textrm{ADC}$, dicho valor resulta \[G_\textrm{min} = 35\un{dB}.\] 
 
-\todo{Ampliar con el valor obtenido}
+Finalmente, el rango de valores posibles que puede tomar la ganancia $G$ de la cadena de recepción de RF mostrada en la figura \ref{fig::cadena-de-recepcion} respetando la máxima potencia de entrada del ADC especificada en la tabla \ref{tab::ADC} y garantizando una BER de $10^{-5}$ a la salida del demodulador es \[35\un{dB} < G < 117\un{dB}.\]
 \end{document}

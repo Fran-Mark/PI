@@ -67,7 +67,7 @@ Si bien no es necesario conocer el funcionamiento interno ni la implementación 
 
 Se probaron diversos valores tanto de acimut como de elevación y pudo conformarse la señal exitósamente utilizando el esquemático mostrado en la figura \ref{fig::doa-test}. En todos los casos logró detectarse correctamente la dirección de arribo y se realizó de manera exitosa la conformación de haz, verificando así el comportamiento de estos bloques.
 
-\figura[0.7]{theta-phi}{Geometría de una arreglo rectangular uniforme. Para la generación de señales se tomo este modelo con $M_x = M_y = 4$\cite{proyecto-grigo}.}
+\figura[0.7]{theta-phi}{Geometría de una arreglo rectangular uniforme. Para la generación de señales se tomo este modelo con $M_x = M_y = 4$\cite{proyecto-grigo}.}[Geometría de una arreglo rectangular uniforme.]
 
 \figura[0.8]{doa-test}{Diagrama de bloques empleado para verificar el funcionamiento de los bloques \texttt{DoA Esprit Estimation} y \texttt{Beamformer (C++)}.}
 
@@ -87,11 +87,29 @@ Esto resulta impráctico cuando ya se conoce la dirección de arribo, como es el
 \subsection{Seguimiento y conformación de haz a partir de TLE}
 El TLE codifica toda la información necesaria para describir la órbita de un satélite (ver apéndice \ref{ap::tle}), de manera que conociendo la ubicación de la estación terrena y la órbita de la misión objetivo es posible determinar la ubicación en el cielo de la misión respecto a la estación terrena, obteniendo así valores para los ángulos de elevación y acimut los cuales son necesarios para realizar la conformación de haz.
 
-\subsubsection{La librería \textit{orbit-predictor}}
-Para la implementación de este bloque se hizo uso de las funciones provistas en la librería \textit{orbit-predictor} de Python desarrollada en un repositorio de GitHub de Satellogic\cite{orbit-predictor}. Esta librería incluye numerosas funciones relacionadas a la predicción de órbitas. De interés resulta la posibilidad de introducir el TLE como parámetro para el predictor de órbita de un satélite.
+Más aún, con el TLE y la frecuencia de operación de la misión objetivo puede estimarse el corrimiento Doppler percibido desde la estación terrena. Luego, en base a esta estimación pueden incorporarse etapas de corrección del mismo.
 
-La librería cuenta con objetos de tipo \texttt{Location} que representan un punto en el planeta Tierra mediante la especificación de latitud, longitud y altura. Se definió un nuevo objeto \texttt{Location} ubicado en las coordenadas de la futura instalación de la estación terrena, estas son:
-\todo{Poner cordenadas}
+Se desarrolló un módulo OOT de GNU Radio para el seguimiento de un satélite, la corrección del corrimiento Doppler y la conformación digital de haz.
+
+\subsubsection{La librería \textit{orbit-predictor}}
+Para la implementación de este bloque se hizo uso de las funciones provistas en la librería \textit{orbit-predictor} de Python desarrollada en un repositorio de GitHub de Satellogic~\cite{orbit-predictor}. Esta librería incluye numerosas funciones relacionadas a la predicción de órbitas. De interés resulta la posibilidad de introducir el TLE como parámetro para el predictor de órbita de un satélite.
+
+La librería cuenta con objetos de tipo \texttt{Location} que representan un punto en el planeta Tierra mediante la especificación de latitud, longitud y altura. Se definió un nuevo objeto \texttt{Location} ubicado en las coordenadas de la futura instalación de la estación terrena, las cuales se detallan en la tabla \ref{tab::coords-et}.
+
+\begin{table}[H]
+\centering
+\resizebox{0.5\textwidth}{!}{%
+\begin{tabular}{|ll|}
+\hline
+\multicolumn{2}{|l|}{\textbf{Coordenadas utilizadas para la estación terrena}} \\ \hline
+\multicolumn{1}{|l|}{Latitud {[}$\degree${]}} & -41.123 \\ \hline
+\multicolumn{1}{|l|}{Longitud {[}$\degree${]}} & -71.410 \\ \hline
+\multicolumn{1}{|l|}{Altura {[}msnm{]}} & 769 \\ \hline
+\end{tabular}%
+}
+\caption{Ubicación de la estación terrena considerada para realizar los cálculos.}\label{tab::coords-et}
+\end{table}
+
 
 Se implementaron además tres funciones para las siguientes tareas:
 \change{Chequear si hice esto así o si mejor lo digo en el streaming on demand}
@@ -102,7 +120,7 @@ Se implementaron además tres funciones para las siguientes tareas:
 \end{itemize}
 
 
-\figura[0.9]{bf-from-tle}{Diagrama de bloques que utiliza los TLE para realizar la conformación de haz.}
+\figura[0.9]{bf-from-tle}{Diagrama de bloques que utiliza los TLE para realizar el seguimiento de la misión, la corrección del corrimiento Doppler y la conformación de haz.}
 
 
 \subsection{Pruebas en capturas reales}
@@ -110,6 +128,7 @@ Se comprobó el funcionamiento de los algoritmos tanto preexistentes como el nue
 
 La integración de estas capturas con los bloques de conformación de haz disponibles no es directa ya que las mismas contienen la información de cada canal codificada como enteros de 16 bits (\textit{shorts}), los cuales fueron escritos en formato \textit{offset binary} \todo{ref de qué es off bin}, \unsure{Realmente vale la pena explicar esto?}
 
+\todo{Capaz poner una tabla con señales generadas (angulos) vs angulos detectados}
 
 \figura{signal-complexer2}{Complejizador}
 
@@ -128,10 +147,28 @@ Por otro lado, para lograr una correcta interpretación de los datos debe teners
 
 Una solución a este problema es leer los datos de a 16 bits y luego agrupar dos datos de 16 bits como un único dato complejo de 32 bits. Esto se logra configurando el tipo de dato del \texttt{UDP Source} como \texttt{short}, que es un entero de 16 bits. Luego mediante la instanciación del bloque \texttt{IShort To Complex}, el cual forma parte de la librería, se convierten dos \texttt{shorts} consecutivos en un \texttt{Complex Float 32}. De esta manera, se puede trabajar durante todo el procesamiento con datos del tipo \texttt{Complex Float 32}.
 
-\subsection{Lector de \textit{header}}
-El paquete enviado por la placa incorpora un \textit{header}. El mismo fue desarrollado en \cite{proyecto-jose} y su estructura puede encontrarse en \texttt{PIQuinteros/SoftwarePS/client/lib/acqPack.h}.
+\subsubsection{Composición del paquete}
+Desde el lado del software desarrollado en \cite{proyecto-jose} se fijó una estructura del paquete de datos adquirido, el cual se ilustra en la figura \ref{fig::paquete-original}. Dicho paquete se compone de 87~bytes de \textit{header} y su \textit{payload} consiste de 1000~muestras de cada uno de los 16~canales del ADC escritas de manera secuencial, esto es: 1000~muestras del primer canal, seguidas de 1000~muestras del segundo canal y así sucesivamente.
 
-Este encabezado consiste de 88 bytes y contiene, entre otras cosas, las \textit{fifo flags}. Estas son señales de control que permiten el monitoreo de las FIFOs dentro de la FPGA. Resultan relevantes para detectar por ejemplo situaciones de \textit{overflow}, lo cual puede ocurrir si las FIFOs se llenan antes de ser leídas por el PS.
+Esta estructura resulta incómoda para interactuar con GNU Radio por dos motivos:
+\begin{enumerate}
+    \item Dado que se concluyó que los datos se interpretaran como datos de tipo \texttt{short}, los mismos se agruparan de a 2~bytes. Luego, el \textit{header}, al ser un mútiplo de 2~bytes, no puede separarse con facilidad.
+    
+    \item El hecho de que las muestras de los canales vengan agrupadas por canal dificulta la demultiplexación de los datos. Más sencillo sería si se agrupáse por número de muestra, enviando la primera muestra de cada uno de los 16 canales, seguida por la segunda muestra de cada uno de los 16 canales y así sucesivamente.
+\end{enumerate}
+
+Se realizaron entonces dos cambios fundamentales para facilitar la comunicación con GNU Radio. Por un lado se realizó un \textit{padding} de 1~byte del \textit{header} para que tenga un largo par (88~bytes). Por otro lado, se modificó la estructura mostrada en la figura \ref{fig::paquete-original} para lograr la estructura de intercalación de canales por número de muestra descrita en el punto 2.
+
+Finalmente, el largo total del paquete resulta \[88\un{bytes} + 16\un{canales} \times 4\un{bytes/muestra/canal} \times 1000\un{muestras} = 64088\un{bytes}.\]
+
+\figura[0.5]{paquete-original}{Paquete de datos adquirido original desarrollado en \cite{proyecto-jose}.}[Paquete de datos adquirido original.]
+
+\todo{foto nueva estructura}
+
+\subsection{Lector de \textit{header}}
+Como se mencionó, el paquete enviado por la placa incorpora un \textit{header}. El mismo fue desarrollado en \cite{proyecto-jose} y su estructura puede encontrarse en \texttt{PIQuinteros/SoftwarePS/client/lib/acqPack.h}.
+
+Este encabezado consiste de 88 bytes y contiene, entre otras cosas, las \textit{fifo flags} (ver figura \ref{fig::paquete-original}). Estas son señales de control que permiten el monitoreo de las FIFOs dentro de la FPGA. Resultan relevantes para detectar por ejemplo situaciones de \textit{overflow}, lo cual puede ocurrir si las FIFOs se llenan antes de ser leídas por el PS.
 
 Para poder decodificar el encabezado de los paquetes se implementó un módulo OOT personalizado en GNU Radio empleando la herramienta \textit{gr\_modtool} mencionada anteriormente. La definición del mismo se encuentra en \texttt{GNU-Radio/OOT/gr-beamforming/lib/HeaderReader\_impl.h}. 
 
@@ -144,9 +181,23 @@ Para corroborar que la comunicación entre la placa y el SDR estaba funcionando 
 
 En la figura \ref{fig::gnu-simplificado} se muestra el esquemático utilizado para esta comprobación. El mismo incorpora lo anteriormente discutido junto con dos puntos de visualización donde se colocaron instancias del bloque \texttt{QT GUI Sink}, el cual brinda, entre otras cosas un gráfico en tiempo y en frecuencia de la señal de entrada.
 
-Se separaron los datos en \textit{header} y \textit{payload} \todo{Continuar}
+Se separaron los datos en \textit{header} y \textit{payload} mediante el uso del bloque \texttt{Stream Demux}. Como se mencionó, el tamaño total del paquete resulta de 64088~bytes, de los cuales los primeros 88 corresponden al \textit{header} y el resto corresponde al \textit{payload}. Al interpretar los datos como \texttt{shorts}, debe configurarse el \texttt{Stream Demux} para enviar los primeros 32000~\texttt{shorts} por un puerto y los otros 44 por el otro.
+
+Se disparó luego una captura desde la placa utilizando datos del contador mencionado en la tabla \ref{tab::fifo-input-mux}. El uso de un contador permite de manera sencilla identificar pérdida de datos. Se observó que se recibían los datos de todos los canales y se comprobó el correcto funcionamiento del contador y la interfaz de comunicación, esto se muestra en la figura \ref{fig::grafico-contador}. Allí se muestra la señal recibida en todos los canales, esto es, antes del \texttt{Stream Demux} complejo mostrado en la figura \ref{fig::gnu-simplificado}. Se observa que todos los canales reciben el mismo valor del contador, y que este último avanza de uno en uno como se esperaba.
+
+Se procedió a continuación a la captura de datos crudos del oscilador local de \textit{debug} desarrollado en el capítulo \ref{cap::preproc}. Con la frecuencia del mismo configurada a $19.51\un{MHz}$, se adquirió un único paquete para evitar el \textit{overflow} en las FIFOs y se verificó que se recibía un tono real a esa frecuencia, como se muestra en la figura \ref{fig::grafico-raw-local-osc}.
+
+Como siguiente paso, se configuró el registro que controla el \texttt{FIFO Input Mux} para visualizar la salida de datos del preprocesamiento. Con la señal del oscilador local de \textit{debug} se espera encontrar a la salida del preprocesamiento un tono complejo centrado en $-10\un{kHz}$ como se obtuvo cuando se simuló con UVM en la sección \ref{sec::simu-uvm}. En la figura \ref{fig::grafico-preproc} se muestra la salida del preprocesamiento, donde efectivamente se ve dicho tono y se observa también \textit{aliasing}, habiendo un tono indeseado en 10~kHz. Este \textit{alias}, sin embargo, se encuentra más de 40~dB por debajo del tono de $-10\un{kHz}$. Esta atenuación concuerda con la fijada para el filtro de haz en la tabla \ref{tab::filtro-beam-nuevo}.
+
+Por último, para verificar el correcto funcionamiento del \texttt{Header Reader} se adquirieron datos crudos (generados a 65~MSps) con el objetivo de intencionalmente provocar \textit{overflow} en las FIFOs para verificar si esto era debidamente decodificado y notificado al usuario. Se comprobó este comportamiento de manera exitosa, obteniendose mensajes de \textit{overflow} en la consola.
 
 \figura{gnu-simplificado}{Esquemático utilizado para la prueba de comunicación entre la CIAA-ACC y GNU Radio.}
+
+\figura[0.6]{grafico-contador}{Gráfico de la señal detectada en todos los canales juntos (antes del \texttt{Stream Demux} complejo) en función del tiempo.}
+
+\figura[0.6]{grafico-raw-local-osc}{Gráfico de la ganancia relativa en función de las componentes de frecuencia de la señal cuando la entrada son los datos crudos del oscilador local de \textit{debug}.}
+
+\figura[0.7]{grafico-preproc}{Gráfico de la ganancia relativa en función de las componentes de frecuencia de la señal cuando la entrada son los datos preprocesados.}
 
 \section{Validación de la cadena de adquisición y procesamiento}
 A lo largo del desarrollo del sistema de adquisición y preprocesamiento en el capítulo \ref{cap::preproc} se validaron las etapas de manera aislada. De igual manera, en el desarrollo de la etapa de procesamiento externo se comprobó el funcionamiento del conformador de haz, la detección de dirección de arribo y la lectura de \textit{header} de manera individual.
@@ -162,9 +213,34 @@ Las señales de salida del integrado entonces emulan la recepción de señales r
     \item Distancia entre elementos.
 \end{itemize}
 
-\todo{Qué se probó? Poner frecs, capturas}
-\todo{Replicación para probar en 16 canales}
-\todo{Incorporación de acimut?}
-\subsection{Adaptación del emulador}
-El emulador original replica un arreglo lineal de $4 \times 1$ elementos, sin embargo, para que el bloque \texttt{DoA Esprit Estimation} funcione debe recibir señales de un arreglo cuadrado. Por esto es necesario refactorizar el código desarrollado en \cite{proyecto-arce} para emular un arreglo cuadrado de $2 \times 2$ elementos.
+\todo{Mencionar que también se emula el corrimiento Doppler}
+
+\subsection{Adaptación del emulador}\label{subsec::adaptacion-emulador}
+El emulador original replica un arreglo lineal de $4 \times 1$ elementos que solo emula variaciones en el ángulo de elevación $\theta$, sin embargo, para que el bloque \texttt{DoA Esprit Estimation} funcione, este debe recibir señales de un arreglo cuadrado. Por esto es necesario refactorizar el código desarrollado en \cite{proyecto-arce} para emular un arreglo cuadrado de $2 \times 2$ elementos.
+
+Para esto, si se desea mantener únicamente un parámetro variable (el ángulo de elevación), puede enviarse la misma señal a dos antenas adyacentes y una señal desfasada a las dos antenas restantes. De esta manera, el arreglo de $2 \times 2$ solo recibe variaciones en $\theta$ y se corresponde al caso donde la pasada del satélite es perpendicular al arreglo, esto se corresponde con el conjunto de ángulos de acimut $\phi:$~$[0\degree, 90\degree, 180\degree, 270\degree]$, dependiendo de cuáles dos antenas reciben la misma señal. El diagrama de bloques empleado para esta comprobación se muestra en la figura \ref{fig::bd-array-2-2}.
+
+\figura[1]{bd-array-2-2}{Diagrama de bloques utilizado para la adaptación del arreglo, la detección de dirección de arribo y la conformación de haz.}
+\todo{Continuar, alguna foto}
+
+\subsection{Extensión a 16 canales}\label{subsec::ext-16-canales}
+Durante la operación del receptor, el software deberá lidiar con 16 canales en simultáneo. Para verificar la capacidad del mismo para hacerlo, partiendo del arreglo lineal de $4 \times 1$, se replicó la señal de cada antena cuatro veces, de manera de obtener un arreglo de $4 \times 4$ análogo al arreglo de $2 \times 2$ obtenido en la subsección \ref{subsec::adaptacion-emulador}, donde el ángulo de acimut puede tomar los siguientes valores $\phi = [0\degree, 90\degree, 180\degree, 270\degree]$. El diagrama de bloques empleado para esta comprobación se muestra en la figura \ref{fig::bd-array-4-4}.
+
+\figura[1]{bd-array-4-4}{Diagrama de bloques utilizado para la simulación del arreglo de $4 \times 4$ elementos.}
+
+\subsection{Incorporación del ángulo de acimut}
+
+\subsection{Pruebas con un segundo emulador de arreglo}
+Las pruebas realizadas con el emulador de arreglo lineal desarrollado en \cite{proyecto-arce} permitieron validar gran parte del sistema como se desarrollo en las subsecciones anteriores. No obstante, solo genera 4 señales, de manera que no permite validar los 16 canales del ADC operando en simultáneo. Se hizo una extensión a 16 canales en la subsección \ref{subsec::ext-16-canales}, pero esta extensión se realiza en software, no en hardware.
+
+Para poder realizar una prueba que utilice los 16 canales físicos del ADC se hizo uso del emulador de arreglo desarrollado y fabricado en \cite{proyecto-jose}. El mismo es un emulador de un arreglo de $4 \times 4$ elementos dispuestos de forma rectangular y separados una distancia $\lambda/2$, donde $\lambda = \frac{c}{146\un{MHz} \approx 2.05\un{m}}$. Resulta relevante notar que este emulador no fue hecho para la banda de UHF en la que opera el receptor desarrollado en este proyecto, sino para la banda de VHF de 144~MHz a 148~MHz.
+
+No obstante, pueden configurarse las frecuencias de los osciladores dentro de la placa para poder preprocesar señales en esta banda.
+
+Una señal de entrada a $147\un{MHz}$, por ejemplo, se \textit{mapea} a \[147\un{MHz} - 2 \times 65 = 17\un{MHz}\] tras el muestreo pasabanda. Luego, la rotación de espectro de $18.5\un{MHz}$ causado por la mezcla de banda traslada el tono a $1.5\un{MHz}$, dejándolo en el límite de la banda de paso. Finalmente, configurando el oscilador de haz para operar a $-1.5\un{MHz}$ se obtiene la señal en banda base.
+
+Este emulador, a diferencia del utilizado en las demás comprobaciones, emula la recepción de una señal inmóvil desde una dirección fija, lo cual no permite comprobar las capacidades del sistema de realizar un seguimiento de la señal. Estas capacidades, sin embargo, ya fueron evaluadas en las anteriores subsecciones.
+
+\todo{fotos}
+
 \end{document}

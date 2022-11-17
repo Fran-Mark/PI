@@ -16,11 +16,20 @@
 \setcitestyle{numbers,square,comma}
 \bibliographystyle{ibtesis}
 
-\newcommand{\figura}[3][0.9]{
+% \newcommand{\figura}[3][0.9]{
+% \begin{figure}[H]
+%     \centering
+%         \includegraphics[width=#1\linewidth]{#2}
+%     \caption{#3}
+%     \label{fig::#2}
+% \end{figure}
+% }
+\usepackage{xparse}
+\NewDocumentCommand{\figura}{O{0.9} m m O{#3}}{
 \begin{figure}[H]
     \centering
         \includegraphics[width=#1\linewidth]{#2}
-    \caption{#3}
+    \caption[#4]{#3}
     \label{fig::#2}
 \end{figure}
 }
