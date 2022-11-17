@@ -1,9 +1,9 @@
 from PyQt5.QtWidgets import *
 
-from PyQt5.QtCore import QProcess, Qt
+from PyQt5.QtCore import QProcess, Qt, QThread, QObject
 import sys
 
-from PyQt5.QtGui import QFont, QTextCursor
+from PyQt5.QtGui import QFont, QTextCursor, QDoubleValidator
 
 import socCommands as soc
 import gnu_schematic as gnu
@@ -26,8 +26,9 @@ class BeamFreqSetter:
 
         self.beamFreqSetter.addWidget(self.button,3)
         self.beamFreqSetterLineEdit = QLineEdit(alignment=Qt.AlignCenter)
+        self.beamFreqSetterLineEdit.setValidator(QDoubleValidator(bottom=435, top=438, decimals=3))
         self.beamFreqSetterLineEdit.setPlaceholderText("Freq")
-        self.beamFreqSetterLineEdit.returnPressed.connect(lambda: window.write(window.sshClient, soc.setBeamFreqCmd(self.beamNumber, float(self.beamFreqSetterLineEdit.text()))))
+        self.beamFreqSetterLineEdit.returnPressed.connect(self.onReturnPressed)
         self.beamFreqSetter.addWidget(self.beamFreqSetterLineEdit,3)
         self.beamFreqSetterSlider = QSlider(Qt.Horizontal)
         self.beamFreqSetterSlider.setMinimum(435000)
@@ -47,7 +48,11 @@ class BeamFreqSetter:
 
         self.beamFreqSetterSlider.setValue(int(self.window.configData[f'beam{self.beamNumber + 1}Freq']*1000))
 
-
+    def onReturnPressed(self):  
+        self.beamFreqSetterSlider.setValue(int(float(self.beamFreqSetterLineEdit.text())*1000))
+        self.window.write(self.window.sshClient, soc.setBeamFreqCmd(self.beamNumber, float(self.beamFreqSetterLineEdit.text())))
+    
+    
     def getLayout(self):
         return self.beamFreqSetter
 
@@ -57,13 +62,14 @@ class BeamFreqSetter:
             self.button.setStyleSheet('QPushButton:checked {background-color: green}')
 
 
-def copyText(window : QMainWindow):
-    # qtext.selectAll()
-    # qtext.copy()
-    # qtext.setTextCursor(QTextCursor())
-    # configData = soc.decodeReading(window.sshClientMessenger.toPlainText())
-    # print(configData)
-    pass
+class ServerStatusObject(QObject):
+    def __init__(self, window : QMainWindow):
+        super().__init__()
+        self.window = window
+    def run(self):
+        while True:
+            self.window.serverStatusTextBox.setText(self.window.serverMessenger.toPlainText())
+            sleep(1)
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -72,10 +78,7 @@ class MainWindow(QMainWindow):
         #Set up processes
         self.server, self.serverMessenger = self.setUpProcess("server")
         self.sshClient, self.sshClientMessenger = self.setUpProcess("sshClient")
-        # self.write(self.sshClient, soc.sendReadCmd())
-        # configData = soc.decodeReading(self.sshClientMessenger.toPlainText())
-        # print(configData)
-        #self.write(self.sshClient, soc.startCmd())
+
         self.configData = soc.readConfigData()
         self.serverText = QLineEdit()
         self.serverText.setPlaceholderText("Write command to server")
@@ -84,9 +87,6 @@ class MainWindow(QMainWindow):
         self.sshClientText = QLineEdit()
         self.sshClientText.setPlaceholderText("Write command to CIAA")
         self.sshClientText.returnPressed.connect(lambda: textClickHandler(self, self.sshClientText, self.sshClient))
-
-        self.testButton = QPushButton("Test")
-        self.testButton.clicked.connect(lambda: copyText(self))
 
         self.configData = soc.readConfigData()
         self.initLayout()
@@ -138,6 +138,8 @@ class MainWindow(QMainWindow):
 
         localOscFreqSetterHLayout = QHBoxLayout()
         localOscFreqSetterLineEdit = QLineEdit(alignment=Qt.AlignCenter)
+        #set validation to only accept numbers
+        localOscFreqSetterLineEdit.setValidator(QDoubleValidator(bottom=0, top=32.5, decimals=3))
         localOscFreqSetterLineEdit.setPlaceholderText("Freq")
         localOscFreqSetterLineEdit.returnPressed.connect(lambda: self.write(self.sshClient, soc.setLocalOscFreqCmd(float(localOscFreqSetterLineEdit.text()))))
         #set default value
@@ -177,15 +179,35 @@ class MainWindow(QMainWindow):
         dataSelectorLayout.addLayout(beamFreqSetterLayout)
         dataSelectorLayout.addStretch(1)
 
-        launchButton = QPushButton("Launch")
+        serverStatusGroupBox = QGroupBox()
+        serverStatusLayout = QVBoxLayout()
+        serverStatusGroupBox.setLayout(serverStatusLayout)
+        dataSelectorLayout.addWidget(serverStatusGroupBox)
+        serverStatusLabel = QLabel("Server status", font=QFont("Utopia", 12, QFont.Bold))
+        serverStatusLayout.addWidget(serverStatusLabel)
+        serverStatusLayout.addSpacing(15)
+        #add non-editable text box
+        # self.serverStatusTextBox = QTextEdit()
+        # self.serverStatusTextBox.setReadOnly(True)
+        # self.serverStatusTextBox.setFont(QFont("Cantarell", 10))
+        # serverStatusLayout.addWidget(self.serverStatusTextBox)
+        # serverStatusLayout.addStretch(1)
+        #launch thread to update server status
+        # self.serverStatusObject = ServerStatusObject(self)
+        # self.serverStatusThread = QThread()
+        # self.serverStatusObject.moveToThread(self.serverStatusThread)
+        # self.serverStatusThread.started.connect(self.serverStatusObject.run)
+        # self.serverStatusThread.start()
+        
+
+
+
+        launchButton = QPushButton("Launch capture")
         launchButton.setFont(QFont("Utopia", 12, QFont.Bold))
         dataSelectorLayout.addWidget(launchButton)
         launchButton.setStyleSheet("background-color: green; color: white")
         launchButton.setFixedHeight(50)
         launchButton.clicked.connect(lambda: self.write(self.sshClient, soc.launchAcqCmd()))
-
-        dataSelectorLayout.addWidget(self.testButton)
-
 
 
         #GNU
@@ -264,7 +286,7 @@ class MainWindow(QMainWindow):
         else:
             event.ignore()
 
-    def runGnu(self, top_block_cls=gnu.bf_fixed_doa):
+    def runGnu(self, top_block_cls=gnu.maint):
         try:
             self.tb = top_block_cls()
             self.tb.start()
@@ -276,6 +298,9 @@ class MainWindow(QMainWindow):
         except Exception as e:
             print(e)
             self.dataVisualizerLayout.addWidget(QLabel("No se pudo iniciar GNU, conecte la placa y reinicie el programa", font=QFont("Cantarell", 14), alignment=Qt.AlignCenter))
+
+
+
 
 
 app = QApplication(sys.argv)

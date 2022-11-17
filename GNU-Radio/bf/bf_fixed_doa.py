@@ -34,7 +34,7 @@ from argparse import ArgumentParser
 from gnuradio.eng_arg import eng_float, intx
 from gnuradio import eng_notation
 from stream_demux import stream_demux_swig
-import my_beamformer
+import beamforming
 
 from gnuradio import qtgui
 
@@ -97,26 +97,30 @@ class bf_fixed_doa(gr.top_block, Qt.QWidget):
         self.qtgui_sink_x_0.enable_rf_freq(False)
 
         self.top_layout.addWidget(self._qtgui_sink_x_0_win)
-        self.my_beamformer_beamformer_from_angles_0 = my_beamformer.beamformer_from_angles(15, 60, 19.51)
         self.blocks_throttle_1 = blocks.throttle(gr.sizeof_short*1, samp_rate,True)
         self.blocks_stream_to_vector_0 = blocks.stream_to_vector(gr.sizeof_gr_complex*1, 16)
         self.blocks_short_to_char_0 = blocks.short_to_char(1)
         self.blocks_null_sink_1 = blocks.null_sink(gr.sizeof_char*1)
         self.blocks_message_debug_0 = blocks.message_debug()
         self.blocks_interleaved_short_to_complex_0 = blocks.interleaved_short_to_complex(False, False)
-        self.blocks_file_source_0_0 = blocks.file_source(gr.sizeof_short*1, '/run/media/fran/46FAA90DFAA8FA77/Ventanas/IB/PI/GitHub/GNU-Radio/tests-en-labo/files/datos_preproc', True, 0, 0)
+        self.blocks_file_source_0_0 = blocks.file_source(gr.sizeof_short*1, '/run/media/fran/46FAA90DFAA8FA77/Ventanas/IB/PI/GitHub/GNU-Radio/ignore/tests-en-labo/files/datos_preproc', True, 0, 0)
         self.blocks_file_source_0_0.set_begin_tag(pmt.PMT_NIL)
+        self.beamforming_doaesprit_py_cf_0 = beamforming.doaesprit_py_cf(4, 4, 19.51e6, 299792458/(2*19.51e6), 1, 128)
+        self.beamforming_beamformer_0 = beamforming.beamformer(4, 4, 0)
 
 
         ##################################################
         # Connections
         ##################################################
+        self.msg_connect((self.beamforming_doaesprit_py_cf_0, 'doa_port'), (self.beamforming_beamformer_0, 'doa_port'))
+        self.msg_connect((self.beamforming_doaesprit_py_cf_0, 'doa_port'), (self.blocks_message_debug_0, 'print'))
+        self.connect((self.beamforming_beamformer_0, 0), (self.qtgui_sink_x_0, 0))
         self.connect((self.blocks_file_source_0_0, 0), (self.blocks_throttle_1, 0))
         self.connect((self.blocks_interleaved_short_to_complex_0, 0), (self.blocks_stream_to_vector_0, 0))
         self.connect((self.blocks_short_to_char_0, 0), (self.blocks_null_sink_1, 0))
-        self.connect((self.blocks_stream_to_vector_0, 0), (self.my_beamformer_beamformer_from_angles_0, 0))
+        self.connect((self.blocks_stream_to_vector_0, 0), (self.beamforming_beamformer_0, 0))
+        self.connect((self.blocks_stream_to_vector_0, 0), (self.beamforming_doaesprit_py_cf_0, 0))
         self.connect((self.blocks_throttle_1, 0), (self.stream_demux_stream_demux_1_0, 0))
-        self.connect((self.my_beamformer_beamformer_from_angles_0, 0), (self.qtgui_sink_x_0, 0))
         self.connect((self.stream_demux_stream_demux_1_0, 0), (self.blocks_interleaved_short_to_complex_0, 0))
         self.connect((self.stream_demux_stream_demux_1_0, 1), (self.blocks_short_to_char_0, 0))
 

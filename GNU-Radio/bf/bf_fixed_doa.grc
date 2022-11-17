@@ -98,7 +98,7 @@ blocks:
     bus_structure: null
     coordinate: [1144, 96.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: beamforming_doaesprit_py_cf_0
   id: beamforming_doaesprit_py_cf
   parameters:
@@ -119,7 +119,7 @@ blocks:
     bus_structure: null
     coordinate: [704, 32.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: blocks_complex_to_float_0
   id: blocks_complex_to_float
   parameters:
@@ -341,7 +341,7 @@ blocks:
     alias: ''
     begin_tag: pmt.PMT_NIL
     comment: ''
-    file: /run/media/fran/46FAA90DFAA8FA77/Ventanas/IB/PI/GitHub/GNU-Radio/tests-en-labo/files/datos_preproc
+    file: /run/media/fran/46FAA90DFAA8FA77/Ventanas/IB/PI/GitHub/GNU-Radio/ignore/tests-en-labo/files/datos_preproc
     length: '0'
     maxoutbuf: '0'
     minoutbuf: '0'
@@ -965,7 +965,7 @@ blocks:
     bus_structure: null
     coordinate: [1008, 256.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: qtgui_freq_sink_x_0
   id: qtgui_freq_sink_x
   parameters:
