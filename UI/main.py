@@ -1,9 +1,9 @@
 from PyQt5.QtWidgets import *
 
-from PyQt5.QtCore import QProcess, Qt, QThread, QObject
+from PyQt5.QtCore import QProcess, Qt, QObject
 import sys
 
-from PyQt5.QtGui import QFont, QTextCursor, QDoubleValidator
+from PyQt5.QtGui import QFont, QDoubleValidator
 
 import socCommands as soc
 import gnu_schematic as gnu
@@ -79,6 +79,8 @@ class MainWindow(QMainWindow):
         self.server, self.serverMessenger = self.setUpProcess("server")
         self.sshClient, self.sshClientMessenger = self.setUpProcess("sshClient")
 
+        self.write(self.sshClient, soc.startCmd())
+
         self.configData = soc.readConfigData()
         self.serverText = QLineEdit()
         self.serverText.setPlaceholderText("Write command to server")
@@ -88,7 +90,6 @@ class MainWindow(QMainWindow):
         self.sshClientText.setPlaceholderText("Write command to CIAA")
         self.sshClientText.returnPressed.connect(lambda: textClickHandler(self, self.sshClientText, self.sshClient))
 
-        self.configData = soc.readConfigData()
         self.initLayout()
 
     def initLayout(self):

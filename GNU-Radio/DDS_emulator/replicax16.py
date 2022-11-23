@@ -99,96 +99,23 @@ class replicax16(gr.top_block, Qt.QWidget):
         self.stream_demux_stream_demux_2 = stream_demux_swig.stream_demux(gr.sizeof_gr_complex*1, (1, 1, 1, 1))
         self.stream_demux_stream_demux_1 = stream_demux_swig.stream_demux(gr.sizeof_gr_complex*1, (4,12))
         self.stream_demux_stream_demux_0 = stream_demux_swig.stream_demux(gr.sizeof_short*1, (32000, 44))
-        self.qtgui_time_sink_x_1 = qtgui.time_sink_c(
-            1024, #size
-            samp_rate, #samp_rate
-            "", #name
-            1 #number of inputs
-        )
-        self.qtgui_time_sink_x_1.set_update_time(0.10)
-        self.qtgui_time_sink_x_1.set_y_axis(-1, 1)
-
-        self.qtgui_time_sink_x_1.set_y_label('Amplitude', "")
-
-        self.qtgui_time_sink_x_1.enable_tags(True)
-        self.qtgui_time_sink_x_1.set_trigger_mode(qtgui.TRIG_MODE_FREE, qtgui.TRIG_SLOPE_POS, 0.0, 0, 0, "")
-        self.qtgui_time_sink_x_1.enable_autoscale(False)
-        self.qtgui_time_sink_x_1.enable_grid(True)
-        self.qtgui_time_sink_x_1.enable_axis_labels(True)
-        self.qtgui_time_sink_x_1.enable_control_panel(False)
-        self.qtgui_time_sink_x_1.enable_stem_plot(False)
-
-
-        labels = ['Signal 1', 'Signal 2', 'Signal 3', 'Signal 4', 'Signal 5',
-            'Signal 6', 'Signal 7', 'Signal 8', 'Signal 9', 'Signal 10']
-        widths = [1, 1, 1, 1, 1,
-            1, 1, 1, 1, 1]
-        colors = ['blue', 'red', 'green', 'black', 'cyan',
-            'magenta', 'yellow', 'dark red', 'dark green', 'dark blue']
-        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
-            1.0, 1.0, 1.0, 1.0, 1.0]
-        styles = [1, 1, 1, 1, 1,
-            1, 1, 1, 1, 1]
-        markers = [-1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1]
-
-
-        for i in range(2):
-            if len(labels[i]) == 0:
-                if (i % 2 == 0):
-                    self.qtgui_time_sink_x_1.set_line_label(i, "Re{{Data {0}}}".format(i/2))
-                else:
-                    self.qtgui_time_sink_x_1.set_line_label(i, "Im{{Data {0}}}".format(i/2))
-            else:
-                self.qtgui_time_sink_x_1.set_line_label(i, labels[i])
-            self.qtgui_time_sink_x_1.set_line_width(i, widths[i])
-            self.qtgui_time_sink_x_1.set_line_color(i, colors[i])
-            self.qtgui_time_sink_x_1.set_line_style(i, styles[i])
-            self.qtgui_time_sink_x_1.set_line_marker(i, markers[i])
-            self.qtgui_time_sink_x_1.set_line_alpha(i, alphas[i])
-
-        self._qtgui_time_sink_x_1_win = sip.wrapinstance(self.qtgui_time_sink_x_1.pyqwidget(), Qt.QWidget)
-        self.tabs_layout_2.addWidget(self._qtgui_time_sink_x_1_win)
-        self.qtgui_freq_sink_x_0 = qtgui.freq_sink_c(
-            1024, #size
+        self.qtgui_sink_x_0 = qtgui.sink_c(
+            1024, #fftsize
             firdes.WIN_BLACKMAN_hARRIS, #wintype
             0, #fc
             samp_rate, #bw
             "", #name
-            1
+            True, #plotfreq
+            True, #plotwaterfall
+            True, #plottime
+            True #plotconst
         )
-        self.qtgui_freq_sink_x_0.set_update_time(0.10)
-        self.qtgui_freq_sink_x_0.set_y_axis(-140, 10)
-        self.qtgui_freq_sink_x_0.set_y_label('Relative Gain', 'dB')
-        self.qtgui_freq_sink_x_0.set_trigger_mode(qtgui.TRIG_MODE_FREE, 0.0, 0, "")
-        self.qtgui_freq_sink_x_0.enable_autoscale(False)
-        self.qtgui_freq_sink_x_0.enable_grid(True)
-        self.qtgui_freq_sink_x_0.set_fft_average(1.0)
-        self.qtgui_freq_sink_x_0.enable_axis_labels(True)
-        self.qtgui_freq_sink_x_0.enable_control_panel(False)
+        self.qtgui_sink_x_0.set_update_time(1.0/10)
+        self._qtgui_sink_x_0_win = sip.wrapinstance(self.qtgui_sink_x_0.pyqwidget(), Qt.QWidget)
 
+        self.qtgui_sink_x_0.enable_rf_freq(False)
 
-
-        labels = ['', '', '', '', '',
-            '', '', '', '', '']
-        widths = [1, 1, 1, 1, 1,
-            1, 1, 1, 1, 1]
-        colors = ["blue", "red", "green", "black", "cyan",
-            "magenta", "yellow", "dark red", "dark green", "dark blue"]
-        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
-            1.0, 1.0, 1.0, 1.0, 1.0]
-
-        for i in range(1):
-            if len(labels[i]) == 0:
-                self.qtgui_freq_sink_x_0.set_line_label(i, "Data {0}".format(i))
-            else:
-                self.qtgui_freq_sink_x_0.set_line_label(i, labels[i])
-            self.qtgui_freq_sink_x_0.set_line_width(i, widths[i])
-            self.qtgui_freq_sink_x_0.set_line_color(i, colors[i])
-            self.qtgui_freq_sink_x_0.set_line_alpha(i, alphas[i])
-
-        self._qtgui_freq_sink_x_0_win = sip.wrapinstance(self.qtgui_freq_sink_x_0.pyqwidget(), Qt.QWidget)
-        self.tabs_layout_1.addWidget(self._qtgui_freq_sink_x_0_win)
+        self.top_layout.addWidget(self._qtgui_sink_x_0_win)
         self.blocks_udp_source_0 = blocks.udp_source(gr.sizeof_short*1, '192.168.0.21', 12345, 64088, True)
         self.blocks_streams_to_vector_0 = blocks.streams_to_vector(gr.sizeof_gr_complex*1, 16)
         self.blocks_stream_to_vector_1 = blocks.stream_to_vector(gr.sizeof_char*1, 88)
@@ -206,8 +133,7 @@ class replicax16(gr.top_block, Qt.QWidget):
         ##################################################
         self.msg_connect((self.beamforming_doaesprit_py_cf_0, 'doa_port'), (self.beamforming_beamformer_0, 'doa_port'))
         self.msg_connect((self.beamforming_doaesprit_py_cf_0, 'doa_port'), (self.blocks_message_debug_0, 'print'))
-        self.connect((self.beamforming_beamformer_0, 0), (self.qtgui_freq_sink_x_0, 0))
-        self.connect((self.beamforming_beamformer_0, 0), (self.qtgui_time_sink_x_1, 0))
+        self.connect((self.beamforming_beamformer_0, 0), (self.qtgui_sink_x_0, 0))
         self.connect((self.blocks_interleaved_short_to_complex_0, 0), (self.stream_demux_stream_demux_1, 0))
         self.connect((self.blocks_short_to_char_0, 0), (self.blocks_stream_to_vector_1, 0))
         self.connect((self.blocks_stream_to_vector_1, 0), (self.beamforming_HeaderReader_0, 0))
@@ -218,22 +144,22 @@ class replicax16(gr.top_block, Qt.QWidget):
         self.connect((self.stream_demux_stream_demux_0, 1), (self.blocks_short_to_char_0, 0))
         self.connect((self.stream_demux_stream_demux_1, 1), (self.blocks_null_sink_0, 0))
         self.connect((self.stream_demux_stream_demux_1, 0), (self.stream_demux_stream_demux_2, 0))
-        self.connect((self.stream_demux_stream_demux_2, 0), (self.blocks_streams_to_vector_0, 0))
-        self.connect((self.stream_demux_stream_demux_2, 0), (self.blocks_streams_to_vector_0, 3))
-        self.connect((self.stream_demux_stream_demux_2, 1), (self.blocks_streams_to_vector_0, 4))
-        self.connect((self.stream_demux_stream_demux_2, 2), (self.blocks_streams_to_vector_0, 9))
         self.connect((self.stream_demux_stream_demux_2, 1), (self.blocks_streams_to_vector_0, 6))
-        self.connect((self.stream_demux_stream_demux_2, 1), (self.blocks_streams_to_vector_0, 5))
-        self.connect((self.stream_demux_stream_demux_2, 3), (self.blocks_streams_to_vector_0, 12))
+        self.connect((self.stream_demux_stream_demux_2, 0), (self.blocks_streams_to_vector_0, 0))
         self.connect((self.stream_demux_stream_demux_2, 2), (self.blocks_streams_to_vector_0, 10))
-        self.connect((self.stream_demux_stream_demux_2, 2), (self.blocks_streams_to_vector_0, 8))
-        self.connect((self.stream_demux_stream_demux_2, 3), (self.blocks_streams_to_vector_0, 15))
         self.connect((self.stream_demux_stream_demux_2, 1), (self.blocks_streams_to_vector_0, 7))
-        self.connect((self.stream_demux_stream_demux_2, 3), (self.blocks_streams_to_vector_0, 13))
         self.connect((self.stream_demux_stream_demux_2, 0), (self.blocks_streams_to_vector_0, 1))
         self.connect((self.stream_demux_stream_demux_2, 3), (self.blocks_streams_to_vector_0, 14))
-        self.connect((self.stream_demux_stream_demux_2, 0), (self.blocks_streams_to_vector_0, 2))
+        self.connect((self.stream_demux_stream_demux_2, 2), (self.blocks_streams_to_vector_0, 9))
+        self.connect((self.stream_demux_stream_demux_2, 3), (self.blocks_streams_to_vector_0, 12))
         self.connect((self.stream_demux_stream_demux_2, 2), (self.blocks_streams_to_vector_0, 11))
+        self.connect((self.stream_demux_stream_demux_2, 0), (self.blocks_streams_to_vector_0, 2))
+        self.connect((self.stream_demux_stream_demux_2, 3), (self.blocks_streams_to_vector_0, 13))
+        self.connect((self.stream_demux_stream_demux_2, 1), (self.blocks_streams_to_vector_0, 5))
+        self.connect((self.stream_demux_stream_demux_2, 1), (self.blocks_streams_to_vector_0, 4))
+        self.connect((self.stream_demux_stream_demux_2, 3), (self.blocks_streams_to_vector_0, 15))
+        self.connect((self.stream_demux_stream_demux_2, 2), (self.blocks_streams_to_vector_0, 8))
+        self.connect((self.stream_demux_stream_demux_2, 0), (self.blocks_streams_to_vector_0, 3))
 
 
     def closeEvent(self, event):
@@ -246,8 +172,7 @@ class replicax16(gr.top_block, Qt.QWidget):
 
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
-        self.qtgui_freq_sink_x_0.set_frequency_range(0, self.samp_rate)
-        self.qtgui_time_sink_x_1.set_samp_rate(self.samp_rate)
+        self.qtgui_sink_x_0.set_frequency_range(0, self.samp_rate)
 
     def get_fc(self):
         return self.fc
